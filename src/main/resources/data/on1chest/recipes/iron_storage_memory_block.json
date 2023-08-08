@@ -7,14 +7,14 @@
   ],
   "key": {
     "1": {
-      "tag": "minecraft:planks"
+      "item": "minecraft:iron_ingot"
     },
     "2": {
-      "item": "minecraft:chest"
+      "item": "on1chest:copper_storage_memory_block"
     }
   },
   "result": {
-    "item": "on1chest:wood_storage_memory_block",
+    "item": "on1chest:iron_storage_memory_block",
     "count": 1
   }
 }

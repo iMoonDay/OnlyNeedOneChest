@@ -1,23 +1,29 @@
 {
   "type": "minecraft:crafting_shaped",
   "pattern": [
-    "313",
+    "343",
     "121",
-    "313"
+    "353"
   ],
   "key": {
     "1": {
       "item": "on1chest:storage_blank_block"
     },
     "2": {
-      "item": "minecraft:diamond"
+      "item": "on1chest:storage_accessor_block"
     },
     "3": {
-      "item": "minecraft:iron_ingot"
+      "item": "minecraft:gold_ingot"
+    },
+    "4": {
+      "item": "minecraft:crafting_table"
+    },
+    "5": {
+      "item": "minecraft:hopper"
     }
   },
   "result": {
-    "item": "on1chest:storage_accessor_block",
+    "item": "on1chest:storage_processor_block",
     "count": 1
   }
 }

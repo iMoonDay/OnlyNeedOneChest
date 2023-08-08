@@ -1,20 +1,16 @@
 {
-  "type": "minecraft:crafting_shaped",
-  "pattern": [
-    "111",
-    "121",
-    "111"
-  ],
-  "key": {
-    "1": {
-      "item": "minecraft:diamond"
-    },
-    "2": {
-      "item": "on1chest:gold_storage_memory_block"
-    }
+  "type": "minecraft:smithing_transform",
+  "template": {
+    "item": "minecraft:netherite_upgrade_smithing_template"
+  },
+  "base": {
+    "item": "on1chest:diamond_storage_memory_block"
+  },
+  "addition": {
+    "item": "minecraft:netherite_ingot"
   },
   "result": {
-    "item": "on1chest:diamond_storage_memory_block",
+    "item": "on1chest:netherite_storage_memory_block",
     "count": 1
   }
 }

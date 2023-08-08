@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:block/cube_all",
   "textures": {
-    "all": "minecraft:block/oak_planks"
+    "all": "on1chest:block/storage_blank_block"
   }
 }

@@ -1,7 +1,7 @@
 {
   "variants": {
     "": {
-      "model": "minecraft:block/oak_planks"
+      "model": "on1chest:block/storage_blank_block"
     }
   }
 }

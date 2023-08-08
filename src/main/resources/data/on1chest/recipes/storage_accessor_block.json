@@ -1,20 +1,23 @@
 {
   "type": "minecraft:crafting_shaped",
   "pattern": [
-    "111",
+    "313",
     "121",
-    "111"
+    "313"
   ],
   "key": {
     "1": {
-      "item": "minecraft:gold_ingot"
+      "item": "on1chest:storage_blank_block"
     },
     "2": {
-      "item": "on1chest:iron_storage_memory_block"
+      "item": "minecraft:diamond"
+    },
+    "3": {
+      "item": "minecraft:iron_ingot"
     }
   },
   "result": {
-    "item": "on1chest:gold_storage_memory_block",
+    "item": "on1chest:storage_accessor_block",
     "count": 1
   }
 }

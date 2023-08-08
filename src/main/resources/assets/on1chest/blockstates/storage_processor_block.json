@@ -1,7 +1,7 @@
 {
   "variants": {
     "": {
-      "model": "on1chest:block/storage_memory_block"
+      "model": "on1chest:block/storage_processor_block"
     }
   }
 }

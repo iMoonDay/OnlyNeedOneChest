@@ -1,8 +1,7 @@
 package com.imoonday.on1chest.client;
 
-import com.imoonday.on1chest.OnlyNeedOneChest;
+import com.imoonday.on1chest.init.ModScreens;
 import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.fabric.api.client.screenhandler.v1.ScreenRegistry;
 
 public class OnlyNeedOneChestClient implements ClientModInitializer {
     /**
@@ -10,6 +9,6 @@ public class OnlyNeedOneChestClient implements ClientModInitializer {
      */
     @Override
     public void onInitializeClient() {
-
+        ModScreens.registerClient();
     }
 }

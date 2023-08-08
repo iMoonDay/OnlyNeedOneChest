@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "111",
+    "111",
+    "111"
+  ],
+  "key": {
+    "1": {
+      "tag": "minecraft:planks"
+    }
+  },
+  "result": {
+    "item": "on1chest:storage_blank_block",
+    "count": 1
+  }
+}

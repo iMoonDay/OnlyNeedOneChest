@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:block/cube_all",
   "textures": {
-    "all": "on1chest:block/storage_blank_block"
+    "all": "on1chest:block/storage_processor_block"
   }
 }
