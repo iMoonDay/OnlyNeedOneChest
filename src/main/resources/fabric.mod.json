@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "id": "on1chest",
+  "version": "${version}",
+
+  "name": "OnlyNeedOneChest",
+  "description": "",
+  "authors": [],
+  "contact": {},
+
+  "license": "MIT",
+  "icon": "assets/on1chest/icon.png",
+
+  "environment": "*",
+  "entrypoints": {},
+
+      "mixins": [
+        "on1chest.mixins.json"
+      ],
+
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+        "fabric": "*",
+    "minecraft": "${minecraft_version}"
+  }
+}
