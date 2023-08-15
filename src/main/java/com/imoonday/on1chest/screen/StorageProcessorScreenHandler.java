@@ -120,12 +120,12 @@ public class StorageProcessorScreenHandler extends StorageAssessorScreenHandler 
             newStack = originalStack.copy();
             if (invSlot >= inventoryStartIndex && invSlot < playerInventoryStartIndex) {
                 if (this.insertItem(originalStack, playerInventoryStartIndex, playerInventoryStartIndex + 36, true)) {
-                    this.removeStack(newStack);
+                    this.removeStack(newStack, slot);
                 } else {
                     return ItemStack.EMPTY;
                 }
             } else if ((invSlot >= playerInventoryStartIndex) && this.canInsert(originalStack)) {
-                this.addStack(originalStack);
+                this.addStack(originalStack, slot);
             } else if (invSlot == RESULT_ID) {
                 this.context.run((world, pos) -> originalStack.getItem().onCraft(originalStack, world, player));
                 if (!this.insertItem(originalStack, playerInventoryStartIndex, playerInventoryStartIndex + 36, true)) {

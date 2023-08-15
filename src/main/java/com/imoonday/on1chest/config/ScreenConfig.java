@@ -4,12 +4,15 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
+import com.imoonday.on1chest.screen.client.StorageAssessorScreen;
 import me.shedaniel.clothconfig2.api.ConfigBuilder;
 import me.shedaniel.clothconfig2.api.ConfigCategory;
 import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.text.Text;
@@ -25,10 +28,14 @@ public class ScreenConfig {
     private static File file;
     private static ScreenConfig INSTANCE = new ScreenConfig();
 
-    public KeyBinding markItemStackKey = new KeyBinding("key.on1chest.mark_item_stack", GLFW.GLFW_KEY_A, "key.categories.on1chest");
-    public KeyBinding takeAllStacksKey = new KeyBinding("key.on1chest.take_all_stacks", GLFW.GLFW_KEY_SPACE, "key.categories.on1chest");
+    public KeyBinding markItemStackKey = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.on1chest.mark_item_stack", GLFW.GLFW_KEY_C, "key.categories.on1chest"));
+    public KeyBinding takeAllStacksKey = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.on1chest.take_all_stacks", GLFW.GLFW_KEY_SPACE, "key.categories.on1chest"));
     public boolean displaySortWidget;
+    public int sortWidgetOffsetX;
+    public int sortWidgetOffsetY;
     public boolean displayCheckBoxes;
+    public int checkBoxesOffsetX;
+    public int checkBoxesOffsetY;
 
     private static void prepareConfigFile() {
         if (file == null) {
@@ -80,11 +87,17 @@ public class ScreenConfig {
         return INSTANCE;
     }
 
+    @Environment(EnvType.CLIENT)
     public static Screen createConfigScreen(Screen parent) {
         ConfigBuilder builder = ConfigBuilder.create()
                 .setParentScreen(parent)
                 .setTitle(Text.literal("On1chest"))
-                .setSavingRunnable(ScreenConfig::save);
+                .setSavingRunnable(() -> {
+                    if (MinecraftClient.getInstance().currentScreen instanceof StorageAssessorScreen screen) {
+                        screen.onScreenConfigUpdate(ScreenConfig.INSTANCE);
+                    }
+                    save();
+                });
 
         ConfigCategory screenSettings = builder.getOrCreateCategory(Text.literal("Screen Settings"));
 
@@ -92,12 +105,18 @@ public class ScreenConfig {
 
         screenSettings.addEntry(entryBuilder.fillKeybindingField(Text.translatable(getInstance().markItemStackKey.getTranslationKey()), getInstance().markItemStackKey)
                 .setTooltip(Text.literal("按住键点击物品进行标记收藏"))
-                .setKeySaveConsumer(key -> getInstance().markItemStackKey.setBoundKey(key))
+                .setKeySaveConsumer(key -> {
+                    getInstance().markItemStackKey.setBoundKey(key);
+                    KeyBinding.updateKeysByCode();
+                })
                 .build());
 
         screenSettings.addEntry(entryBuilder.fillKeybindingField(Text.translatable(getInstance().takeAllStacksKey.getTranslationKey()), getInstance().takeAllStacksKey)
                 .setTooltip(Text.literal("按住键点击物品拿取全部"))
-                .setKeySaveConsumer(key -> getInstance().takeAllStacksKey.setBoundKey(key))
+                .setKeySaveConsumer(key -> {
+                    getInstance().takeAllStacksKey.setBoundKey(key);
+                    KeyBinding.updateKeysByCode();
+                })
                 .build());
 
         screenSettings.addEntry(entryBuilder.startBooleanToggle(Text.literal("显示排序按钮"), INSTANCE.displaySortWidget)
@@ -105,9 +124,29 @@ public class ScreenConfig {
                 .setSaveConsumer(display -> getInstance().displaySortWidget = display)
                 .build());
 
+        screenSettings.addEntry(entryBuilder.startIntField(Text.literal("排序按钮X偏移"), INSTANCE.sortWidgetOffsetX)
+                .setDefaultValue(0)
+                .setSaveConsumer(offset -> getInstance().sortWidgetOffsetX = offset)
+                .build());
+
+        screenSettings.addEntry(entryBuilder.startIntField(Text.literal("排序按钮Y偏移"), INSTANCE.sortWidgetOffsetY)
+                .setDefaultValue(0)
+                .setSaveConsumer(offset -> getInstance().sortWidgetOffsetY = offset)
+                .build());
+
         screenSettings.addEntry(entryBuilder.startBooleanToggle(Text.literal("显示过滤选项"), INSTANCE.displayCheckBoxes)
                 .setDefaultValue(true)
                 .setSaveConsumer(display -> getInstance().displayCheckBoxes = display)
+                .build());
+
+        screenSettings.addEntry(entryBuilder.startIntField(Text.literal("过滤选项X偏移"), INSTANCE.checkBoxesOffsetX)
+                .setDefaultValue(0)
+                .setSaveConsumer(offset -> getInstance().checkBoxesOffsetX = offset)
+                .build());
+
+        screenSettings.addEntry(entryBuilder.startIntField(Text.literal("过滤选项Y偏移"), INSTANCE.checkBoxesOffsetY)
+                .setDefaultValue(0)
+                .setSaveConsumer(offset -> getInstance().checkBoxesOffsetY = offset)
                 .build());
 
         return builder.build();

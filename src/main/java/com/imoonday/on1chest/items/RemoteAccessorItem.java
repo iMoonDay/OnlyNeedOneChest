@@ -127,9 +127,12 @@ public class RemoteAccessorItem extends Item {
             RegistryKey<World> registryKey = RegistryKey.of(RegistryKeys.WORLD, Identifier.tryParse(world1));
             if (registryKey != null) {
                 ServerWorld serverWorld = ((ServerWorld) world).getServer().getWorld(registryKey);
-                if (serverWorld != null && (this.crossDimensional || world == serverWorld) && serverWorld.getBlockEntity(new BlockPos(x, y, z)) instanceof StorageAccessorBlockEntity entity) {
-                    player.openHandledScreen(entity);
-                    return ActionResult.SUCCESS;
+                if (serverWorld != null && (this.crossDimensional || world == serverWorld)) {
+                    BlockPos blockPos = new BlockPos(x, y, z);
+                    if (serverWorld.getBlockEntity(blockPos) instanceof StorageAccessorBlockEntity entity) {
+                        player.openHandledScreen(entity);
+                        return ActionResult.SUCCESS;
+                    }
                 }
             }
         }

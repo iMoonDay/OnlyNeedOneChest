@@ -20,6 +20,7 @@ import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.screen.NamedScreenHandlerFactory;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.ScreenHandlerContext;
+import net.minecraft.screen.slot.Slot;
 import net.minecraft.text.Text;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.BlockPos;
@@ -115,10 +116,6 @@ public class StorageAccessorBlockEntity extends BlockEntity implements NamedScre
         return createNbt();
     }
 
-    public DefaultedList<ItemStack> createItemList() {
-        return createItemList(world, pos);
-    }
-
     public DefaultedList<ItemStack> createItemList(World world, BlockPos pos) {
         if (world == null || pos == null) {
             return DefaultedList.of();
@@ -138,10 +135,6 @@ public class StorageAccessorBlockEntity extends BlockEntity implements NamedScre
             itemList1.set(index++, key.copyWithCount(integer));
         }
         return itemList1;
-    }
-
-    public List<BlockPos> getConnectedBlocks() {
-        return getConnectedBlocks(world, pos);
     }
 
     public List<BlockPos> getConnectedBlocks(World world, BlockPos pos) {
@@ -166,10 +159,6 @@ public class StorageAccessorBlockEntity extends BlockEntity implements NamedScre
         return result;
     }
 
-    public List<Inventory> getAllInventories() {
-        return getAllInventories(world, pos);
-    }
-
     public List<Inventory> getAllInventories(World world, BlockPos pos) {
         if (world == null || pos == null) {
             return List.of();
@@ -177,29 +166,26 @@ public class StorageAccessorBlockEntity extends BlockEntity implements NamedScre
         return getConnectedBlocks(world, pos).stream().filter(blockPos -> world.getBlockEntity(blockPos) instanceof StorageMemoryBlockEntity).map(blockPos -> (StorageMemoryBlockEntity) world.getBlockEntity(blockPos)).collect(Collectors.toCollection(ArrayList::new));
     }
 
-    public boolean canInsert(ItemStack stack) {
-        return canInsert(world, pos, stack);
-    }
 
     public boolean canInsert(World world, BlockPos pos, ItemStack stack) {
         if (world == null || pos == null) {
             return false;
         }
-        DefaultedList<ItemStack> stacks = this.createItemList(world, pos);
-        return stacks.stream().anyMatch(stack1 -> ItemStack.canCombine(stack, stack1) && stack.getCount() + stack1.getCount() <= stack1.getMaxCount() || stack1.isEmpty());
+        return this.getAllInventories(world, pos).stream().anyMatch(inventory -> inventory.containsAny(stack1 -> ItemStack.canCombine(stack, stack1) && stack.getCount() + stack1.getCount() <= stack1.getMaxCount() || stack1.isEmpty()));
     }
 
-    public boolean removeStack(ItemStack stack, int removeCount) {
-        return removeStack(world, pos, stack, removeCount);
-    }
-
-    public boolean removeStack(World world, BlockPos pos, ItemStack stack, int removeCount) {
+    public boolean removeStack(World world, BlockPos pos, ItemStack stack, int removeCount, Slot slot) {
         if (world == null || pos == null) {
             return false;
         }
         boolean removed = false;
+        Set<Inventory> inventories = new HashSet<>();
+        if (slot instanceof StorageAssessorScreenHandler.MemorySlot memorySlot) {
+            inventories.addAll(memorySlot.getActualInventories());
+        }
+        inventories.addAll(this.getAllInventories(world, pos));
         a:
-        for (Inventory inventory : this.getAllInventories(world, pos)) {
+        for (Inventory inventory : inventories) {
             boolean markDirty = false;
             for (int i = 0; i < inventory.size(); ++i) {
                 if (removeCount <= 0) {
@@ -224,14 +210,13 @@ public class StorageAccessorBlockEntity extends BlockEntity implements NamedScre
                 inventory.markDirty();
             }
         }
+        if (slot instanceof StorageAssessorScreenHandler.MemorySlot memorySlot && removed) {
+            memorySlot.updateActualInventories();
+        }
         return removed;
     }
 
-    public boolean addStack(ItemStack stack, int count) {
-        return addStack(world, pos, stack, count);
-    }
-
-    public boolean addStack(World world, BlockPos pos, ItemStack stack, int count) {
+    public boolean addStack(World world, BlockPos pos, ItemStack stack, int count, Slot slot) {
         if (world == null || pos == null) {
             return false;
         }
@@ -250,7 +235,7 @@ public class StorageAccessorBlockEntity extends BlockEntity implements NamedScre
                     continue;
                 }
                 int maxCount = Math.min(remainingCount, stack.getMaxCount());
-                if (ItemStack.canCombine(stack1, stack)) {
+                if (ItemStack.canCombine(stack1, stack) && stack1.getCount() < stack1.getMaxCount()) {
                     if (maxCount + stack1.getCount() <= stack1.getMaxCount()) {
                         stack1.increment(maxCount);
                         remainingCount -= maxCount;
@@ -282,6 +267,9 @@ public class StorageAccessorBlockEntity extends BlockEntity implements NamedScre
                         remainingCount -= maxCount;
                         added = true;
                         markDirty = true;
+                        if (slot instanceof StorageAssessorScreenHandler.MemorySlot memorySlot) {
+                            memorySlot.addActualInventory(inventory);
+                        }
                     }
                 }
                 if (markDirty) {

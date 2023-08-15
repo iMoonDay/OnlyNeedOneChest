@@ -1,6 +1,8 @@
 package com.imoonday.on1chest.screen;
 
+import com.imoonday.on1chest.blocks.StorageAccessorBlock;
 import com.imoonday.on1chest.blocks.entities.StorageAccessorBlockEntity;
+import com.imoonday.on1chest.blocks.entities.StorageMemoryBlockEntity;
 import com.imoonday.on1chest.init.ModScreens;
 import com.imoonday.on1chest.mixin.ScreenHandlerInvoker;
 import com.imoonday.on1chest.network.NetworkHandler;
@@ -29,6 +31,8 @@ import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.ClickType;
 import net.minecraft.util.collection.DefaultedList;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 
@@ -45,9 +49,11 @@ public class StorageAssessorScreenHandler extends AbstractRecipeScreenHandler<Re
     public final PlayerEntity player;
     public final ScreenHandlerContext context;
     public DefaultedList<ItemStack> itemList = DefaultedList.of();
+    public List<Inventory> inventories = new ArrayList<>();
     public boolean isPressingAlt;
     public boolean isPressingCtrl;
     public final MemoryInventory inventory;
+    private final Set<ChunkPos> forceLoadingPoses = new HashSet<>();
 
     public StorageAssessorScreenHandler(int syncId, PlayerInventory playerInventory) {
         this(syncId, playerInventory, ScreenHandlerContext.EMPTY);
@@ -62,6 +68,21 @@ public class StorageAssessorScreenHandler extends AbstractRecipeScreenHandler<Re
         this.rows = rows;
         this.inventory = new MemoryInventory(rows * 9);
         updateItemList();
+        this.context.run((world, pos) -> {
+            if (world instanceof ServerWorld serverWorld) {
+                tryForceLoadChunk(serverWorld, pos);
+                this.inventories.stream().filter(inventory -> inventory instanceof StorageMemoryBlockEntity).map(inventory -> (StorageMemoryBlockEntity) inventory).forEach(entity -> tryForceLoadChunk(serverWorld, entity.getPos()));
+            }
+        });
+    }
+
+    private void tryForceLoadChunk(ServerWorld serverWorld, BlockPos blockPos) {
+        ChunkPos chunkPos;
+        chunkPos = new ChunkPos(blockPos);
+        if (!serverWorld.getForcedChunks().contains(chunkPos.toLong())) {
+            serverWorld.setChunkForced(chunkPos.x, chunkPos.z, true);
+            this.forceLoadingPoses.add(chunkPos);
+        }
     }
 
     public StorageAssessorScreenHandler(int syncId, PlayerInventory playerInventory, ScreenHandlerContext context) {
@@ -69,6 +90,18 @@ public class StorageAssessorScreenHandler extends AbstractRecipeScreenHandler<Re
         this.addInventorySlots();
         this.addPlayerInventorySlots(playerInventory, 27, 103, 27, 161);
         this.scrollItems(0.0f);
+    }
+
+    @Override
+    public void onClosed(PlayerEntity player) {
+        super.onClosed(player);
+        if (!this.forceLoadingPoses.isEmpty()) {
+            this.context.run((world, pos) -> {
+                if (world instanceof ServerWorld serverWorld) {
+                    this.forceLoadingPoses.forEach(chunkPos -> serverWorld.setChunkForced(chunkPos.x, chunkPos.z, false));
+                }
+            });
+        }
     }
 
     public static void update(World world) {
@@ -174,12 +207,12 @@ public class StorageAssessorScreenHandler extends AbstractRecipeScreenHandler<Re
             newStack = originalStack.copy();
             if (invSlot >= inventoryStartIndex && invSlot < playerInventoryStartIndex) {
                 if (this.insertItem(originalStack, playerInventoryStartIndex, playerInventoryStartIndex + 35, true)) {
-                    this.removeStack(newStack);
+                    this.removeStack(newStack, slot);
                 } else {
                     return ItemStack.EMPTY;
                 }
             } else if (invSlot >= playerInventoryStartIndex && this.canInsert(originalStack)) {
-                this.addStack(originalStack);
+                this.addStack(originalStack, slot);
             } else {
                 return ItemStack.EMPTY;
             }
@@ -261,13 +294,17 @@ public class StorageAssessorScreenHandler extends AbstractRecipeScreenHandler<Re
 
     @Override
     public boolean canUse(PlayerEntity player) {
-        return true;
+        return context.get((world, pos) -> world.getBlockState(pos).getBlock() instanceof StorageAccessorBlock, true);
     }
 
     public void updateItemList() {
         context.run((world, pos) -> {
             if (world.getBlockEntity(pos) instanceof StorageAccessorBlockEntity entity) {
-                itemList = entity.createItemList(world, pos);
+                this.itemList = entity.createItemList(world, pos);
+                this.inventories = entity.getAllInventories(world, pos);
+//                if (!this.slots.isEmpty()) {
+//                    IntStream.range(this.inventoryStartIndex, this.inventoryStartIndex + this.inventory.size()).filter(i -> this.slots.get(i) instanceof MemorySlot).mapToObj(i -> (MemorySlot) this.slots.get(i)).forEach(MemorySlot::updateActualInventories);
+//                }
             }
             this.updateItems();
         });
@@ -286,6 +323,7 @@ public class StorageAssessorScreenHandler extends AbstractRecipeScreenHandler<Re
         switch (actionType) {
             case QUICK_MOVE -> {
                 if (slot.canTakeItems(player)) {
+                    isPressingCtrl = false;
                     this.quickMove(player, slotIndex);
                     slot.markDirty();
                     return;
@@ -504,10 +542,25 @@ public class StorageAssessorScreenHandler extends AbstractRecipeScreenHandler<Re
         return true;
     }
 
-    class MemorySlot extends Slot {
+    public class MemorySlot extends Slot {
+
+        private final Set<Inventory> actualInventories = new HashSet<>();
 
         public MemorySlot(Inventory inventory, int index, int x, int y) {
             super(inventory, index, x, y);
+        }
+
+        public Set<Inventory> getActualInventories() {
+            return actualInventories;
+        }
+
+        public void updateActualInventories() {
+            actualInventories.clear();
+            inventories.stream().filter(inventory -> inventory.containsAny(stack -> ItemStack.canCombine(stack, this.getStack()))).forEach(actualInventories::add);
+        }
+
+        public void addActualInventory(Inventory inventory) {
+            this.actualInventories.add(inventory);
         }
 
         @Override
@@ -517,7 +570,7 @@ public class StorageAssessorScreenHandler extends AbstractRecipeScreenHandler<Re
 
         @Override
         public ItemStack insertStack(ItemStack stack, int count) {
-            return addStack(stack, count);
+            return addStack(stack, count, this);
         }
 
         @Override
@@ -541,14 +594,14 @@ public class StorageAssessorScreenHandler extends AbstractRecipeScreenHandler<Re
 
         @Override
         public void setStack(ItemStack stack) {
-            removeStack(this.getStack());
+            removeStack(this.getStack(), this);
             insertStack(stack);
         }
 
         @Override
         public void onTakeItem(PlayerEntity player, ItemStack stack) {
             if (!player.getWorld().isClient) {
-                removeStack(stack);
+                removeStack(stack, this);
             }
             super.onTakeItem(player, stack);
         }
@@ -564,25 +617,25 @@ public class StorageAssessorScreenHandler extends AbstractRecipeScreenHandler<Re
         return context.get((world, pos) -> world.getBlockEntity(pos) instanceof StorageAccessorBlockEntity entity && entity.canInsert(world, pos, stack), false);
     }
 
-    public void removeStack(ItemStack stack) {
-        removeStack(stack, stack.getCount());
+    public void removeStack(ItemStack stack, Slot slot) {
+        removeStack(stack, stack.getCount(), slot);
     }
 
-    public void removeStack(ItemStack stack, int removeCount) {
+    public void removeStack(ItemStack stack, int removeCount, Slot slot) {
         context.run((world, pos) -> {
-            if (world.getBlockEntity(pos) instanceof StorageAccessorBlockEntity entity && entity.removeStack(world, pos, stack, removeCount)) {
+            if (world.getBlockEntity(pos) instanceof StorageAccessorBlockEntity entity && entity.removeStack(world, pos, stack, removeCount, slot)) {
                 updateItemList();
             }
         });
     }
 
-    public ItemStack addStack(ItemStack stack) {
-        return addStack(stack, stack.getCount());
+    public ItemStack addStack(ItemStack stack, Slot slot) {
+        return addStack(stack, stack.getCount(), slot);
     }
 
-    public ItemStack addStack(ItemStack stack, int count) {
+    public ItemStack addStack(ItemStack stack, int count, Slot slot) {
         context.run((world, pos) -> {
-            if (world.getBlockEntity(pos) instanceof StorageAccessorBlockEntity entity && entity.addStack(world, pos, stack, count)) {
+            if (world.getBlockEntity(pos) instanceof StorageAccessorBlockEntity entity && entity.addStack(world, pos, stack, count, slot)) {
                 updateItemList();
             }
         });

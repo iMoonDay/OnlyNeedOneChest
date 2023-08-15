@@ -65,7 +65,8 @@ public class StorageAssessorScreen extends HandledScreen<StorageAssessorScreenHa
             NetworkHandler.sendToServer(nbt -> nbt.putString("nameFilter", ""));
         }).dimensions(this.x + 193, this.y + 4, 14, 12).tooltip(Tooltip.of(Text.translatable("button.on1chest.clear"))).build());
 
-        this.sortWidget = ButtonWidget.builder(Text.translatable("sort.on1chest.title"), button -> NetworkHandler.sendToServer(nbt -> nbt.putBoolean("comparator", true))).dimensions(this.x + 5, this.y + 19, 19, 13).tooltip(Tooltip.of(Text.translatable("sort.on1chest.tooltip", Text.translatable(SortComparator.ID.translationKey)))).build();
+        this.sortWidget = ButtonWidget.builder(Text.translatable("sort.on1chest.title"), button -> NetworkHandler.sendToServer(nbt -> nbt.putBoolean("comparator", true))).dimensions(this.x + 5 + ScreenConfig.getInstance().sortWidgetOffsetX, this.y + 19 + ScreenConfig.getInstance().sortWidgetOffsetY, 19, 13).tooltip(Tooltip.of(Text.translatable("sort.on1chest.tooltip", Text.translatable(SortComparator.ID.translationKey)))).build();
+        this.sortWidget.visible = ScreenConfig.getInstance().displaySortWidget;
         this.addDrawableChild(this.sortWidget);
 
         this.addDrawableChild(ButtonWidget.builder(Text.literal("O"), button -> {
@@ -82,23 +83,29 @@ public class StorageAssessorScreen extends HandledScreen<StorageAssessorScreenHa
         NetworkHandler.sendToServer(nbtCompound -> nbtCompound.putBoolean("init", true));
     }
 
-    @Override
-    protected void handledScreenTick() {
-        super.handledScreenTick();
-        this.sortWidget.visible = ScreenConfig.getInstance().displaySortWidget;
-        Arrays.stream(this.checkboxWidgets).forEach(widget -> widget.visible = ScreenConfig.getInstance().displayCheckBoxes);
+    public void onScreenConfigUpdate(ScreenConfig config) {
+        this.sortWidget.visible = config.displaySortWidget;
+        this.sortWidget.setPosition(this.x + 5 + config.sortWidgetOffsetX, this.y + 19 + config.sortWidgetOffsetY);
+        CheckboxWidget[] widgets = this.checkboxWidgets;
+        for (int i = 0; i < widgets.length; i++) {
+            CheckboxWidget widget = widgets[i];
+            widget.visible = config.displayCheckBoxes;
+            widget.setPosition(this.x + 215 + config.checkBoxesOffsetX, this.y + 17 + 21 * i + config.checkBoxesOffsetY);
+        }
     }
 
     @NotNull
     private CheckboxWidget createCheckboxWidget(int i) {
         ItemStackFilter filter = ItemStackFilter.values()[i];
-        return new CheckboxWidget(StorageAssessorScreen.this.x + 215, StorageAssessorScreen.this.y + 17 + 21 * i, 20, 20, Text.translatable(filter.getTranslationKey()), false) {
+        CheckboxWidget checkboxWidget = new CheckboxWidget(StorageAssessorScreen.this.x + 215 + ScreenConfig.getInstance().checkBoxesOffsetX, StorageAssessorScreen.this.y + 17 + 21 * i + ScreenConfig.getInstance().checkBoxesOffsetY, 20, 20, Text.translatable(filter.getTranslationKey()), false) {
             @Override
             public void onPress() {
                 super.onPress();
                 NetworkHandler.sendToServer(nbtCompound -> nbtCompound.putInt(this.isChecked() ? "addStackFilter" : "removeStackFilter", i));
             }
         };
+        checkboxWidget.visible = ScreenConfig.getInstance().displayCheckBoxes;
+        return checkboxWidget;
     }
 
     @Override
@@ -167,8 +174,8 @@ public class StorageAssessorScreen extends HandledScreen<StorageAssessorScreenHa
         return super.mouseClicked(mouseX, mouseY, button);
     }
 
-    protected static boolean isKeyPressed(KeyBinding keyBinding) {
-        return InputUtil.isKeyPressed(MinecraftClient.getInstance().getWindow().getHandle(), KeyBindingHelper.getBoundKeyOf(keyBinding).getCode());
+    protected static boolean isKeyPressed(KeyBinding key) {
+        return InputUtil.isKeyPressed(MinecraftClient.getInstance().getWindow().getHandle(), KeyBindingHelper.getBoundKeyOf(key).getCode());
     }
 
     @Override
