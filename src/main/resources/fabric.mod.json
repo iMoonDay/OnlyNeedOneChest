@@ -19,6 +19,9 @@
     ],
     "main": [
       "com.imoonday.on1chest.OnlyNeedOneChest"
+    ],
+    "modmenu": [
+      "com.imoonday.on1chest.config.ModMenuIntegration"
     ]
   },
   "mixins": [

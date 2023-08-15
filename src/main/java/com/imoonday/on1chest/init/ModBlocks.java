@@ -5,7 +5,9 @@ import com.imoonday.on1chest.blocks.StorageAccessorBlock;
 import com.imoonday.on1chest.blocks.StorageBlankBlock;
 import com.imoonday.on1chest.blocks.StorageMemoryBlock;
 import com.imoonday.on1chest.blocks.StorageProcessorBlock;
+import com.imoonday.on1chest.blocks.entities.StorageAccessorBlockEntity;
 import com.imoonday.on1chest.blocks.entities.StorageMemoryBlockEntity;
+import com.imoonday.on1chest.blocks.entities.StorageProcessorBlockEntity;
 import com.imoonday.on1chest.blocks.memories.*;
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
@@ -35,6 +37,8 @@ public class ModBlocks {
     public static final StorageMemoryBlock OBSIDIAN_STORAGE_MEMORY_BLOCK = register("obsidian_storage_memory_block", new ObsidianStorageMemoryBlock(FabricBlockSettings.copyOf(Blocks.OBSIDIAN)));
 
     public static final BlockEntityType<StorageMemoryBlockEntity> STORAGE_MEMORY_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE, OnlyNeedOneChest.id("storage_memory_block"), FabricBlockEntityTypeBuilder.create(StorageMemoryBlockEntity::new, WOOD_STORAGE_MEMORY_BLOCK, COPPER_STORAGE_MEMORY_BLOCK, IRON_STORAGE_MEMORY_BLOCK, GOLD_STORAGE_MEMORY_BLOCK, DIAMOND_STORAGE_MEMORY_BLOCK, NETHERITE_STORAGE_MEMORY_BLOCK, OBSIDIAN_STORAGE_MEMORY_BLOCK).build());
+    public static final BlockEntityType<StorageAccessorBlockEntity> STORAGE_ACCESSOR_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE, OnlyNeedOneChest.id("storage_accessor_block"), FabricBlockEntityTypeBuilder.create(StorageAccessorBlockEntity::new, STORAGE_ACCESSOR_BLOCK).build());
+    public static final BlockEntityType<StorageProcessorBlockEntity> STORAGE_PROCESSOR_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE, OnlyNeedOneChest.id("storage_processor_block"), FabricBlockEntityTypeBuilder.create(StorageProcessorBlockEntity::new, STORAGE_PROCESSOR_BLOCK).build());
 
     public static void register() {
 

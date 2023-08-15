@@ -4,8 +4,12 @@
   "package": "com.imoonday.on1chest.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
+    "HopperBlockEntityMixin",
+    "PacketByteBufMixin",
+    "ScreenHandlerInvoker"
   ],
   "client": [
+    "CheckboxWidgetAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

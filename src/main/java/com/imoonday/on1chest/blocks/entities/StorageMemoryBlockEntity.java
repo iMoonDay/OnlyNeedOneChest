@@ -1,8 +1,9 @@
 package com.imoonday.on1chest.blocks.entities;
 
-import com.imoonday.on1chest.ImplementedInventory;
 import com.imoonday.on1chest.blocks.StorageMemoryBlock;
 import com.imoonday.on1chest.init.ModBlocks;
+import com.imoonday.on1chest.screen.StorageAssessorScreenHandler;
+import com.imoonday.on1chest.utils.ImplementedInventory;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
@@ -129,6 +130,11 @@ public class StorageMemoryBlockEntity extends BlockEntity implements Implemented
         } else {
             return StorageMemoryBlock.UsedCapacity.FULL;
         }
+    }
 
+    @Override
+    public void markDirty() {
+        super.markDirty();
+        StorageAssessorScreenHandler.update(world);
     }
 }

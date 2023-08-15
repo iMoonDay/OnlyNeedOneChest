@@ -2,6 +2,8 @@ package com.imoonday.on1chest.blocks;
 
 import com.imoonday.on1chest.blocks.entities.StorageMemoryBlockEntity;
 import com.imoonday.on1chest.init.ModBlocks;
+import com.imoonday.on1chest.screen.StorageAssessorScreenHandler;
+import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
@@ -13,6 +15,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.ScreenHandler;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.state.StateManager;
@@ -81,7 +84,7 @@ public abstract class StorageMemoryBlock extends BlockWithEntity {
                     if (!player.isCreative()) {
                         stack.decrement(1);
                     }
-                    world.setBlockState(pos, memoryBlock.getDefaultState(), Block.NOTIFY_LISTENERS);
+                    world.setBlockState(pos, memoryBlock.getDefaultState().with(USED_CAPACITY, state.get(USED_CAPACITY)), Block.NOTIFY_LISTENERS);
                     world.playSound(null, pos, SoundEvents.ENTITY_PLAYER_LEVELUP, SoundCategory.BLOCKS, 1.0f, 1.0f);
                 }
                 player.sendMessage(Text.literal(entity.getOccupiedSize() + "/" + entity.getStorageSize()), true);
@@ -104,7 +107,14 @@ public abstract class StorageMemoryBlock extends BlockWithEntity {
             }
             if (state.hasBlockEntity() && !(newState.getBlock() instanceof StorageMemoryBlock)) {
                 world.removeBlockEntity(pos);
+                update(world, pos);
             }
+        }
+    }
+
+    protected void update(World world, BlockPos pos) {
+        if (world instanceof ServerWorld serverWorld) {
+            PlayerLookup.tracking(serverWorld, pos).stream().filter(player -> player.currentScreenHandler instanceof StorageAssessorScreenHandler).map(player -> (StorageAssessorScreenHandler) player.currentScreenHandler).forEach(StorageAssessorScreenHandler::updateItemList);
         }
     }
 

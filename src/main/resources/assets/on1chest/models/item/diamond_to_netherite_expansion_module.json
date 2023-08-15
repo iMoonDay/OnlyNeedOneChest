@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "on1chest:item/diamond_to_netherite_expansion_module"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "values": [
+    "on1chest:wood_storage_memory_block",
+    "on1chest:copper_storage_memory_block",
+    "on1chest:iron_storage_memory_block",
+    "on1chest:gold_storage_memory_block",
+    "on1chest:diamond_storage_memory_block",
+    "on1chest:netherite_storage_memory_block",
+    "on1chest:storage_blank_block",
+    "on1chest:storage_accessor_block",
+    "on1chest:storage_processor_block"
+  ]
+}

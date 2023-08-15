@@ -1,5 +1,18 @@
 {
-  "group.on1chest.storages": "Storages",
+  "group.on1chest.storages": "On1chest",
+  "item.on1chest.wood_to_copper_expansion_module": "Expansion Module: Wood-Copper",
+  "item.on1chest.copper_to_iron_expansion_module": "Expansion Module: Copper-Iron",
+  "item.on1chest.iron_to_gold_expansion_module": "Expansion Module: Iron-Gold",
+  "item.on1chest.gold_to_diamond_expansion_module": "Expansion Module: Gold-Diamond",
+  "item.on1chest.diamond_to_netherite_expansion_module": "Expansion Module: Diamond-Netherite",
+  "item.on1chest.gold_to_obsidian_expansion_module": "Expansion Module: Gold-Obsidian",
+  "item.on1chest.basic_remote_accessor": "Basic Remote Accessor",
+  "item.on1chest.advanced_remote_accessor": "Advanced Remote Accessor",
+  "item.on1chest.remote_accessor.tooltip.pos": "Recorded Coordinate: %s %d %d %d",
+  "item.on1chest.remote_accessor.tooltip.recorded": "This coordinate has been recorded",
+  "item.on1chest.remote_accessor.tooltip.record": "Record Coordinate: %d %d %d",
+  "item.on1chest.remote_accessor.tooltip.abnormal": "Coordinate anomalies",
+  "item.on1chest.remote_accessor.tooltip.warn": "Dimension anomalies",
   "block.on1chest.storage_blank_block": "Storage Blank Block",
   "block.on1chest.wood_storage_memory_block": "Wood Storage Memory Block",
   "block.on1chest.copper_storage_memory_block": "Copper Storage Memory Block",
@@ -21,5 +34,9 @@
   "filter.on1chest.is_enchanted": "Enchanted",
   "filter.on1chest.has_nbt": "NBT",
   "filter.on1chest.is_damaged": "Damaged",
-  "filter.on1chest.is_food": "Food"
+  "filter.on1chest.is_food": "Food",
+  "button.on1chest.clear": "Clear",
+  "key.on1chest.mark_item_stack": "Mark item stack as favourite stack",
+  "key.on1chest.take_all_stacks": "Take all item stack from slot",
+  "key.categories.on1chest": "On1chest Storage Screen"
 }

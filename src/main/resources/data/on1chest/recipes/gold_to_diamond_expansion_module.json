@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "111",
+    "121",
+    "111"
+  ],
+  "key": {
+    "1": {
+      "item": "minecraft:diamond"
+    },
+    "2": {
+      "item": "on1chest:iron_to_gold_expansion_module"
+    }
+  },
+  "result": {
+    "item": "on1chest:gold_to_diamond_expansion_module",
+    "count": 1
+  }
+}

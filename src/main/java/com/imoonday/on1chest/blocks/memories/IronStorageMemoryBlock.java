@@ -2,8 +2,8 @@ package com.imoonday.on1chest.blocks.memories;
 
 import com.imoonday.on1chest.blocks.StorageMemoryBlock;
 import com.imoonday.on1chest.init.ModBlocks;
+import com.imoonday.on1chest.init.ModItems;
 import net.minecraft.item.Item;
-import net.minecraft.item.Items;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -21,7 +21,7 @@ public class IronStorageMemoryBlock extends StorageMemoryBlock {
     @Override
     public Map<Item, StorageMemoryBlock> getLevelUpEntries() {
         Map<Item, StorageMemoryBlock> map = new HashMap<>();
-        map.put(Items.GOLD_BLOCK, ModBlocks.GOLD_STORAGE_MEMORY_BLOCK);
+        map.put(ModItems.IRON_TO_GOLD_EXPAND_MODULE, ModBlocks.GOLD_STORAGE_MEMORY_BLOCK);
         return map;
     }
 }

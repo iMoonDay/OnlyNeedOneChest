@@ -1,4 +1,4 @@
-package com.imoonday.on1chest;
+package com.imoonday.on1chest.utils;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Inventories;

@@ -1,4 +1,4 @@
-package com.imoonday.on1chest;
+package com.imoonday.on1chest.utils;
 
 import net.sourceforge.pinyin4j.PinyinHelper;
 import net.sourceforge.pinyin4j.format.HanyuPinyinCaseType;

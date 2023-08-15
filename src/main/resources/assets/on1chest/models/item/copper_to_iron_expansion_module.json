@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "on1chest:item/copper_to_iron_expansion_module"
+  }
+}
