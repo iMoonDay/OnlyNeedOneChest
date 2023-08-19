@@ -20,6 +20,7 @@ public class OnlyNeedOneChestClient implements ClientModInitializer {
         ScreenConfig.initConfig();
         ModScreens.registerClient();
         registerGlobalReceiver();
+        KeyBindings.register();
     }
 
     @Environment(EnvType.CLIENT)

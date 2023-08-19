@@ -1,5 +1,6 @@
 package com.imoonday.on1chest.screen;
 
+import com.imoonday.on1chest.blocks.entities.StorageAccessorBlockEntity;
 import com.imoonday.on1chest.init.ModScreens;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
@@ -25,27 +26,27 @@ import java.util.Optional;
 
 public class StorageProcessorScreenHandler extends StorageAssessorScreenHandler {
 
-    public static final int RESULT_ID = 0;
     private final RecipeInputInventory input = new CraftingInventory(this, 3, 3);
     private final CraftingResultInventory result = new CraftingResultInventory();
+    protected ScreenHandlerContext context;
 
     public StorageProcessorScreenHandler(int syncId, PlayerInventory playerInventory) {
-        this(syncId, playerInventory, ScreenHandlerContext.EMPTY);
+        this(syncId, playerInventory, ScreenHandlerContext.EMPTY, null);
     }
 
-    public StorageProcessorScreenHandler(int syncId, PlayerInventory playerInventory, ScreenHandlerContext context) {
-        super(ModScreens.STORAGE_PROCESSOR_SCREEN_HANDLER, syncId, playerInventory, context, 27, 18, 5);
+    public StorageProcessorScreenHandler(int syncId, PlayerInventory playerInventory, ScreenHandlerContext context, StorageAccessorBlockEntity accessor) {
+        super(ModScreens.STORAGE_PROCESSOR_SCREEN_HANDLER, syncId, playerInventory, accessor);
+        this.context = context;
         this.addCraftingSlots(playerInventory);
-        this.addInventorySlots();
-        this.addPlayerInventorySlots(playerInventory, 27, 137, 27, 195);
-        this.scrollItems(0.0f);
+        this.addPlayerInventorySlots(playerInventory, 137, 195);
+        this.addStorageSlots(5, 18);
     }
 
     private void addCraftingSlots(PlayerInventory playerInventory) {
-        this.addSlot(new CraftingResultSlot(playerInventory.player, this.input, this.result, 0, 144, 132));
+        this.addSlot(new CraftingResultSlot(playerInventory.player, this.input, this.result, 0, 135, 132));
         for (int i = 0; i < 3; ++i) {
             for (int j = 0; j < 3; ++j) {
-                this.addSlot(new Slot(this.input, j + i * 3, 50 + j * 18, 114 + i * 18));
+                this.addSlot(new Slot(this.input, j + i * 3, 41 + j * 18, 114 + i * 18));
             }
         }
     }
@@ -109,59 +110,46 @@ public class StorageProcessorScreenHandler extends StorageAssessorScreenHandler 
 
     @SuppressWarnings("ConstantValue")
     @Override
-    public ItemStack quickMove(PlayerEntity player, int invSlot) {
-        if (player.getWorld().isClient) {
-            return ItemStack.EMPTY;
-        }
-        ItemStack newStack = ItemStack.EMPTY;
-        Slot slot = this.slots.get(invSlot);
+    protected ItemStack shiftClickItems(PlayerEntity player, int index) {
+        Slot slot = this.slots.get(index);
         if (slot != null && slot.hasStack()) {
-            ItemStack originalStack = slot.getStack().copy();
-            newStack = originalStack.copy();
-            if (invSlot >= inventoryStartIndex && invSlot < playerInventoryStartIndex) {
-                if (this.insertItem(originalStack, playerInventoryStartIndex, playerInventoryStartIndex + 36, true)) {
-                    this.removeStack(newStack, slot);
+            ItemStack slotStack = slot.getStack();
+            ItemStack itemStack = slotStack.copy();
+            if (index == 0) {
+                if (accessor == null) return ItemStack.EMPTY;
+
+                if (!this.insertItem(slotStack, 10, 46, true)) {
+                    return ItemStack.EMPTY;
+                }
+
+                slot.onQuickTransfer(slotStack, itemStack);
+
+                if (slotStack.isEmpty()) {
+                    slot.setStack(ItemStack.EMPTY);
                 } else {
-                    return ItemStack.EMPTY;
+                    slot.markDirty();
                 }
-            } else if ((invSlot >= playerInventoryStartIndex) && this.canInsert(originalStack)) {
-                this.addStack(originalStack, slot);
-            } else if (invSlot == RESULT_ID) {
-                this.context.run((world, pos) -> originalStack.getItem().onCraft(originalStack, world, player));
-                if (!this.insertItem(originalStack, playerInventoryStartIndex, playerInventoryStartIndex + 36, true)) {
-                    return ItemStack.EMPTY;
-                }
-                slot.onQuickTransfer(originalStack, newStack);
-            } else if (invSlot > RESULT_ID && invSlot < inventoryStartIndex) {
-                if (!insertItem(originalStack, playerInventoryStartIndex, playerInventoryStartIndex + 36, true)) {
-                    return ItemStack.EMPTY;
-                }
-            } else {
-                return ItemStack.EMPTY;
-            }
 
-            int count = slot.getStack().getCount();
-            if (originalStack.isEmpty() && count <= slot.getStack().getMaxCount()) {
-                slot.setStack(ItemStack.EMPTY);
-            } else {
-                slot.markDirty();
-                if (originalStack.getCount() == newStack.getCount()) {
+                if (slotStack.getCount() == itemStack.getCount()) {
                     return ItemStack.EMPTY;
                 }
-                newStack = originalStack;
-                slot.setStack(newStack);
-                slot.markDirty();
-            }
 
-            slot.onTakeItem(player, originalStack);
-            if (invSlot == RESULT_ID) {
-                player.dropItem(originalStack, false);
-            }
+                slot.onTakeItem(player, slotStack);
 
-            updateItemList();
+                player.dropItem(slotStack, false);
+
+                return itemStack;
+            } else if (index > 0 && index < 10) {
+                if (accessor == null) return ItemStack.EMPTY;
+                ItemStack stack = accessor.insertStack(itemStack);
+                slot.setStack(stack);
+                if (!player.getWorld().isClient) {
+                    sendContentUpdates();
+                }
+            }
+            slot.onTakeItem(player, slotStack);
         }
-
-        return newStack;
+        return ItemStack.EMPTY;
     }
 
     protected static void updateResult(ScreenHandler handler, World world, PlayerEntity player, RecipeInputInventory craftingInventory, CraftingResultInventory resultInventory) {

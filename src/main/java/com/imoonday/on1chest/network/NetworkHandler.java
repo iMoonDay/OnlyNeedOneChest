@@ -10,30 +10,19 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.network.ServerPlayerEntity;
 
-import java.util.function.Consumer;
-
 public class NetworkHandler {
 
-    public static void sendToServer(Consumer<NbtCompound> consumer) {
+    public static void sendToServer(NbtCompound nbtCompound) {
         PacketByteBuf buf = PacketByteBufs.create();
-        NbtCompound nbt = new NbtCompound();
-        if (consumer != null) {
-            consumer.accept(nbt);
-        }
-        buf.writeNbt(nbt);
+        buf.writeNbt(nbtCompound);
         ClientPlayNetworking.send(OnlyNeedOneChest.C2S, buf);
     }
 
-    public static void sendToClient(PlayerEntity player, Consumer<NbtCompound> consumer) {
+    public static void sendToClient(PlayerEntity player, NbtCompound nbtCompound) {
         if (player instanceof ServerPlayerEntity serverPlayer) {
             PacketByteBuf buf = PacketByteBufs.create();
-            NbtCompound nbt = new NbtCompound();
-            if (consumer != null) {
-                consumer.accept(nbt);
-            }
-            buf.writeNbt(nbt);
+            buf.writeNbt(nbtCompound);
             ServerPlayNetworking.send(serverPlayer, OnlyNeedOneChestClient.S2C, buf);
         }
     }
-
 }

@@ -15,8 +15,7 @@ public class CombinedItemStack {
     }
 
     public CombinedItemStack(ItemStack stack, long count) {
-        this.stack = stack;
-        this.stack.setCount(1);
+        this.stack = stack.copyWithCount(1);
         this.count = count;
     }
 
@@ -28,10 +27,18 @@ public class CombinedItemStack {
         return count;
     }
 
-    public ItemStack getActualStack() {
+    public boolean isEmpty() {
+        return count <= 0 || stack.isEmpty();
+    }
+
+    public ItemStack getActualStack(long count) {
         ItemStack itemStack = stack.copy();
         itemStack.setCount((int) count);
         return itemStack;
+    }
+
+    public ItemStack getActualStack() {
+        return getActualStack(count);
     }
 
     public void writeToNBT(NbtCompound nbt) {
@@ -103,5 +110,13 @@ public class CombinedItemStack {
         if (other == null) return false;
         if (count != other.count) return false;
         return stack == null ? other.stack == null : ItemStack.canCombine(stack, other.stack);
+    }
+
+    @Override
+    public String toString() {
+        return "CombinedItemStack{" +
+                "stack=" + stack +
+                ", count=" + count +
+                '}';
     }
 }

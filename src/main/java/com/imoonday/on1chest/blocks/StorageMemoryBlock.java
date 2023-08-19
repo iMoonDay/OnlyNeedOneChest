@@ -2,8 +2,7 @@ package com.imoonday.on1chest.blocks;
 
 import com.imoonday.on1chest.blocks.entities.StorageMemoryBlockEntity;
 import com.imoonday.on1chest.init.ModBlocks;
-import com.imoonday.on1chest.screen.StorageAssessorScreenHandler;
-import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
+import com.imoonday.on1chest.utils.ConnectBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
@@ -15,7 +14,6 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.ScreenHandler;
-import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.state.StateManager;
@@ -33,7 +31,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 
-public abstract class StorageMemoryBlock extends BlockWithEntity {
+public abstract class StorageMemoryBlock extends BlockWithEntity implements ConnectBlock {
 
     public static final EnumProperty<UsedCapacity> USED_CAPACITY = EnumProperty.of("used_capacity", UsedCapacity.class);
 
@@ -107,14 +105,7 @@ public abstract class StorageMemoryBlock extends BlockWithEntity {
             }
             if (state.hasBlockEntity() && !(newState.getBlock() instanceof StorageMemoryBlock)) {
                 world.removeBlockEntity(pos);
-                update(world, pos);
             }
-        }
-    }
-
-    protected void update(World world, BlockPos pos) {
-        if (world instanceof ServerWorld serverWorld) {
-            PlayerLookup.tracking(serverWorld, pos).stream().filter(player -> player.currentScreenHandler instanceof StorageAssessorScreenHandler).map(player -> (StorageAssessorScreenHandler) player.currentScreenHandler).forEach(StorageAssessorScreenHandler::updateItemList);
         }
     }
 

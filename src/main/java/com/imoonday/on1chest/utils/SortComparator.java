@@ -9,32 +9,31 @@ import java.util.function.Function;
 
 public enum SortComparator {
 
-    ID("sort.on1chest.raw_id", stack -> Registries.ITEM.getRawId(stack.getItem())),
-    NAME("sort.on1chest.name", stack -> stack.getName().getString()),
-    COUNT("sort.on1chest.count", ItemStack::getCount),
-    MAX_COUNT("sort.on1chest.max_count", ItemStack::getMaxCount),
-    DAMAGE("sort.on1chest.damage", ItemStack::getDamage),
-    RARITY("sort.on1chest.rarity", ItemStack::getRarity);
+    ID("sort.on1chest.raw_id", stack -> Registries.ITEM.getRawId(stack.getStack().getItem())),
+    NAME("sort.on1chest.name", stack -> stack.getStack().getName().getString()),
+    COUNT("sort.on1chest.count", CombinedItemStack::getCount),
+    DAMAGE("sort.on1chest.damage", itemStack -> itemStack.getStack().getDamage()),
+    RARITY("sort.on1chest.rarity", itemStack -> itemStack.getStack().getRarity());
 
     public final String translationKey;
-    private final Comparator<ItemStack> comparator;
+    private final Comparator<CombinedItemStack> comparator;
 
-    <T extends Comparable<? super T>> SortComparator(String translationKey, Function<ItemStack, ? extends T> comparator) {
+    <T extends Comparable<? super T>> SortComparator(String translationKey, Function<CombinedItemStack, ? extends T> comparator) {
         this.translationKey = translationKey;
 
         this.comparator = Comparator.comparing(comparator).thenComparing(stack -> {
-            String name = stack.getName().getString();
+            String name = stack.getStack().getName().getString();
             try {
                 name = ChineseUtils.toPinyin(name);
             } catch (Exception e) {
                 e.printStackTrace();
             }
             return name;
-        }).thenComparingInt(ItemStack::getCount).thenComparingInt(ItemStack::getDamage);
+        }).thenComparingLong(CombinedItemStack::getCount).thenComparingInt(value -> value.getStack().getDamage());
     }
 
-    public Comparator<ItemStack> getComparator(Collection<ItemStack> favouriteStacks, boolean reversed) {
-        return Comparator.<ItemStack, Boolean>comparing(stack -> favouriteStacks.stream().anyMatch(stack1 -> ItemStack.canCombine(stack, stack1))).reversed().thenComparing(reversed ? comparator.reversed() : comparator);
+    public Comparator<CombinedItemStack> createComparator(Collection<ItemStack> favouriteStacks, boolean reversed) {
+        return Comparator.<CombinedItemStack, Boolean>comparing(stack -> favouriteStacks.stream().anyMatch(stack1 -> ItemStack.canCombine(stack.getStack(), stack1))).reversed().thenComparing(reversed ? comparator.reversed() : comparator);
     }
 
     public SortComparator next() {

@@ -60,6 +60,15 @@ public class RemoteAccessorItem extends Item {
         return nbt != null && nbt.contains("world", NbtElement.STRING_TYPE) && nbt.contains("x", NbtElement.INT_TYPE) && nbt.contains("y", NbtElement.INT_TYPE) && nbt.contains("z", NbtElement.INT_TYPE);
     }
 
+    @Nullable
+    public BlockPos getPos(ItemStack stack) {
+        NbtCompound nbt = stack.getNbt();
+        if (nbt != null && nbt.contains("world", NbtElement.STRING_TYPE) && nbt.contains("x", NbtElement.INT_TYPE) && nbt.contains("y", NbtElement.INT_TYPE) && nbt.contains("z", NbtElement.INT_TYPE)) {
+            return new BlockPos(nbt.getInt("x"), nbt.getInt("y"), nbt.getInt("z"));
+        }
+        return null;
+    }
+
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
         ItemStack stack = user.getStackInHand(hand);

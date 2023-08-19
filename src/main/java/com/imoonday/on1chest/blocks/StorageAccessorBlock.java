@@ -1,11 +1,16 @@
 package com.imoonday.on1chest.blocks;
 
 import com.imoonday.on1chest.blocks.entities.StorageAccessorBlockEntity;
-import com.imoonday.on1chest.blocks.entities.StorageMemoryBlockEntity;
-import net.minecraft.block.BlockEntityProvider;
+import com.imoonday.on1chest.init.ModBlocks;
+import com.imoonday.on1chest.utils.ConnectBlock;
+import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.BlockWithEntity;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.block.entity.BlockEntityTicker;
+import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.inventory.Inventory;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
@@ -14,7 +19,10 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
-public class StorageAccessorBlock extends StorageBlankBlock implements BlockEntityProvider {
+import java.util.List;
+
+public class StorageAccessorBlock extends BlockWithEntity implements ConnectBlock {
+
     public StorageAccessorBlock(Settings settings) {
         super(settings);
     }
@@ -26,17 +34,10 @@ public class StorageAccessorBlock extends StorageBlankBlock implements BlockEnti
         }
         if (!world.isClient) {
             if (player.isSneaking()) {
-                int occupied = 0;
-                int total = 0;
-                int count = 0;
-                for (BlockPos blockPos : accessorBlock.getConnectedBlocks(world, pos)) {
-                    if (world.getBlockEntity(blockPos) instanceof StorageMemoryBlockEntity memoryBlock) {
-                        occupied += memoryBlock.getOccupiedSize();
-                        total += memoryBlock.getStorageSize();
-                        count++;
-                    }
-                }
-                player.sendMessage(Text.literal("%d/%d(%d)".formatted(occupied, total, count)), true);
+                List<Inventory> inventories = accessorBlock.getAllInventories(world, pos);
+                int size = accessorBlock.getInventory().size();
+                int occupied = size - accessorBlock.getFreeSlotCount();
+                player.sendMessage(Text.literal("%d/%d(%d)".formatted(occupied, size, inventories.size())), true);
             } else {
                 player.openHandledScreen(accessorBlock);
             }
@@ -48,5 +49,16 @@ public class StorageAccessorBlock extends StorageBlankBlock implements BlockEnti
     @Override
     public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
         return new StorageAccessorBlockEntity(pos, state);
+    }
+
+    @Nullable
+    @Override
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {
+        return checkType(type, ModBlocks.STORAGE_ACCESSOR_BLOCK_ENTITY, StorageAccessorBlockEntity::tick);
+    }
+
+    @Override
+    public BlockRenderType getRenderType(BlockState state) {
+        return BlockRenderType.MODEL;
     }
 }

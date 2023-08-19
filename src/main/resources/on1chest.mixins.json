@@ -4,12 +4,15 @@
   "package": "com.imoonday.on1chest.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
+    "GameRulesInvoker",
     "HopperBlockEntityMixin",
-    "PacketByteBufMixin",
-    "ScreenHandlerInvoker"
+    "IntRuleInvoker",
+    "ScreenHandlerInvoker",
+    "SlotAccessor"
   ],
   "client": [
-    "CheckboxWidgetAccessor"
+    "CheckboxWidgetAccessor",
+    "ClickableWidgetAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

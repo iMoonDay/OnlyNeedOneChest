@@ -2,9 +2,9 @@ package com.imoonday.on1chest.utils;
 
 public interface InteractHandler {
 
-    void onInteract(CombinedItemStack itemStack, SlotAction action, boolean rightClick);
+    void onInteract(CombinedItemStack itemStack, SlotAction action, boolean shift);
 
     enum SlotAction {
-        INSERT_OR_TAKE, MOVE_ALL, QUICK_MOVE, MARK;
+        LEFT_CLICK, RIGHT_CLICK, TAKE_ALL, QUICK_MOVE, COPY
     }
 }

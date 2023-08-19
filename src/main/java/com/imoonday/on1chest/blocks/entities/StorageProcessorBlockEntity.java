@@ -17,6 +17,6 @@ public class StorageProcessorBlockEntity extends StorageAccessorBlockEntity {
 
     @Override
     public @Nullable ScreenHandler createMenu(int syncId, PlayerInventory playerInventory, PlayerEntity player) {
-        return new StorageProcessorScreenHandler(syncId, playerInventory, ScreenHandlerContext.create(world, pos));
+        return new StorageProcessorScreenHandler(syncId, playerInventory, ScreenHandlerContext.create(world, pos), this);
     }
 }

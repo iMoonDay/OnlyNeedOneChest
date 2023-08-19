@@ -2,7 +2,6 @@ package com.imoonday.on1chest.blocks.entities;
 
 import com.imoonday.on1chest.blocks.StorageMemoryBlock;
 import com.imoonday.on1chest.init.ModBlocks;
-import com.imoonday.on1chest.screen.StorageAssessorScreenHandler;
 import com.imoonday.on1chest.utils.ImplementedInventory;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -135,6 +134,17 @@ public class StorageMemoryBlockEntity extends BlockEntity implements Implemented
     @Override
     public void markDirty() {
         super.markDirty();
-        StorageAssessorScreenHandler.update(world);
+//        StorageAssessorScreenHandler.update(world);
+    }
+
+    @Override
+    public String toString() {
+        return "StorageMemoryBlockEntity{" +
+                "level=" + level +
+                ", inventory=" + inventory +
+                ", world=" + world +
+                ", pos=" + pos +
+                ", removed=" + removed +
+                '}';
     }
 }

@@ -1,6 +1,7 @@
 package com.imoonday.on1chest;
 
 import com.imoonday.on1chest.init.ModBlocks;
+import com.imoonday.on1chest.init.ModGameRules;
 import com.imoonday.on1chest.init.ModItems;
 import com.imoonday.on1chest.init.ModScreens;
 import com.imoonday.on1chest.utils.IScreenDataReceiver;
@@ -13,13 +14,12 @@ public class OnlyNeedOneChest implements ModInitializer {
 
     /**
      * Bugs:
-     * EMI免费制作
-     * 数量过多取出卡顿
-     * 和部分快捷键冲突
      * <p>
-     * Suggestions:
+     * TODO:
+     * <p>
      * 内存块设置(设置：关闭是否连接)
-     * 限制箱子上限 默认64
+     * <p>
+     * 兼容REI,JEI,EMI等自动补全配方
      */
 
     public static final Identifier C2S = id("c2s");
@@ -29,6 +29,7 @@ public class OnlyNeedOneChest implements ModInitializer {
         ModBlocks.register();
         ModItems.register();
         ModScreens.register();
+        ModGameRules.register();
         registerGlobalReceiver();
     }
 
