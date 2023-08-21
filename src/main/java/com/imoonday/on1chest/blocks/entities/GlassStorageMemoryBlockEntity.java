@@ -8,6 +8,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.random.Random;
 import net.minecraft.world.World;
 
 import java.util.Collections;
@@ -17,9 +18,11 @@ import java.util.stream.Collectors;
 public class GlassStorageMemoryBlockEntity extends StorageMemoryBlockEntity {
 
     private ItemStack displayItem = ItemStack.EMPTY;
+    public float uniqueOffset;
 
     public GlassStorageMemoryBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlocks.GLASS_STORAGE_MEMORY_BLOCK_ENTITY, pos, state);
+        this.uniqueOffset = Random.create().nextFloat() * (float) Math.PI * 2.0f;
     }
 
     public static void tick(World world, BlockPos pos, BlockState state, GlassStorageMemoryBlockEntity entity) {
@@ -55,6 +58,7 @@ public class GlassStorageMemoryBlockEntity extends StorageMemoryBlockEntity {
     protected void writeNbt(NbtCompound nbt) {
         super.writeNbt(nbt);
         nbt.put("displayItem", displayItem.writeNbt(new NbtCompound()));
+        nbt.putFloat("uniqueOffset", uniqueOffset);
     }
 
     @Override
@@ -62,6 +66,9 @@ public class GlassStorageMemoryBlockEntity extends StorageMemoryBlockEntity {
         super.readNbt(nbt);
         if (nbt.contains("displayItem", NbtElement.COMPOUND_TYPE)) {
             this.displayItem = ItemStack.fromNbt(nbt.getCompound("displayItem"));
+        }
+        if (nbt.contains("uniqueOffset", NbtElement.FLOAT_TYPE)) {
+            this.uniqueOffset = nbt.getFloat("uniqueOffset");
         }
     }
 }

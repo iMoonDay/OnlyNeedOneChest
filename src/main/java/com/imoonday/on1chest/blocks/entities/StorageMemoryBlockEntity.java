@@ -85,7 +85,7 @@ public class StorageMemoryBlockEntity extends BlockEntity implements Implemented
 
     private DefaultedList<ItemStack> createInventory() {
         DefaultedList<ItemStack> inventory = DefaultedList.ofSize(getStorageSize(), ItemStack.EMPTY);
-        if (this.inventory != null) {
+        if (this.world != null && this.inventory != null && !this.world.isClient) {
             for (int i = 0; i < this.inventory.size(); i++) {
                 inventory.set(i, this.inventory.get(i));
             }

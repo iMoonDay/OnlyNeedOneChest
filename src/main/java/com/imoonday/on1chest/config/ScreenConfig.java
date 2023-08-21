@@ -54,6 +54,14 @@ public class ScreenConfig {
     private int favouriteColor = Color.YELLOW.getRGB();
     private boolean displayCountBeforeName = true;
 
+    private boolean randomMode = false;
+    private boolean autoSpacing = false;
+    private float scale = 1.25f;
+    private double interval = 0.75;
+    private float rotationSpeed = 1.0f;
+    private float rotationDegrees = -1;
+    private double itemYOffset = 0.0f;
+
     private static void prepareConfigFile() {
         if (file == null) {
             file = new File(FabricLoader.getInstance().getConfigDir().toFile(), "on1chest.json");
@@ -119,7 +127,7 @@ public class ScreenConfig {
                 .setTitle(Text.translatable("group.on1chest.storages"))
                 .setSavingRunnable(ScreenConfig::saveAndUpdate);
 
-        ConfigCategory screenSettings = builder.getOrCreateCategory(Text.translatable("config.on1chest.screen.categories"));
+        ConfigCategory screenSettings = builder.getOrCreateCategory(Text.translatable("config.on1chest.categories.screen"));
 
         ConfigEntryBuilder entryBuilder = builder.entryBuilder();
 
@@ -187,6 +195,55 @@ public class ScreenConfig {
                 .setDefaultValue(new ArrayList<>())
                 .setSaveConsumer(strings -> getInstance().setFavouriteStacks(strings.stream().map(FavouriteItemStack::fromString).filter(Objects::nonNull).collect(Collectors.toSet())))
                 .setAddButtonTooltip(Text.literal("Example:\nminecraft:diamond_sword{Damage:0}\nminecraft:diamond_sword\ndiamond_sword\nminecraft:diamond_sword*\ndiamond_sword*"))
+                .build());
+
+        ConfigCategory rendererSettings = builder.getOrCreateCategory(Text.translatable("config.on1chest.categories.renderer"));
+
+        rendererSettings.addEntry(entryBuilder.startBooleanToggle(Text.translatable("config.on1chest.renderer.randomMode"), getInstance().isRandomMode())
+                .setDefaultValue(false)
+                .setSaveConsumer(random -> getInstance().setRandomMode(random))
+                .build());
+
+        rendererSettings.addEntry(entryBuilder.startBooleanToggle(Text.translatable("config.on1chest.renderer.autoSpacing"), getInstance().isAutoSpacing())
+                .setDefaultValue(false)
+                .setSaveConsumer(autoSpacing -> getInstance().setAutoSpacing(autoSpacing))
+                .setRequirement(() -> !getInstance().isRandomMode())
+                .build());
+
+        rendererSettings.addEntry(entryBuilder.startFloatField(Text.translatable("config.on1chest.renderer.scale"), getInstance().getScale())
+                .setDefaultValue(1.25f)
+                .setSaveConsumer(scale -> getInstance().setScale(scale))
+                .setRequirement(() -> !getInstance().isRandomMode())
+                .setMin(0)
+                .build());
+
+        rendererSettings.addEntry(entryBuilder.startDoubleField(Text.translatable("config.on1chest.renderer.interval"), getInstance().getInterval())
+                .setDefaultValue(0.75)
+                .setSaveConsumer(interval -> getInstance().setInterval(interval))
+                .setRequirement(() -> !getInstance().isRandomMode())
+                .setMin(0)
+                .build());
+
+        rendererSettings.addEntry(entryBuilder.startFloatField(Text.translatable("config.on1chest.renderer.rotationDegrees"), getInstance().getRotationDegrees())
+                .setDefaultValue(-1.0f)
+                .setSaveConsumer(angle -> getInstance().setRotationDegrees(angle))
+                .setRequirement(() -> !getInstance().isRandomMode())
+                .setMin(-1.0f)
+                .setMax(360.0f)
+                .build());
+
+        rendererSettings.addEntry(entryBuilder.startFloatField(Text.translatable("config.on1chest.renderer.rotationSpeed"), getInstance().getRotationSpeed())
+                .setDefaultValue(1.0f)
+                .setSaveConsumer(speed -> getInstance().setRotationSpeed(speed))
+                .setRequirement(() -> !getInstance().isRandomMode() && getInstance().getRotationDegrees() < 0)
+                .setMin(0)
+                .build());
+
+        rendererSettings.addEntry(entryBuilder.startDoubleField(Text.translatable("config.on1chest.renderer.itemYOffset"), getInstance().getItemYOffset())
+                .setDefaultValue(0)
+                .setSaveConsumer(offset -> getInstance().setItemYOffset(offset))
+                .setMin(-1)
+                .setMax(2)
                 .build());
 
         return builder.build();
@@ -379,6 +436,69 @@ public class ScreenConfig {
 
     public void setDisplayCountBeforeName(boolean displayCountBeforeName) {
         this.displayCountBeforeName = displayCountBeforeName;
+        saveAndUpdate();
+    }
+
+    public boolean isAutoSpacing() {
+        return autoSpacing;
+    }
+
+    public void setAutoSpacing(boolean autoSpacing) {
+        this.autoSpacing = autoSpacing;
+        saveAndUpdate();
+    }
+
+    public float getScale() {
+        return scale;
+    }
+
+    public void setScale(float scale) {
+        this.scale = scale;
+        saveAndUpdate();
+    }
+
+    public double getInterval() {
+        return interval;
+    }
+
+    public void setInterval(double interval) {
+        this.interval = interval;
+        saveAndUpdate();
+    }
+
+    public float getRotationSpeed() {
+        return rotationSpeed;
+    }
+
+    public void setRotationSpeed(float rotationSpeed) {
+        this.rotationSpeed = rotationSpeed;
+        saveAndUpdate();
+    }
+
+    public float getRotationDegrees() {
+        return rotationDegrees;
+    }
+
+    public void setRotationDegrees(float rotationDegrees) {
+        this.rotationDegrees = rotationDegrees;
+        saveAndUpdate();
+    }
+
+    public boolean isRandomMode() {
+        return randomMode;
+    }
+
+    public void setRandomMode(boolean randomMode) {
+        this.randomMode = randomMode;
+        saveAndUpdate();
+    }
+
+    public double getItemYOffset() {
+        return itemYOffset;
+    }
+
+    public void setItemYOffset(double itemYOffset) {
+        this.itemYOffset = itemYOffset;
         saveAndUpdate();
     }
 }

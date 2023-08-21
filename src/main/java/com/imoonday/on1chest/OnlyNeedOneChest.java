@@ -13,7 +13,10 @@ import net.minecraft.util.Identifier;
 public class OnlyNeedOneChest implements ModInitializer {
 
     /**
-     * TODO:<p>1.兼容REI,JEI,EMI等自动补全配方</P>
+     * BUG:
+     * 1.取出物品不更新客户端
+     * TODO:
+     * 1.兼容REI,JEI,EMI等自动补全配方
      */
 
     public static final Identifier C2S = id("c2s");
