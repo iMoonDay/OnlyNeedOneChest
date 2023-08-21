@@ -1,26 +1,66 @@
 package com.imoonday.on1chest.client;
 
 import com.imoonday.on1chest.OnlyNeedOneChest;
+import com.imoonday.on1chest.client.renderer.GlassStorageMemoryBlockEntityRenderer;
 import com.imoonday.on1chest.config.ScreenConfig;
+import com.imoonday.on1chest.init.ModBlocks;
 import com.imoonday.on1chest.init.ModScreens;
+import com.imoonday.on1chest.screen.client.StorageAssessorScreen;
+import com.imoonday.on1chest.utils.CombinedItemStack;
 import com.imoonday.on1chest.utils.IScreenDataReceiver;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
+import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.render.RenderLayer;
+import net.minecraft.client.render.block.entity.BlockEntityRendererFactories;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.Nullable;
 
 public class OnlyNeedOneChestClient implements ClientModInitializer {
 
     public static final Identifier S2C = OnlyNeedOneChest.id("s2c");
+    private static CombinedItemStack selectedStack = null;
 
     @Override
     public void onInitializeClient() {
         ScreenConfig.initConfig();
         ModScreens.registerClient();
         registerGlobalReceiver();
-        KeyBindings.register();
+        registerCountDisplay();
+        BlockEntityRendererFactories.register(ModBlocks.GLASS_STORAGE_MEMORY_BLOCK_ENTITY, GlassStorageMemoryBlockEntityRenderer::new);
+        BlockRenderLayerMap.INSTANCE.putBlock(ModBlocks.GLASS_STORAGE_MEMORY_BLOCK, RenderLayer.getTranslucent());
+    }
+
+    @Environment(EnvType.CLIENT)
+    private static void registerCountDisplay() {
+        ItemTooltipCallback.EVENT.register((itemStack, tooltipContext, list) -> {
+            if (!ScreenConfig.getInstance().isDisplayCountBeforeName()) {
+                return;
+            }
+            if (selectedStack == null) {
+                return;
+            }
+            if (!(MinecraftClient.getInstance().currentScreen instanceof StorageAssessorScreen)) {
+                selectedStack = null;
+                return;
+            }
+            if (selectedStack.canCombineWith(itemStack)) {
+                Text text = list.get(0);
+                if (text != null) {
+                    list.set(0, Text.literal(selectedStack.getCount() + " ").append(text).setStyle(text.getStyle()));
+                }
+            }
+        });
+    }
+
+    public static void setSelectedStack(@Nullable CombinedItemStack selectedStack) {
+        OnlyNeedOneChestClient.selectedStack = selectedStack;
     }
 
     @Environment(EnvType.CLIENT)
@@ -34,4 +74,6 @@ public class OnlyNeedOneChestClient implements ClientModInitializer {
             });
         });
     }
+
+
 }

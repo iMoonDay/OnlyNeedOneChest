@@ -10,9 +10,14 @@ public class StorageProcessorScreen extends StorageAssessorScreen {
 
     public StorageProcessorScreen(StorageAssessorScreenHandler handler, PlayerInventory inventory, Text title) {
         super(handler, inventory, title);
-        this.backgroundWidth = 196;
         this.backgroundHeight = 256;
         this.playerInventoryTitleY = this.backgroundHeight - 94;
+    }
+
+    @Override
+    protected void init() {
+        super.init();
+        this.playerInventoryTitleX = this.backgroundWidth - 26 - textRenderer.getWidth(title);
     }
 
     @Override

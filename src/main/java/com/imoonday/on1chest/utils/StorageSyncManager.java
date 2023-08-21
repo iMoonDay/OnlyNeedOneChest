@@ -178,7 +178,7 @@ public class StorageSyncManager {
         return false;
     }
 
-    public void sendInteract(CombinedItemStack intStack, InteractHandler.SlotAction action, boolean mod) {
+    public void sendInteract(CombinedItemStack intStack, SlotAction action, boolean mod) {
         PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
         int flags = mod ? 1 : 0;
         if (intStack == null) {
@@ -212,7 +212,7 @@ public class StorageSyncManager {
                 long count = buf.readVarLong();
                 stack.setCount(count);
             }
-            handler.onInteract(stack, buf.readEnumConstant(InteractHandler.SlotAction.class), (flags & 1) != 0);
+            handler.onInteract(stack, buf.readEnumConstant(SlotAction.class), (flags & 1) != 0);
         }
     }
 

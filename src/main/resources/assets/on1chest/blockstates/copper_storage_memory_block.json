@@ -1,16 +1,19 @@
 {
   "variants": {
-    "used_capacity=zero": {
+    "used_capacity=zero,activated=true": {
       "model": "on1chest:block/copper_storage_memory_block_zero"
     },
-    "used_capacity=low": {
+    "used_capacity=low,activated=true": {
       "model": "on1chest:block/copper_storage_memory_block_low"
     },
-    "used_capacity=high": {
+    "used_capacity=high,activated=true": {
       "model": "on1chest:block/copper_storage_memory_block_high"
     },
-    "used_capacity=full": {
+    "used_capacity=full,activated=true": {
       "model": "on1chest:block/copper_storage_memory_block_full"
+    },
+    "activated=false": {
+      "model": "on1chest:block/copper_storage_memory_block_closed"
     }
   }
 }

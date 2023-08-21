@@ -17,6 +17,7 @@ import net.minecraft.screen.ScreenHandler;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.state.StateManager;
+import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.state.property.EnumProperty;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
@@ -34,15 +35,16 @@ import java.util.Map;
 public abstract class StorageMemoryBlock extends BlockWithEntity implements ConnectBlock {
 
     public static final EnumProperty<UsedCapacity> USED_CAPACITY = EnumProperty.of("used_capacity", UsedCapacity.class);
+    public static final BooleanProperty ACTIVATED = BooleanProperty.of("activated");
 
     public StorageMemoryBlock(Settings settings) {
         super(settings);
-        this.setDefaultState(this.stateManager.getDefaultState().with(USED_CAPACITY, UsedCapacity.ZERO));
+        this.setDefaultState(this.stateManager.getDefaultState().with(USED_CAPACITY, UsedCapacity.ZERO).with(ACTIVATED, true));
     }
 
     @Override
     protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
-        builder.add(USED_CAPACITY);
+        builder.add(USED_CAPACITY, ACTIVATED);
     }
 
     public abstract int getLevel();
@@ -75,6 +77,10 @@ public abstract class StorageMemoryBlock extends BlockWithEntity implements Conn
     @Override
     public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
         if (!world.isClient) {
+            if (player.isSneaking()) {
+                world.setBlockState(pos, state.with(ACTIVATED, !state.get(ACTIVATED)), NOTIFY_LISTENERS);
+                return ActionResult.SUCCESS;
+            }
             if (world.getBlockEntity(pos) instanceof StorageMemoryBlockEntity entity) {
                 ItemStack stack = player.getStackInHand(hand);
                 StorageMemoryBlock memoryBlock = getLevelUpEntries().get(stack.getItem());
@@ -82,7 +88,7 @@ public abstract class StorageMemoryBlock extends BlockWithEntity implements Conn
                     if (!player.isCreative()) {
                         stack.decrement(1);
                     }
-                    world.setBlockState(pos, memoryBlock.getDefaultState().with(USED_CAPACITY, state.get(USED_CAPACITY)), Block.NOTIFY_LISTENERS);
+                    world.setBlockState(pos, memoryBlock.getDefaultState().with(USED_CAPACITY, state.get(USED_CAPACITY)).with(ACTIVATED, state.get(ACTIVATED)), Block.NOTIFY_LISTENERS);
                     world.playSound(null, pos, SoundEvents.ENTITY_PLAYER_LEVELUP, SoundCategory.BLOCKS, 1.0f, 1.0f);
                 }
                 player.sendMessage(Text.literal(entity.getOccupiedSize() + "/" + entity.getStorageSize()), true);

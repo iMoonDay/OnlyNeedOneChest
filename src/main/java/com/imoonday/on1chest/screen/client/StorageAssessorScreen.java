@@ -1,7 +1,7 @@
 package com.imoonday.on1chest.screen.client;
 
 import com.imoonday.on1chest.OnlyNeedOneChest;
-import com.imoonday.on1chest.client.KeyBindings;
+import com.imoonday.on1chest.client.OnlyNeedOneChestClient;
 import com.imoonday.on1chest.config.ScreenConfig;
 import com.imoonday.on1chest.mixin.CheckboxWidgetAccessor;
 import com.imoonday.on1chest.mixin.ClickableWidgetAccessor;
@@ -10,7 +10,6 @@ import com.imoonday.on1chest.utils.*;
 import com.mojang.blaze3d.systems.RenderSystem;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
@@ -20,12 +19,15 @@ import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.CheckboxWidget;
 import net.minecraft.client.gui.widget.IconButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.util.InputUtil;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.inventory.Inventory;
+import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.screen.slot.Slot;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
@@ -33,7 +35,6 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
 import java.awt.*;
@@ -41,7 +42,6 @@ import java.text.NumberFormat;
 import java.util.List;
 import java.util.*;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 public class StorageAssessorScreen extends HandledScreen<StorageAssessorScreenHandler> implements IScreenDataReceiver {
 
@@ -53,15 +53,15 @@ public class StorageAssessorScreen extends HandledScreen<StorageAssessorScreenHa
     protected IconButtonWidget forceUpdateButton;
     protected IconButtonWidget themeButton;
     protected Map<IconButtonWidget, Function<ButtonWidget, Boolean>> rightClickButtonFunctions = new HashMap<>();
-    protected final CheckboxWidget[] checkboxWidgets = new CheckboxWidget[ItemStackFilter.values().length];
+    protected final CheckboxWidget[] filterWidgets = new CheckboxWidget[ItemStackFilter.values().length];
     protected float scrollPosition;
     protected boolean scrolling;
     protected boolean refreshItemList;
     protected String searchLast = "";
-    protected int slotIDUnderMouse = -1;
+    protected int selectedSlot = -1;
+    protected boolean forceUpdate;
     private Comparator<CombinedItemStack> sortComp;
     private int buttonYOffset;
-    protected boolean forceUpdate;
 
     public StorageAssessorScreen(StorageAssessorScreenHandler handler, PlayerInventory inventory, Text title) {
         super(handler, inventory, title);
@@ -73,8 +73,6 @@ public class StorageAssessorScreen extends HandledScreen<StorageAssessorScreenHa
     @Override
     protected void init() {
         super.init();
-
-        this.playerInventoryTitleX = this.backgroundWidth - 10 - textRenderer.getWidth(title);
 
         this.searchBox = new TextFieldWidget(this.textRenderer, this.x + 82, this.y + 6, 86, 10, Text.empty());
         this.searchBox.setDrawsBackground(false);
@@ -90,35 +88,36 @@ public class StorageAssessorScreen extends HandledScreen<StorageAssessorScreenHa
                 this.client.setScreen(ScreenConfig.createConfigScreen(this));
             }
             return false;
-        }, null, Text.literal("设置"));
+        }, null, Text.translatable("screen.on1chest.button.setting"));
         this.settingButton.visible = true;
 
         this.sortButton = createIconButtonWidget("sort", button -> {
             ScreenConfig.getInstance().setComparator(ScreenConfig.getInstance().getComparator().next());
-            button.setTooltip(Tooltip.of(Text.translatable("sort.on1chest.tooltip", Text.translatable(ScreenConfig.getInstance().getComparator().translationKey))));
+            button.setTooltip(Tooltip.of(Text.translatable("sort.on1chest.tooltip", Text.translatable(ScreenConfig.getInstance().getComparator().translationKey), Text.translatable("sort.on1chest.order." + (ScreenConfig.getInstance().isReversed() ? "reverse" : "positive")))));
             return true;
         }, button -> {
             ScreenConfig.getInstance().setReversed(!ScreenConfig.getInstance().isReversed());
+            button.setTooltip(Tooltip.of(Text.translatable("sort.on1chest.tooltip", Text.translatable(ScreenConfig.getInstance().getComparator().translationKey), Text.translatable("sort.on1chest.order." + (ScreenConfig.getInstance().isReversed() ? "reverse" : "positive")))));
             return true;
-        }, Text.translatable("sort.on1chest.tooltip", Text.translatable(ScreenConfig.getInstance().getComparator().translationKey)));
+        }, Text.translatable("sort.on1chest.tooltip", Text.translatable(ScreenConfig.getInstance().getComparator().translationKey), Text.translatable("sort.on1chest.order." + (ScreenConfig.getInstance().isReversed() ? "reverse" : "positive"))));
 
         this.filtersButton = createIconButtonWidget("filters", button -> {
             ScreenConfig.getInstance().setDisplayFilterWidgets(!ScreenConfig.getInstance().isDisplayFilterWidgets());
-            button.setTooltip(Tooltip.of(Text.literal("过滤项：" + (ScreenConfig.getInstance().isDisplayFilterWidgets() ? "显示" : "隐藏"))));
+            button.setTooltip(Tooltip.of(Text.translatable("screen.on1chest.button.filter", ScreenConfig.getInstance().isDisplayFilterWidgets() ? Text.translatable("screen.on1chest.button.display") : Text.translatable("screen.on1chest.button.hide"))));
             return false;
-        }, null, Text.literal("过滤项：" + (ScreenConfig.getInstance().isDisplayFilterWidgets() ? "显示" : "隐藏")));
+        }, null, Text.translatable("screen.on1chest.button.filter", Text.translatable("screen.on1chest.button." + (ScreenConfig.getInstance().isDisplayFilterWidgets() ? "display" : "hide"))));
 
         this.noSortButton = createIconButtonWidget("nosort", button -> {
             ScreenConfig.getInstance().setNoSortWithShift(!ScreenConfig.getInstance().isNoSortWithShift());
-            button.setTooltip(Tooltip.of(Text.literal("Shift暂停排序：" + (ScreenConfig.getInstance().isNoSortWithShift() ? "开启" : "关闭"))));
+            button.setTooltip(Tooltip.of(Text.translatable("screen.on1chest.button.noSortWithShift", Text.translatable("screen.on1chest.button." + (ScreenConfig.getInstance().isNoSortWithShift() ? "open" : "close")))));
             return true;
-        }, null, Text.literal("Shift暂停排序：" + (ScreenConfig.getInstance().isNoSortWithShift() ? "开启" : "关闭")));
+        }, null, Text.translatable("screen.on1chest.button.noSortWithShift", Text.translatable("screen.on1chest.button." + (ScreenConfig.getInstance().isNoSortWithShift() ? "open" : "close"))));
 
         this.forceUpdateButton = createIconButtonWidget("force_update", button -> {
             ScreenConfig.getInstance().setUpdateOnInsert(!ScreenConfig.getInstance().isUpdateOnInsert());
-            button.setTooltip(Tooltip.of(Text.literal("存入新物品时强制更新排序：" + (ScreenConfig.getInstance().isUpdateOnInsert() ? "开启" : "关闭"))));
+            button.setTooltip(Tooltip.of(Text.translatable("screen.on1chest.button.updateOnInsert", Text.translatable("screen.on1chest.button." + (ScreenConfig.getInstance().isUpdateOnInsert() ? "open" : "close")))));
             return ScreenConfig.getInstance().isUpdateOnInsert();
-        }, null, Text.literal("存入新物品时强制更新排序：" + (ScreenConfig.getInstance().isUpdateOnInsert() ? "开启" : "关闭")));
+        }, null, Text.translatable("screen.on1chest.button.updateOnInsert", Text.translatable("screen.on1chest.button." + (ScreenConfig.getInstance().isUpdateOnInsert() ? "open" : "close"))));
 
         this.themeButton = createIconButtonWidget("theme", button -> {
             ScreenConfig.getInstance().setTheme(ScreenConfig.getInstance().getTheme().next());
@@ -127,8 +126,8 @@ public class StorageAssessorScreen extends HandledScreen<StorageAssessorScreenHa
         }, null, ScreenConfig.getInstance().getTheme().getLocalizeText());
 
         for (int i = 0; i < ItemStackFilter.values().length; i++) {
-            this.checkboxWidgets[i] = createCheckboxWidget(i);
-            this.addDrawableChild(this.checkboxWidgets[i]);
+            this.filterWidgets[i] = createCheckboxWidget(i);
+            this.addDrawableChild(this.filterWidgets[i]);
         }
     }
 
@@ -137,7 +136,8 @@ public class StorageAssessorScreen extends HandledScreen<StorageAssessorScreenHa
         this.sortButton.visible = visible;
         this.filtersButton.visible = visible;
         this.noSortButton.visible = visible;
-        Arrays.stream(this.checkboxWidgets).forEach(widget -> widget.visible = config.isDisplayFilterWidgets());
+        Arrays.stream(this.filterWidgets).forEach(widget -> widget.visible = config.isDisplayFilterWidgets());
+        refreshItemList = true;
     }
 
     private IconButtonWidget createIconButtonWidget(String fileName, Function<ButtonWidget, Boolean> function, Function<ButtonWidget, Boolean> rightClickFunction, Text tooltip) {
@@ -192,15 +192,11 @@ public class StorageAssessorScreen extends HandledScreen<StorageAssessorScreenHa
         if (refreshItemList || !searchLast.equals(searchString) || forceUpdate) {
             handler.itemListClientSorted.clear();
             handler.itemListClient.stream().filter(stack -> stack != null && stack.getStack() != null && StorageAssessorScreenHandler.checkTextFilter(stack.getStack(), searchString)).forEach(this::addStackToClientList);
-            handler.itemListClientSorted.sort(handler.noSort && !forceUpdate ? sortComp : ScreenConfig.getInstance().getComparator().createComparator(ScreenConfig.getInstance().getFavouriteStacks().stream().map(FavouriteItemStack::getStack).collect(Collectors.toSet()), ScreenConfig.getInstance().isReversed()));
+            handler.itemListClientSorted.sort(handler.noSort && !forceUpdate ? sortComp : ScreenConfig.getInstance().getComparator().createComparator(ScreenConfig.getInstance().getFavouriteStacks(), ScreenConfig.getInstance().isReversed()));
             handler.itemListClientSorted.removeIf(stack -> !ScreenConfig.getInstance().getStackFilters().stream().allMatch(filter -> filter.getPredicate().test(stack.getStack())));
             if (!searchLast.equals(searchString)) {
                 handler.scrollItems(0);
                 this.scrollPosition = 0;
-                NbtCompound nbt = new NbtCompound();
-                nbt.putString("s", searchString);
-                handler.sendMessage(nbt);
-                onUpdateSearch(searchString);
             } else {
                 handler.scrollItems(this.scrollPosition);
             }
@@ -210,8 +206,20 @@ public class StorageAssessorScreen extends HandledScreen<StorageAssessorScreenHa
         }
     }
 
-    protected void onUpdateSearch(String text) {
+    public Slot getSelectedSlot() {
+        Slot s = this.focusedSlot;
+        if (s != null) return s;
+        if (selectedSlot > -1 && handler.getSlotByID(selectedSlot).stack != null) {
+            fakeSelectedSlot.inventory.setStack(0, handler.getSlotByID(selectedSlot).stack.getStack());
+            return fakeSelectedSlot;
+        }
+        return null;
+    }
 
+    @Override
+    public void close() {
+        super.close();
+        OnlyNeedOneChestClient.setSelectedStack(null);
     }
 
     private void addStackToClientList(CombinedItemStack stack) {
@@ -280,11 +288,11 @@ public class StorageAssessorScreen extends HandledScreen<StorageAssessorScreenHa
                 MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0f));
             }
         }
-        if (slotIDUnderMouse > -1) {
+        if (selectedSlot > -1) {
             switch (button) {
                 case GLFW.GLFW_MOUSE_BUTTON_LEFT -> {
-                    if (isKeyPressed(KeyBindings.markItemStackKey) && this.handler.getSlotByID(slotIDUnderMouse).stack != null) {
-                        ItemStack stack = this.handler.getSlotByID(slotIDUnderMouse).stack.getActualStack(1);
+                    if (isKeyPressed(ScreenConfig.getInstance().getMarkItemStackKey()) && this.handler.getSlotByID(selectedSlot).stack != null) {
+                        ItemStack stack = this.handler.getSlotByID(selectedSlot).stack.getActualStack(1);
                         if (ScreenConfig.getInstance().getFavouriteStacks().stream().noneMatch(stack1 -> stack1.equals(stack))) {
                             ScreenConfig.getInstance().addFavouriteStack(stack);
                             refreshItemList = true;
@@ -292,26 +300,26 @@ public class StorageAssessorScreen extends HandledScreen<StorageAssessorScreenHa
                         return true;
                     }
                     if (!this.handler.getCursorStack().isEmpty()) {
-                        storageSlotClick(null, isKeyPressed(KeyBindings.takeAllStacksKey) ? InteractHandler.SlotAction.TAKE_ALL : InteractHandler.SlotAction.LEFT_CLICK, false);
-                    } else if (this.handler.getSlotByID(slotIDUnderMouse).stack != null && this.handler.getSlotByID(slotIDUnderMouse).stack.getCount() > 0) {
-                        storageSlotClick(this.handler.getSlotByID(slotIDUnderMouse).stack, hasShiftDown() ? InteractHandler.SlotAction.QUICK_MOVE : (isKeyPressed(KeyBindings.takeAllStacksKey) ? InteractHandler.SlotAction.TAKE_ALL : InteractHandler.SlotAction.LEFT_CLICK), false);
+                        storageSlotClick(null, isKeyPressed(ScreenConfig.getInstance().getTakeAllStacksKey()) ? SlotAction.TAKE_ALL : SlotAction.LEFT_CLICK, false);
+                    } else if (this.handler.getSlotByID(selectedSlot).stack != null && this.handler.getSlotByID(selectedSlot).stack.getCount() > 0) {
+                        storageSlotClick(this.handler.getSlotByID(selectedSlot).stack, hasShiftDown() ? SlotAction.QUICK_MOVE : (isKeyPressed(ScreenConfig.getInstance().getTakeAllStacksKey()) ? SlotAction.TAKE_ALL : SlotAction.LEFT_CLICK), false);
                         return true;
                     }
                 }
                 case GLFW.GLFW_MOUSE_BUTTON_RIGHT -> {
-                    if (isKeyPressed(KeyBindings.markItemStackKey) && this.handler.getSlotByID(slotIDUnderMouse).stack != null) {
-                        ScreenConfig.getInstance().removeFavouriteStack(this.handler.getSlotByID(slotIDUnderMouse).stack.getActualStack(1));
+                    if (isKeyPressed(ScreenConfig.getInstance().getMarkItemStackKey()) && this.handler.getSlotByID(selectedSlot).stack != null) {
+                        ScreenConfig.getInstance().removeFavouriteStack(this.handler.getSlotByID(selectedSlot).stack.getActualStack(1));
                         refreshItemList = true;
                         return true;
                     }
-                    if (this.handler.getSlotByID(slotIDUnderMouse).stack != null && this.handler.getSlotByID(slotIDUnderMouse).stack.getCount() > 0) {
-                        storageSlotClick(this.handler.getSlotByID(slotIDUnderMouse).stack, InteractHandler.SlotAction.RIGHT_CLICK, hasShiftDown());
+                    if (this.handler.getSlotByID(selectedSlot).stack != null && this.handler.getSlotByID(selectedSlot).stack.getCount() > 0) {
+                        storageSlotClick(this.handler.getSlotByID(selectedSlot).stack, SlotAction.RIGHT_CLICK, hasShiftDown());
                     }
                     return true;
                 }
                 case GLFW.GLFW_MOUSE_BUTTON_MIDDLE -> {
-                    if (this.handler.getCursorStack().isEmpty() && this.handler.getSlotByID(slotIDUnderMouse).stack != null) {
-                        storageSlotClick(this.handler.getSlotByID(slotIDUnderMouse).stack, InteractHandler.SlotAction.COPY, false);
+                    if (this.handler.getCursorStack().isEmpty() && this.handler.getSlotByID(selectedSlot).stack != null) {
+                        storageSlotClick(this.handler.getSlotByID(selectedSlot).stack, SlotAction.COPY, false);
                         return true;
                     }
                 }
@@ -320,11 +328,11 @@ public class StorageAssessorScreen extends HandledScreen<StorageAssessorScreenHa
         return super.mouseClicked(mouseX, mouseY, button);
     }
 
-    protected static boolean isKeyPressed(KeyBinding key) {
-        return InputUtil.isKeyPressed(MinecraftClient.getInstance().getWindow().getHandle(), KeyBindingHelper.getBoundKeyOf(key).getCode());
+    protected static boolean isKeyPressed(InputUtil.Key key) {
+        return InputUtil.isKeyPressed(MinecraftClient.getInstance().getWindow().getHandle(), key.getCode());
     }
 
-    protected void storageSlotClick(CombinedItemStack slotStack, InteractHandler.SlotAction act, boolean mod) {
+    protected void storageSlotClick(CombinedItemStack slotStack, SlotAction act, boolean mod) {
         this.handler.manager.sendInteract(slotStack, act, mod);
     }
 
@@ -338,6 +346,9 @@ public class StorageAssessorScreen extends HandledScreen<StorageAssessorScreenHa
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
+        if (!ScreenConfig.getInstance().isScrollOutside() && this.selectedSlot <= -1 && !this.isClickInScrollbar(mouseX, mouseY)) {
+            return super.mouseScrolled(mouseX, mouseY, amount);
+        }
         this.scrollPosition = this.handler.getScrollPosition(this.scrollPosition, amount);
         this.handler.scrollItems(this.scrollPosition);
         return true;
@@ -392,11 +403,13 @@ public class StorageAssessorScreen extends HandledScreen<StorageAssessorScreenHa
             handler.itemListClient = new ArrayList<>(handler.itemList);
         }
 
-        if (this.handler.getCursorStack().isEmpty() && slotIDUnderMouse != -1) {
-            StorageAssessorScreenHandler.StorageSlot slot = handler.storageSlotList.get(slotIDUnderMouse);
+        OnlyNeedOneChestClient.setSelectedStack(selectedSlot != -1 && handler.storageSlotList.get(selectedSlot) != null ? handler.storageSlotList.get(selectedSlot).stack : null);
+
+        if (this.handler.getCursorStack().isEmpty() && selectedSlot != -1) {
+            StorageAssessorScreenHandler.StorageSlot slot = handler.storageSlotList.get(selectedSlot);
             if (slot.stack != null) {
                 if (slot.stack.isEmpty()) {
-                    MutableText text = Text.literal("等待刷新");
+                    MutableText text = Text.translatable("screen.on1chest.slot.waitingForRefresh");
                     long time = Util.getMeasuringTimeMs() % 4000 / 1000;
                     for (long i = 0; i < time; i++) {
                         text.append(".");
@@ -415,7 +428,7 @@ public class StorageAssessorScreen extends HandledScreen<StorageAssessorScreenHa
     protected void drawForeground(DrawContext context, int mouseX, int mouseY) {
         super.drawForeground(context, mouseX, mouseY);
         context.getMatrices().push();
-        slotIDUnderMouse = drawSlots(context, mouseX, mouseY);
+        selectedSlot = drawSlots(context, mouseX, mouseY);
         context.getMatrices().pop();
     }
 
@@ -438,24 +451,25 @@ public class StorageAssessorScreen extends HandledScreen<StorageAssessorScreenHa
         if (slot.stack != null) {
             ItemStack stack = slot.stack.getStack().copy().split(1);
 
-            if (ScreenConfig.getInstance().getFavouriteStacks().stream().anyMatch(stack1 -> stack1.equals(stack))) {
-                if (isVanilla) {
-                    context.drawBorder(i - 1, j - 1, 18, 18, Color.YELLOW.getRGB());
-                } else {
-                    context.fill(i, j + 1, i + 3, j + 2, Color.YELLOW.getRGB());
-                    context.fill(i + 1, j, i + 2, j + 3, Color.YELLOW.getRGB());
-                }
-            }
-
             context.drawItem(stack, i, j);
             context.drawItemInSlot(textRenderer, stack, i, j);
 
+            if (ScreenConfig.getInstance().getFavouriteStacks().stream().anyMatch(stack1 -> stack1.equals(stack))) {
+                int color = ScreenConfig.getInstance().getFavouriteColor();
+                if (isVanilla) {
+                    context.drawBorder(i - 1, j - 1, 18, 18, color);
+                } else {
+                    context.fill(i, j + 1, i + 3, j + 2, color);
+                    context.fill(i + 1, j, i + 2, j + 3, color);
+                }
+            }
+
             long count = slot.stack.getCount();
-            Color color = null;
+            Integer color = null;
             if (count <= 0) {
-                color = Color.RED;
-            } else if (isHovered) {
-                color = Color.GREEN;
+                color = Color.RED.getRGB();
+            } else if (isHovered && !isVanilla && this.handler.getCursorStack().isEmpty()) {
+                color = ScreenConfig.getInstance().getSelectedColor();
             }
             drawStackSize(context, textRenderer, count, i, j, color);
         }
@@ -464,14 +478,14 @@ public class StorageAssessorScreen extends HandledScreen<StorageAssessorScreenHa
             if (isVanilla) {
                 drawSlotHighlight(context, i, j, 0);
             } else if (slot.stack != null && this.handler.getCursorStack().isEmpty()) {
-                context.drawBorder(i - 1, j - 1, 18, 18, Color.GREEN.getRGB());
+                context.drawBorder(i - 1, j - 1, 18, 18, ScreenConfig.getInstance().getSelectedColor());
             }
             return true;
         }
         return false;
     }
 
-    private void drawStackSize(DrawContext context, TextRenderer renderer, long size, int x, int y, @Nullable Color color) {
+    private void drawStackSize(DrawContext context, TextRenderer renderer, long size, int x, int y, Integer color) {
         float scaleFactor = 0.6f;
         RenderSystem.disableDepthTest();
         RenderSystem.disableBlend();
@@ -483,7 +497,7 @@ public class StorageAssessorScreen extends HandledScreen<StorageAssessorScreenHa
         float inverseScaleFactor = 1.0f / scaleFactor;
         int X = (int) (((float) x + 0 + 16.0f - renderer.getWidth(stackSize) * scaleFactor) * inverseScaleFactor);
         int Y = (int) (((float) y + 0 + 16.0f - 7.0f * scaleFactor) * inverseScaleFactor);
-        int i = color != null ? color.getRGB() : 16777215;
+        int i = color != null ? color : 16777215;
         context.drawText(renderer, stackSize, X, Y, i, true);
         context.getMatrices().pop();
         RenderSystem.enableDepthTest();
@@ -499,5 +513,31 @@ public class StorageAssessorScreen extends HandledScreen<StorageAssessorScreenHa
     public void receive(NbtCompound nbt) {
         handler.receiveClientNBTPacket(nbt);
         refreshItemList = true;
+    }
+
+    private FakeSlot fakeSelectedSlot = new FakeSlot();
+
+    private static class FakeSlot extends Slot {
+
+        private static final Inventory DUMMY = new SimpleInventory(1);
+
+        public FakeSlot() {
+            super(DUMMY, 0, Integer.MIN_VALUE, Integer.MIN_VALUE);
+        }
+
+        @Override
+        public boolean canTakePartial(PlayerEntity player) {
+            return false;
+        }
+
+        @Override
+        public void setStack(ItemStack stack) {
+            super.setStack(stack);
+        }
+
+        @Override
+        public ItemStack takeStack(int amount) {
+            return ItemStack.EMPTY;
+        }
     }
 }

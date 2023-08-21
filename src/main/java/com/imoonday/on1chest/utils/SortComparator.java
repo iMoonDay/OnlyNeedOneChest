@@ -1,6 +1,5 @@
 package com.imoonday.on1chest.utils;
 
-import net.minecraft.item.ItemStack;
 import net.minecraft.registry.Registries;
 
 import java.util.Collection;
@@ -11,6 +10,7 @@ public enum SortComparator {
 
     ID("sort.on1chest.raw_id", stack -> Registries.ITEM.getRawId(stack.getStack().getItem())),
     NAME("sort.on1chest.name", stack -> stack.getStack().getName().getString()),
+    MOD("sort.on1chest.mod", stack -> Registries.ITEM.getId(stack.getStack().getItem()).getNamespace()),
     COUNT("sort.on1chest.count", CombinedItemStack::getCount),
     DAMAGE("sort.on1chest.damage", itemStack -> itemStack.getStack().getDamage()),
     RARITY("sort.on1chest.rarity", itemStack -> itemStack.getStack().getRarity());
@@ -32,8 +32,8 @@ public enum SortComparator {
         }).thenComparingLong(CombinedItemStack::getCount).thenComparingInt(value -> value.getStack().getDamage());
     }
 
-    public Comparator<CombinedItemStack> createComparator(Collection<ItemStack> favouriteStacks, boolean reversed) {
-        return Comparator.<CombinedItemStack, Boolean>comparing(stack -> favouriteStacks.stream().anyMatch(stack1 -> ItemStack.canCombine(stack.getStack(), stack1))).reversed().thenComparing(reversed ? comparator.reversed() : comparator);
+    public Comparator<CombinedItemStack> createComparator(Collection<FavouriteItemStack> favouriteStacks, boolean reversed) {
+        return Comparator.<CombinedItemStack, Boolean>comparing(stack -> favouriteStacks.stream().anyMatch(favouriteItemStack -> favouriteItemStack.equals(stack.getStack()))).reversed().thenComparing(reversed ? comparator.reversed() : comparator);
     }
 
     public SortComparator next() {

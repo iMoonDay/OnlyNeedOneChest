@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "111",
+    "121",
+    "111"
+  ],
+  "key": {
+    "1": {
+      "item": "minecraft:glass"
+    },
+    "2": {
+      "item": "minecraft:chest"
+    }
+  },
+  "result": {
+    "item": "on1chest:glass_storage_memory_block",
+    "count": 1
+  }
+}

@@ -1,5 +1,6 @@
 package com.imoonday.on1chest.blocks.entities;
 
+import com.imoonday.on1chest.blocks.StorageMemoryBlock;
 import com.imoonday.on1chest.init.ModBlocks;
 import com.imoonday.on1chest.init.ModGameRules;
 import com.imoonday.on1chest.screen.StorageAssessorScreenHandler;
@@ -60,7 +61,7 @@ public class StorageAccessorBlockEntity extends BlockEntity implements NamedScre
 
     @Override
     public Text getDisplayName() {
-        return this.getCachedState().getBlock().getName();
+        return Text.translatable(this.getCachedState().getBlock().getTranslationKey() + ".title");
     }
 
     @Nullable
@@ -85,7 +86,6 @@ public class StorageAccessorBlockEntity extends BlockEntity implements NamedScre
                 if ((adjacentState.getBlock() instanceof ConnectBlock) && !result.contains(adjacentPos)) {
                     result.add(adjacentPos);
                     queue.add(adjacentPos);
-
                 }
             }
         }
@@ -97,7 +97,7 @@ public class StorageAccessorBlockEntity extends BlockEntity implements NamedScre
             return List.of();
         }
         int limit = world.getGameRules().getInt(ModGameRules.MAX_MEMORY_RANGE);
-        return limit <= 0 ? new ArrayList<>() : getConnectedBlocks(world, pos).stream().filter(blockPos -> world.getBlockEntity(blockPos) instanceof StorageMemoryBlockEntity).map(blockPos -> (StorageMemoryBlockEntity) world.getBlockEntity(blockPos)).limit(limit).collect(Collectors.toCollection(ArrayList::new));
+        return limit <= 0 ? new ArrayList<>() : getConnectedBlocks(world, pos).stream().filter(blockPos -> world.getBlockState(blockPos).getBlock() instanceof StorageMemoryBlock && world.getBlockState(blockPos).get(StorageMemoryBlock.ACTIVATED) && world.getBlockEntity(blockPos) instanceof StorageMemoryBlockEntity).map(blockPos -> (StorageMemoryBlockEntity) world.getBlockEntity(blockPos)).limit(limit).collect(Collectors.toCollection(ArrayList::new));
     }
 
     public MultiInventory getInventory() {

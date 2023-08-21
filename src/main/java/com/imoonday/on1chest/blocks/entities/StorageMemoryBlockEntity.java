@@ -6,6 +6,7 @@ import com.imoonday.on1chest.utils.ImplementedInventory;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.inventory.Inventories;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
@@ -20,12 +21,16 @@ import org.jetbrains.annotations.Nullable;
 
 public class StorageMemoryBlockEntity extends BlockEntity implements ImplementedInventory {
 
-    private int level = 0;
+    protected int level = 0;
     private DefaultedList<ItemStack> inventory;
 
-    public StorageMemoryBlockEntity(BlockPos pos, BlockState state) {
-        super(ModBlocks.STORAGE_MEMORY_BLOCK_ENTITY, pos, state);
+    public StorageMemoryBlockEntity(BlockEntityType<? extends StorageMemoryBlockEntity> type, BlockPos pos, BlockState state) {
+        super(type, pos, state);
         this.inventory = createInventory();
+    }
+
+    public StorageMemoryBlockEntity(BlockPos pos, BlockState state) {
+        this(ModBlocks.STORAGE_MEMORY_BLOCK_ENTITY, pos, state);
     }
 
     public StorageMemoryBlockEntity(BlockPos pos, BlockState state, int level) {
@@ -129,22 +134,5 @@ public class StorageMemoryBlockEntity extends BlockEntity implements Implemented
         } else {
             return StorageMemoryBlock.UsedCapacity.FULL;
         }
-    }
-
-    @Override
-    public void markDirty() {
-        super.markDirty();
-//        StorageAssessorScreenHandler.update(world);
-    }
-
-    @Override
-    public String toString() {
-        return "StorageMemoryBlockEntity{" +
-                "level=" + level +
-                ", inventory=" + inventory +
-                ", world=" + world +
-                ", pos=" + pos +
-                ", removed=" + removed +
-                '}';
     }
 }

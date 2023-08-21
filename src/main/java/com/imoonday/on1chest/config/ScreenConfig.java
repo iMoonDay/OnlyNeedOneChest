@@ -5,7 +5,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
-import com.imoonday.on1chest.client.KeyBindings;
 import com.imoonday.on1chest.screen.client.StorageAssessorScreen;
 import com.imoonday.on1chest.utils.FavouriteItemStack;
 import com.imoonday.on1chest.utils.ItemStackFilter;
@@ -19,16 +18,18 @@ import net.fabricmc.api.Environment;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.util.InputUtil;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.Nullable;
 
+import java.awt.*;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Environment(EnvType.CLIENT)
 public class ScreenConfig {
@@ -37,6 +38,8 @@ public class ScreenConfig {
     private static File file;
     private static ScreenConfig INSTANCE = new ScreenConfig();
 
+    private String markItemStackKey = "key.keyboard.left.alt";
+    private String takeAllStacksKey = "key.keyboard.space";
     private boolean displayButtonWidgets = true;
     private boolean displayFilterWidgets = true;
     private Set<FavouriteItemStack> favouriteStacks = new HashSet<>();
@@ -46,6 +49,10 @@ public class ScreenConfig {
     private boolean noSortWithShift = true;
     private boolean updateOnInsert = true;
     private Theme theme = Theme.VANILLA;
+    private boolean scrollOutside = true;
+    private int selectedColor = Color.GREEN.getRGB();
+    private int favouriteColor = Color.YELLOW.getRGB();
+    private boolean displayCountBeforeName = true;
 
     private static void prepareConfigFile() {
         if (file == null) {
@@ -109,45 +116,77 @@ public class ScreenConfig {
     public static Screen createConfigScreen(Screen parent) {
         ConfigBuilder builder = ConfigBuilder.create()
                 .setParentScreen(parent)
-                .setTitle(Text.literal("On1chest"))
+                .setTitle(Text.translatable("group.on1chest.storages"))
                 .setSavingRunnable(ScreenConfig::saveAndUpdate);
 
-        ConfigCategory screenSettings = builder.getOrCreateCategory(Text.literal("Screen Settings"));
+        ConfigCategory screenSettings = builder.getOrCreateCategory(Text.translatable("config.on1chest.screen.categories"));
 
         ConfigEntryBuilder entryBuilder = builder.entryBuilder();
 
-        screenSettings.addEntry(entryBuilder.fillKeybindingField(Text.translatable(KeyBindings.markItemStackKey.getTranslationKey()), KeyBindings.markItemStackKey)
-                .setTooltip(Text.literal("按住键点击物品进行标记收藏"))
+        screenSettings.addEntry(entryBuilder.startKeyCodeField(Text.translatable("key.on1chest.mark_item_stack"), getInstance().getMarkItemStackKey())
+                .setDefaultValue(InputUtil.fromTranslationKey("key.keyboard.left.alt"))
+                .setKeySaveConsumer(key -> getInstance().setMarkItemStackKey(key))
+                .setTooltip(Text.translatable("config.on1chest.screen.markItemStackKey"))
                 .build());
 
-        screenSettings.addEntry(entryBuilder.fillKeybindingField(Text.translatable(KeyBindings.takeAllStacksKey.getTranslationKey()), KeyBindings.takeAllStacksKey)
-                .setTooltip(Text.literal("按住键点击物品拿取全部"))
+        screenSettings.addEntry(entryBuilder.startKeyCodeField(Text.translatable("key.on1chest.take_all_stacks"), getInstance().getTakeAllStacksKey())
+                .setDefaultValue(InputUtil.fromTranslationKey("key.keyboard.space"))
+                .setKeySaveConsumer(key -> getInstance().setTakeAllStacksKey(key))
+                .setTooltip(Text.translatable("config.on1chest.screen.takeAllStacksKey"))
                 .build());
 
-        screenSettings.addEntry(entryBuilder.startEnumSelector(Text.literal("主题"), Theme.class, getInstance().getTheme())
+        screenSettings.addEntry(entryBuilder.startEnumSelector(Text.translatable("config.on1chest.screen.theme"), Theme.class, getInstance().getTheme())
                 .setDefaultValue(Theme.VANILLA)
                 .setSaveConsumer(theme -> getInstance().setTheme(theme))
                 .setEnumNameProvider(theme -> ((Theme) theme).getLocalizeText())
                 .build());
 
-        screenSettings.addEntry(entryBuilder.startBooleanToggle(Text.literal("显示设置按钮"), getInstance().isDisplayButtonWidgets())
+        screenSettings.addEntry(entryBuilder.startBooleanToggle(Text.translatable("config.on1chest.screen.displayButtonWidgets"), getInstance().isDisplayButtonWidgets())
                 .setDefaultValue(true)
                 .setSaveConsumer(display -> getInstance().setDisplayButtonWidgets(display))
                 .build());
 
-        screenSettings.addEntry(entryBuilder.startBooleanToggle(Text.literal("显示过滤选项"), getInstance().isDisplayFilterWidgets())
+        screenSettings.addEntry(entryBuilder.startBooleanToggle(Text.translatable("config.on1chest.screen.displayFilterWidgets"), getInstance().isDisplayFilterWidgets())
                 .setDefaultValue(true)
                 .setSaveConsumer(display -> getInstance().setDisplayFilterWidgets(display))
                 .build());
 
-        screenSettings.addEntry(entryBuilder.startBooleanToggle(Text.literal("按住Shift时暂停自动排序"), getInstance().isNoSortWithShift())
+        screenSettings.addEntry(entryBuilder.startBooleanToggle(Text.translatable("config.on1chest.screen.noSortWithShift"), getInstance().isNoSortWithShift())
                 .setDefaultValue(true)
                 .setSaveConsumer(noSort -> getInstance().setNoSortWithShift(noSort))
                 .build());
 
-        screenSettings.addEntry(entryBuilder.startBooleanToggle(Text.literal("存入新物品时强制更新排序"), getInstance().isUpdateOnInsert())
+        screenSettings.addEntry(entryBuilder.startBooleanToggle(Text.translatable("config.on1chest.screen.updateOnInsert"), getInstance().isUpdateOnInsert())
                 .setDefaultValue(true)
                 .setSaveConsumer(update -> getInstance().setUpdateOnInsert(update))
+                .build());
+
+        screenSettings.addEntry(entryBuilder.startBooleanToggle(Text.translatable("config.on1chest.screen.scrollOutside"), getInstance().isScrollOutside())
+                .setDefaultValue(true)
+                .setSaveConsumer(outside -> getInstance().setScrollOutside(outside))
+                .build());
+
+        screenSettings.addEntry(entryBuilder.startBooleanToggle(Text.translatable("config.on1chest.screen.displayCountBeforeName"), getInstance().isDisplayCountBeforeName())
+                .setDefaultValue(true)
+                .setSaveConsumer(display -> getInstance().setDisplayCountBeforeName(display))
+                .build());
+
+        screenSettings.addEntry(entryBuilder.startColorField(Text.translatable("config.on1chest.screen.selectedColor"), getInstance().getSelectedColor())
+                .setDefaultValue(Color.GREEN.getRGB())
+                .setSaveConsumer(color -> getInstance().setSelectedColor(color))
+                .setAlphaMode(true)
+                .build());
+
+        screenSettings.addEntry(entryBuilder.startColorField(Text.translatable("config.on1chest.screen.favouriteColor"), getInstance().getFavouriteColor())
+                .setDefaultValue(Color.YELLOW.getRGB())
+                .setSaveConsumer(color -> getInstance().setFavouriteColor(color))
+                .setAlphaMode(true)
+                .build());
+
+        screenSettings.addEntry(entryBuilder.startStrList(Text.translatable("config.on1chest.screen.favouriteStacks"), getInstance().getFavouriteStacks().stream().map(FavouriteItemStack::toString).collect(Collectors.toList()))
+                .setDefaultValue(new ArrayList<>())
+                .setSaveConsumer(strings -> getInstance().setFavouriteStacks(strings.stream().map(FavouriteItemStack::fromString).filter(Objects::nonNull).collect(Collectors.toSet())))
+                .setAddButtonTooltip(Text.literal("Example:\nminecraft:diamond_sword{Damage:0}\nminecraft:diamond_sword\ndiamond_sword\nminecraft:diamond_sword*\ndiamond_sword*"))
                 .build());
 
         return builder.build();
@@ -210,18 +249,18 @@ public class ScreenConfig {
         return ImmutableSet.copyOf(favouriteStacks);
     }
 
-    public void setFavouriteStacks(Set<FavouriteItemStack> favouriteStacks) {
-        this.favouriteStacks = favouriteStacks;
+    public void setFavouriteStacks(Collection<FavouriteItemStack> favouriteStacks) {
+        this.favouriteStacks = new HashSet<>(favouriteStacks);
         saveAndUpdate();
     }
 
     public void addFavouriteStack(ItemStack stack) {
-        this.favouriteStacks.add(new FavouriteItemStack(stack));
+        this.favouriteStacks.add(new FavouriteItemStack(stack, true));
         saveAndUpdate();
     }
 
     public void removeFavouriteStack(ItemStack stack) {
-        this.favouriteStacks.remove(new FavouriteItemStack(stack));
+        this.favouriteStacks.remove(new FavouriteItemStack(stack, true));
         saveAndUpdate();
     }
 
@@ -229,8 +268,8 @@ public class ScreenConfig {
         return ImmutableSet.copyOf(stackFilters);
     }
 
-    public void setStackFilters(Set<ItemStackFilter> stackFilters) {
-        this.stackFilters = stackFilters;
+    public void setStackFilters(Collection<ItemStackFilter> stackFilters) {
+        this.stackFilters = new HashSet<>(stackFilters);
         saveAndUpdate();
     }
 
@@ -286,6 +325,60 @@ public class ScreenConfig {
 
     public void setTheme(Theme theme) {
         this.theme = theme;
+        saveAndUpdate();
+    }
+
+    public InputUtil.Key getMarkItemStackKey() {
+        return InputUtil.fromTranslationKey(markItemStackKey);
+    }
+
+    public void setMarkItemStackKey(InputUtil.Key markItemStackKey) {
+        this.markItemStackKey = markItemStackKey.getTranslationKey();
+        saveAndUpdate();
+    }
+
+    public InputUtil.Key getTakeAllStacksKey() {
+        return InputUtil.fromTranslationKey(takeAllStacksKey);
+    }
+
+    public void setTakeAllStacksKey(InputUtil.Key takeAllStacksKey) {
+        this.takeAllStacksKey = takeAllStacksKey.getTranslationKey();
+        saveAndUpdate();
+    }
+
+    public boolean isScrollOutside() {
+        return scrollOutside;
+    }
+
+    public void setScrollOutside(boolean scrollOutside) {
+        this.scrollOutside = scrollOutside;
+        saveAndUpdate();
+    }
+
+    public int getSelectedColor() {
+        return selectedColor;
+    }
+
+    public void setSelectedColor(int selectedColor) {
+        this.selectedColor = selectedColor;
+        saveAndUpdate();
+    }
+
+    public int getFavouriteColor() {
+        return favouriteColor;
+    }
+
+    public void setFavouriteColor(int favouriteColor) {
+        this.favouriteColor = favouriteColor;
+        saveAndUpdate();
+    }
+
+    public boolean isDisplayCountBeforeName() {
+        return displayCountBeforeName;
+    }
+
+    public void setDisplayCountBeforeName(boolean displayCountBeforeName) {
+        this.displayCountBeforeName = displayCountBeforeName;
         saveAndUpdate();
     }
 }
