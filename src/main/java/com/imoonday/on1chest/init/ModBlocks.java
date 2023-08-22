@@ -18,12 +18,12 @@ import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class ModBlocks {
 
-    public static final Map<String, Block> BLOCK_WITH_ITEMS = new HashMap<>();
+    public static final Map<String, Block> BLOCK_WITH_ITEMS = new LinkedHashMap<>();
 
     public static final Block STORAGE_BLANK_BLOCK = register("storage_blank_block", new StorageBlankBlock(FabricBlockSettings.copyOf(Blocks.OAK_PLANKS).burnable()));
     public static final Block STORAGE_ACCESSOR_BLOCK = register("storage_accessor_block", new StorageAccessorBlock(FabricBlockSettings.copyOf(Blocks.OAK_PLANKS).burnable()));

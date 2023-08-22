@@ -48,6 +48,7 @@
   "button.on1chest.clear": "Clear",
   "key.on1chest.mark_item_stack": "Mark item stack as favourite stack",
   "key.on1chest.take_all_stacks": "Take all item stack from slot",
+  "key.on1chest.setting_screen": "Open the settings screen",
   "gamerule.maxMemoryRange": "Maximum number of accessible memory blocks",
   "theme.on1chest.vanilla": "Vanilla",
   "theme.on1chest.noSlot": "Vanilla Without Slots",

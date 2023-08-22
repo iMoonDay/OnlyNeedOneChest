@@ -2,7 +2,7 @@ package com.imoonday.on1chest.client.renderer;
 
 import com.imoonday.on1chest.blocks.entities.GlassStorageMemoryBlockEntity;
 import com.imoonday.on1chest.blocks.memories.GlassStorageMemoryBlock;
-import com.imoonday.on1chest.config.ScreenConfig;
+import com.imoonday.on1chest.config.Config;
 import com.imoonday.on1chest.init.ModBlocks;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -41,7 +41,7 @@ public class GlassStorageMemoryBlockEntityRenderer implements BlockEntityRendere
         if (!blockState.get(GlassStorageMemoryBlock.ACTIVATED)) {
             return;
         }
-        ScreenConfig config = ScreenConfig.getInstance();
+        Config config = Config.getInstance();
         if (config.isRandomMode()) {
             ItemStack stack = entity.getDisplayItem();
             if (stack.isEmpty()) {

@@ -48,6 +48,7 @@
   "button.on1chest.clear": "清除",
   "key.on1chest.mark_item_stack": "标记收藏物品",
   "key.on1chest.take_all_stacks": "从插槽中取出所有物品",
+  "key.on1chest.setting_screen": "打开设置界面",
   "gamerule.maxMemoryRange": "最大可访问的内存块数量",
   "theme.on1chest.vanilla": "原版",
   "theme.on1chest.noSlot": "原版无插槽",

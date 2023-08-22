@@ -1,6 +1,6 @@
 package com.imoonday.on1chest.screen.client;
 
-import com.imoonday.on1chest.config.ScreenConfig;
+import com.imoonday.on1chest.config.Config;
 import com.imoonday.on1chest.screen.StorageAssessorScreenHandler;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.text.Text;
@@ -27,6 +27,6 @@ public class StorageProcessorScreen extends StorageAssessorScreen {
 
     @Override
     protected Identifier getTexture() {
-        return ScreenConfig.getInstance().getTheme().getId("processor");
+        return Config.getInstance().getTheme().getId("processor");
     }
 }

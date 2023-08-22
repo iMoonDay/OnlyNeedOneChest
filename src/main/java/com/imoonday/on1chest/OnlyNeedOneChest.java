@@ -14,7 +14,6 @@ public class OnlyNeedOneChest implements ModInitializer {
 
     /**
      * BUG:
-     * 1.取出物品不更新客户端
      * TODO:
      * 1.兼容REI,JEI,EMI等自动补全配方
      */

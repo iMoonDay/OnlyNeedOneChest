@@ -2,7 +2,7 @@ package com.imoonday.on1chest.screen.client;
 
 import com.imoonday.on1chest.OnlyNeedOneChest;
 import com.imoonday.on1chest.client.OnlyNeedOneChestClient;
-import com.imoonday.on1chest.config.ScreenConfig;
+import com.imoonday.on1chest.config.Config;
 import com.imoonday.on1chest.mixin.CheckboxWidgetAccessor;
 import com.imoonday.on1chest.mixin.ClickableWidgetAccessor;
 import com.imoonday.on1chest.screen.StorageAssessorScreenHandler;
@@ -85,45 +85,45 @@ public class StorageAssessorScreen extends HandledScreen<StorageAssessorScreenHa
 
         this.settingButton = createIconButtonWidget("setting", buttonWidget -> {
             if (this.client != null) {
-                this.client.setScreen(ScreenConfig.createConfigScreen(this));
+                this.client.setScreen(Config.createConfigScreen(this));
             }
             return false;
         }, null, Text.translatable("screen.on1chest.button.setting"));
         this.settingButton.visible = true;
 
         this.sortButton = createIconButtonWidget("sort", button -> {
-            ScreenConfig.getInstance().setComparator(ScreenConfig.getInstance().getComparator().next());
-            button.setTooltip(Tooltip.of(Text.translatable("sort.on1chest.tooltip", Text.translatable(ScreenConfig.getInstance().getComparator().translationKey), Text.translatable("sort.on1chest.order." + (ScreenConfig.getInstance().isReversed() ? "reverse" : "positive")))));
+            Config.getInstance().setComparator(Config.getInstance().getComparator().next());
+            button.setTooltip(Tooltip.of(Text.translatable("sort.on1chest.tooltip", Text.translatable(Config.getInstance().getComparator().translationKey), Text.translatable("sort.on1chest.order." + (Config.getInstance().isReversed() ? "reverse" : "positive")))));
             return true;
         }, button -> {
-            ScreenConfig.getInstance().setReversed(!ScreenConfig.getInstance().isReversed());
-            button.setTooltip(Tooltip.of(Text.translatable("sort.on1chest.tooltip", Text.translatable(ScreenConfig.getInstance().getComparator().translationKey), Text.translatable("sort.on1chest.order." + (ScreenConfig.getInstance().isReversed() ? "reverse" : "positive")))));
+            Config.getInstance().setReversed(!Config.getInstance().isReversed());
+            button.setTooltip(Tooltip.of(Text.translatable("sort.on1chest.tooltip", Text.translatable(Config.getInstance().getComparator().translationKey), Text.translatable("sort.on1chest.order." + (Config.getInstance().isReversed() ? "reverse" : "positive")))));
             return true;
-        }, Text.translatable("sort.on1chest.tooltip", Text.translatable(ScreenConfig.getInstance().getComparator().translationKey), Text.translatable("sort.on1chest.order." + (ScreenConfig.getInstance().isReversed() ? "reverse" : "positive"))));
+        }, Text.translatable("sort.on1chest.tooltip", Text.translatable(Config.getInstance().getComparator().translationKey), Text.translatable("sort.on1chest.order." + (Config.getInstance().isReversed() ? "reverse" : "positive"))));
 
         this.filtersButton = createIconButtonWidget("filters", button -> {
-            ScreenConfig.getInstance().setDisplayFilterWidgets(!ScreenConfig.getInstance().isDisplayFilterWidgets());
-            button.setTooltip(Tooltip.of(Text.translatable("screen.on1chest.button.filter", ScreenConfig.getInstance().isDisplayFilterWidgets() ? Text.translatable("screen.on1chest.button.display") : Text.translatable("screen.on1chest.button.hide"))));
+            Config.getInstance().setDisplayFilterWidgets(!Config.getInstance().isDisplayFilterWidgets());
+            button.setTooltip(Tooltip.of(Text.translatable("screen.on1chest.button.filter", Config.getInstance().isDisplayFilterWidgets() ? Text.translatable("screen.on1chest.button.display") : Text.translatable("screen.on1chest.button.hide"))));
             return false;
-        }, null, Text.translatable("screen.on1chest.button.filter", Text.translatable("screen.on1chest.button." + (ScreenConfig.getInstance().isDisplayFilterWidgets() ? "display" : "hide"))));
+        }, null, Text.translatable("screen.on1chest.button.filter", Text.translatable("screen.on1chest.button." + (Config.getInstance().isDisplayFilterWidgets() ? "display" : "hide"))));
 
         this.noSortButton = createIconButtonWidget("nosort", button -> {
-            ScreenConfig.getInstance().setNoSortWithShift(!ScreenConfig.getInstance().isNoSortWithShift());
-            button.setTooltip(Tooltip.of(Text.translatable("screen.on1chest.button.noSortWithShift", Text.translatable("screen.on1chest.button." + (ScreenConfig.getInstance().isNoSortWithShift() ? "open" : "close")))));
+            Config.getInstance().setNoSortWithShift(!Config.getInstance().isNoSortWithShift());
+            button.setTooltip(Tooltip.of(Text.translatable("screen.on1chest.button.noSortWithShift", Text.translatable("screen.on1chest.button." + (Config.getInstance().isNoSortWithShift() ? "open" : "close")))));
             return true;
-        }, null, Text.translatable("screen.on1chest.button.noSortWithShift", Text.translatable("screen.on1chest.button." + (ScreenConfig.getInstance().isNoSortWithShift() ? "open" : "close"))));
+        }, null, Text.translatable("screen.on1chest.button.noSortWithShift", Text.translatable("screen.on1chest.button." + (Config.getInstance().isNoSortWithShift() ? "open" : "close"))));
 
         this.forceUpdateButton = createIconButtonWidget("force_update", button -> {
-            ScreenConfig.getInstance().setUpdateOnInsert(!ScreenConfig.getInstance().isUpdateOnInsert());
-            button.setTooltip(Tooltip.of(Text.translatable("screen.on1chest.button.updateOnInsert", Text.translatable("screen.on1chest.button." + (ScreenConfig.getInstance().isUpdateOnInsert() ? "open" : "close")))));
-            return ScreenConfig.getInstance().isUpdateOnInsert();
-        }, null, Text.translatable("screen.on1chest.button.updateOnInsert", Text.translatable("screen.on1chest.button." + (ScreenConfig.getInstance().isUpdateOnInsert() ? "open" : "close"))));
+            Config.getInstance().setUpdateOnInsert(!Config.getInstance().isUpdateOnInsert());
+            button.setTooltip(Tooltip.of(Text.translatable("screen.on1chest.button.updateOnInsert", Text.translatable("screen.on1chest.button." + (Config.getInstance().isUpdateOnInsert() ? "open" : "close")))));
+            return Config.getInstance().isUpdateOnInsert();
+        }, null, Text.translatable("screen.on1chest.button.updateOnInsert", Text.translatable("screen.on1chest.button." + (Config.getInstance().isUpdateOnInsert() ? "open" : "close"))));
 
         this.themeButton = createIconButtonWidget("theme", button -> {
-            ScreenConfig.getInstance().setTheme(ScreenConfig.getInstance().getTheme().next());
-            button.setTooltip(Tooltip.of(ScreenConfig.getInstance().getTheme().getLocalizeText()));
+            Config.getInstance().setTheme(Config.getInstance().getTheme().next());
+            button.setTooltip(Tooltip.of(Config.getInstance().getTheme().getLocalizeText()));
             return false;
-        }, null, ScreenConfig.getInstance().getTheme().getLocalizeText());
+        }, null, Config.getInstance().getTheme().getLocalizeText());
 
         for (int i = 0; i < ItemStackFilter.values().length; i++) {
             this.filterWidgets[i] = createCheckboxWidget(i);
@@ -131,7 +131,7 @@ public class StorageAssessorScreen extends HandledScreen<StorageAssessorScreenHa
         }
     }
 
-    public void onScreenConfigUpdate(ScreenConfig config) {
+    public void onScreenConfigUpdate(Config config) {
         boolean visible = config.isDisplayButtonWidgets();
         this.sortButton.visible = visible;
         this.filtersButton.visible = visible;
@@ -157,7 +157,7 @@ public class StorageAssessorScreen extends HandledScreen<StorageAssessorScreenHa
         if (tooltip != null) {
             widget.setTooltip(Tooltip.of(tooltip));
         }
-        widget.visible = ScreenConfig.getInstance().isDisplayButtonWidgets();
+        widget.visible = Config.getInstance().isDisplayButtonWidgets();
         if (rightClickFunction != null) {
             this.rightClickButtonFunctions.put(widget, rightClickFunction);
         }
@@ -173,7 +173,7 @@ public class StorageAssessorScreen extends HandledScreen<StorageAssessorScreenHa
             @Override
             public void onPress() {
                 super.onPress();
-                ScreenConfig config = ScreenConfig.getInstance();
+                Config config = Config.getInstance();
                 if (config.getStackFilters().contains(filter)) {
                     config.removeStackFilter(filter);
                 } else {
@@ -182,8 +182,8 @@ public class StorageAssessorScreen extends HandledScreen<StorageAssessorScreenHa
                 refreshItemList = true;
             }
         };
-        checkboxWidget.visible = ScreenConfig.getInstance().isDisplayFilterWidgets();
-        ((CheckboxWidgetAccessor) checkboxWidget).setChecked(ScreenConfig.getInstance().getStackFilters().contains(filter));
+        checkboxWidget.visible = Config.getInstance().isDisplayFilterWidgets();
+        ((CheckboxWidgetAccessor) checkboxWidget).setChecked(Config.getInstance().getStackFilters().contains(filter));
         return checkboxWidget;
     }
 
@@ -192,8 +192,8 @@ public class StorageAssessorScreen extends HandledScreen<StorageAssessorScreenHa
         if (refreshItemList || !searchLast.equals(searchString) || forceUpdate) {
             handler.itemListClientSorted.clear();
             handler.itemListClient.stream().filter(stack -> stack != null && stack.getStack() != null && StorageAssessorScreenHandler.checkTextFilter(stack.getStack(), searchString)).forEach(this::addStackToClientList);
-            handler.itemListClientSorted.sort(handler.noSort && !forceUpdate ? sortComp : ScreenConfig.getInstance().getComparator().createComparator(ScreenConfig.getInstance().getFavouriteStacks(), ScreenConfig.getInstance().isReversed()));
-            handler.itemListClientSorted.removeIf(stack -> !ScreenConfig.getInstance().getStackFilters().stream().allMatch(filter -> filter.getPredicate().test(stack.getStack())));
+            handler.itemListClientSorted.sort(handler.noSort && !forceUpdate ? sortComp : Config.getInstance().getComparator().createComparator(Config.getInstance().getFavouriteStacks(), Config.getInstance().isReversed()));
+            handler.itemListClientSorted.removeIf(stack -> !Config.getInstance().getStackFilters().stream().allMatch(filter -> filter.getPredicate().test(stack.getStack())));
             if (!searchLast.equals(searchString)) {
                 handler.scrollItems(0);
                 this.scrollPosition = 0;
@@ -253,7 +253,7 @@ public class StorageAssessorScreen extends HandledScreen<StorageAssessorScreenHa
     }
 
     protected Identifier getTexture() {
-        return ScreenConfig.getInstance().getTheme().getId("assessor");
+        return Config.getInstance().getTheme().getId("assessor");
     }
 
     @Override
@@ -291,24 +291,24 @@ public class StorageAssessorScreen extends HandledScreen<StorageAssessorScreenHa
         if (selectedSlot > -1) {
             switch (button) {
                 case GLFW.GLFW_MOUSE_BUTTON_LEFT -> {
-                    if (isKeyPressed(ScreenConfig.getInstance().getMarkItemStackKey()) && this.handler.getSlotByID(selectedSlot).stack != null) {
+                    if (isKeyPressed(Config.getInstance().getMarkItemStackKey()) && this.handler.getSlotByID(selectedSlot).stack != null) {
                         ItemStack stack = this.handler.getSlotByID(selectedSlot).stack.getActualStack(1);
-                        if (ScreenConfig.getInstance().getFavouriteStacks().stream().noneMatch(stack1 -> stack1.equals(stack))) {
-                            ScreenConfig.getInstance().addFavouriteStack(stack);
+                        if (Config.getInstance().getFavouriteStacks().stream().noneMatch(stack1 -> stack1.equals(stack))) {
+                            Config.getInstance().addFavouriteStack(stack);
                             refreshItemList = true;
                         }
                         return true;
                     }
                     if (!this.handler.getCursorStack().isEmpty()) {
-                        storageSlotClick(null, isKeyPressed(ScreenConfig.getInstance().getTakeAllStacksKey()) ? SlotAction.TAKE_ALL : SlotAction.LEFT_CLICK, false);
+                        storageSlotClick(null, isKeyPressed(Config.getInstance().getTakeAllStacksKey()) ? SlotAction.TAKE_ALL : SlotAction.LEFT_CLICK, false);
                     } else if (this.handler.getSlotByID(selectedSlot).stack != null && this.handler.getSlotByID(selectedSlot).stack.getCount() > 0) {
-                        storageSlotClick(this.handler.getSlotByID(selectedSlot).stack, hasShiftDown() ? SlotAction.QUICK_MOVE : (isKeyPressed(ScreenConfig.getInstance().getTakeAllStacksKey()) ? SlotAction.TAKE_ALL : SlotAction.LEFT_CLICK), false);
+                        storageSlotClick(this.handler.getSlotByID(selectedSlot).stack, hasShiftDown() ? SlotAction.QUICK_MOVE : (isKeyPressed(Config.getInstance().getTakeAllStacksKey()) ? SlotAction.TAKE_ALL : SlotAction.LEFT_CLICK), false);
                         return true;
                     }
                 }
                 case GLFW.GLFW_MOUSE_BUTTON_RIGHT -> {
-                    if (isKeyPressed(ScreenConfig.getInstance().getMarkItemStackKey()) && this.handler.getSlotByID(selectedSlot).stack != null) {
-                        ScreenConfig.getInstance().removeFavouriteStack(this.handler.getSlotByID(selectedSlot).stack.getActualStack(1));
+                    if (isKeyPressed(Config.getInstance().getMarkItemStackKey()) && this.handler.getSlotByID(selectedSlot).stack != null) {
+                        Config.getInstance().removeFavouriteStack(this.handler.getSlotByID(selectedSlot).stack.getActualStack(1));
                         refreshItemList = true;
                         return true;
                     }
@@ -346,7 +346,7 @@ public class StorageAssessorScreen extends HandledScreen<StorageAssessorScreenHa
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
-        if (!ScreenConfig.getInstance().isScrollOutside() && this.selectedSlot <= -1 && !this.isClickInScrollbar(mouseX, mouseY)) {
+        if (!Config.getInstance().isScrollOutside() && this.selectedSlot <= -1 && !this.isClickInScrollbar(mouseX, mouseY)) {
             return super.mouseScrolled(mouseX, mouseY, amount);
         }
         this.scrollPosition = this.handler.getScrollPosition(this.scrollPosition, amount);
@@ -382,10 +382,10 @@ public class StorageAssessorScreen extends HandledScreen<StorageAssessorScreenHa
         this.renderBackground(context);
         super.render(context, mouseX, mouseY, delta);
 
-        if (ScreenConfig.getInstance().isUpdateOnInsert() && handler.itemList.stream().anyMatch(stack -> handler.itemListClient.stream().noneMatch(stack1 -> stack1.canCombineWith(stack)))) {
+        if (Config.getInstance().isUpdateOnInsert() && handler.itemList.stream().anyMatch(stack -> handler.itemListClient.stream().noneMatch(stack1 -> stack1.canCombineWith(stack)))) {
             forceUpdate = true;
         }
-        if (ScreenConfig.getInstance().isNoSortWithShift() && hasShiftDown() && !forceUpdate) {
+        if (Config.getInstance().isNoSortWithShift() && hasShiftDown() && !forceUpdate) {
             if (!handler.noSort) {
                 List<CombinedItemStack> list = handler.itemListClientSorted;
                 Object2IntMap<CombinedItemStack> map = new Object2IntOpenHashMap<>();
@@ -446,7 +446,7 @@ public class StorageAssessorScreen extends HandledScreen<StorageAssessorScreenHa
 
         int i = slot.x, j = slot.y;
         boolean isHovered = mouseX >= this.x + i - 1 && mouseY >= this.y + j - 1 && mouseX < this.x + i + 17 && mouseY < this.y + j + 17;
-        boolean isVanilla = ScreenConfig.getInstance().getTheme() == Theme.VANILLA;
+        boolean isVanilla = Config.getInstance().getTheme() == Theme.VANILLA;
 
         if (slot.stack != null) {
             ItemStack stack = slot.stack.getStack().copy().split(1);
@@ -454,8 +454,8 @@ public class StorageAssessorScreen extends HandledScreen<StorageAssessorScreenHa
             context.drawItem(stack, i, j);
             context.drawItemInSlot(textRenderer, stack, i, j);
 
-            if (ScreenConfig.getInstance().getFavouriteStacks().stream().anyMatch(stack1 -> stack1.equals(stack))) {
-                int color = ScreenConfig.getInstance().getFavouriteColor();
+            if (Config.getInstance().getFavouriteStacks().stream().anyMatch(stack1 -> stack1.equals(stack))) {
+                int color = Config.getInstance().getFavouriteColor();
                 if (isVanilla) {
                     context.drawBorder(i - 1, j - 1, 18, 18, color);
                 } else {
@@ -469,7 +469,7 @@ public class StorageAssessorScreen extends HandledScreen<StorageAssessorScreenHa
             if (count <= 0) {
                 color = Color.RED.getRGB();
             } else if (isHovered && !isVanilla && this.handler.getCursorStack().isEmpty()) {
-                color = ScreenConfig.getInstance().getSelectedColor();
+                color = Config.getInstance().getSelectedColor();
             }
             drawStackSize(context, textRenderer, count, i, j, color);
         }
@@ -478,7 +478,7 @@ public class StorageAssessorScreen extends HandledScreen<StorageAssessorScreenHa
             if (isVanilla) {
                 drawSlotHighlight(context, i, j, 0);
             } else if (slot.stack != null && this.handler.getCursorStack().isEmpty()) {
-                context.drawBorder(i - 1, j - 1, 18, 18, ScreenConfig.getInstance().getSelectedColor());
+                context.drawBorder(i - 1, j - 1, 18, 18, Config.getInstance().getSelectedColor());
             }
             return true;
         }

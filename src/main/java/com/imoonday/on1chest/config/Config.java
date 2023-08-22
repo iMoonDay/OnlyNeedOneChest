@@ -32,11 +32,11 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Environment(EnvType.CLIENT)
-public class ScreenConfig {
+public class Config {
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static File file;
-    private static ScreenConfig INSTANCE = new ScreenConfig();
+    private static Config INSTANCE = new Config();
 
     private String markItemStackKey = "key.keyboard.left.alt";
     private String takeAllStacksKey = "key.keyboard.space";
@@ -82,10 +82,10 @@ public class ScreenConfig {
             if (file.exists()) {
                 BufferedReader br = new BufferedReader(new FileReader(file));
                 JsonElement jsonElement = JsonParser.parseReader(br);
-                ScreenConfig config = ScreenConfig.fromJson(jsonElement.toString());
+                Config config = Config.fromJson(jsonElement.toString());
                 if (config != null) {
-                    ScreenConfig.INSTANCE = config;
-                    ScreenConfig.INSTANCE.checkNull();
+                    Config.INSTANCE = config;
+                    Config.INSTANCE.checkNull();
                 } else {
                     save();
                 }
@@ -115,7 +115,7 @@ public class ScreenConfig {
         }
     }
 
-    public static ScreenConfig getInstance() {
+    public static Config getInstance() {
         INSTANCE.checkNull();
         return INSTANCE;
     }
@@ -125,7 +125,7 @@ public class ScreenConfig {
         ConfigBuilder builder = ConfigBuilder.create()
                 .setParentScreen(parent)
                 .setTitle(Text.translatable("group.on1chest.storages"))
-                .setSavingRunnable(ScreenConfig::saveAndUpdate);
+                .setSavingRunnable(Config::saveAndUpdate);
 
         ConfigCategory screenSettings = builder.getOrCreateCategory(Text.translatable("config.on1chest.categories.screen"));
 
@@ -179,16 +179,14 @@ public class ScreenConfig {
                 .setSaveConsumer(display -> getInstance().setDisplayCountBeforeName(display))
                 .build());
 
-        screenSettings.addEntry(entryBuilder.startColorField(Text.translatable("config.on1chest.screen.selectedColor"), getInstance().getSelectedColor())
+        screenSettings.addEntry(entryBuilder.startAlphaColorField(Text.translatable("config.on1chest.screen.selectedColor"), getInstance().getSelectedColor())
                 .setDefaultValue(Color.GREEN.getRGB())
                 .setSaveConsumer(color -> getInstance().setSelectedColor(color))
-                .setAlphaMode(true)
                 .build());
 
-        screenSettings.addEntry(entryBuilder.startColorField(Text.translatable("config.on1chest.screen.favouriteColor"), getInstance().getFavouriteColor())
+        screenSettings.addEntry(entryBuilder.startAlphaColorField(Text.translatable("config.on1chest.screen.favouriteColor"), getInstance().getFavouriteColor())
                 .setDefaultValue(Color.YELLOW.getRGB())
                 .setSaveConsumer(color -> getInstance().setFavouriteColor(color))
-                .setAlphaMode(true)
                 .build());
 
         screenSettings.addEntry(entryBuilder.startStrList(Text.translatable("config.on1chest.screen.favouriteStacks"), getInstance().getFavouriteStacks().stream().map(FavouriteItemStack::toString).collect(Collectors.toList()))
@@ -251,7 +249,7 @@ public class ScreenConfig {
 
     public static void saveAndUpdate() {
         if (MinecraftClient.getInstance().currentScreen instanceof StorageAssessorScreen screen) {
-            screen.onScreenConfigUpdate(ScreenConfig.getInstance());
+            screen.onScreenConfigUpdate(Config.getInstance());
         }
         save();
     }
@@ -261,8 +259,8 @@ public class ScreenConfig {
     }
 
     @Nullable
-    public static ScreenConfig fromJson(String json) {
-        return GSON.fromJson(json, ScreenConfig.class);
+    public static Config fromJson(String json) {
+        return GSON.fromJson(json, Config.class);
     }
 
     public void checkNull() {
