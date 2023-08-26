@@ -62,6 +62,8 @@ public class Config {
     private float rotationDegrees = -1;
     private double itemYOffset = 0.0f;
 
+    private boolean renderTargetItem = true;
+
     private static void prepareConfigFile() {
         if (file == null) {
             file = new File(FabricLoader.getInstance().getConfigDir().toFile(), "on1chest.json");
@@ -242,6 +244,13 @@ public class Config {
                 .setSaveConsumer(offset -> getInstance().setItemYOffset(offset))
                 .setMin(-1)
                 .setMax(2)
+                .build());
+
+        ConfigCategory blockSettings = builder.getOrCreateCategory(Text.translatable("config.on1chest.categories.block"));
+
+        blockSettings.addEntry(entryBuilder.startBooleanToggle(Text.translatable("config.on1chest.block.renderTargetItem"), getInstance().isRenderTargetItem())
+                .setDefaultValue(true)
+                .setSaveConsumer(render -> getInstance().setRenderTargetItem(render))
                 .build());
 
         return builder.build();
@@ -497,6 +506,15 @@ public class Config {
 
     public void setItemYOffset(double itemYOffset) {
         this.itemYOffset = itemYOffset;
+        saveAndUpdate();
+    }
+
+    public boolean isRenderTargetItem() {
+        return renderTargetItem;
+    }
+
+    public void setRenderTargetItem(boolean renderTargetItem) {
+        this.renderTargetItem = renderTargetItem;
         saveAndUpdate();
     }
 }

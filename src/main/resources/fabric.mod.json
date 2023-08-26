@@ -14,6 +14,9 @@
   "icon": "assets/on1chest/icon.png",
   "environment": "*",
   "entrypoints": {
+    "fabric-datagen": [
+      "com.imoonday.on1chest.data.DataGeneration"
+    ],
     "client": [
       "com.imoonday.on1chest.client.OnlyNeedOneChestClient"
     ],

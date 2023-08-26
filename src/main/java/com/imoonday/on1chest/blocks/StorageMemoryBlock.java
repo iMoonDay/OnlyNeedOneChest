@@ -1,7 +1,7 @@
 package com.imoonday.on1chest.blocks;
 
 import com.imoonday.on1chest.blocks.entities.StorageMemoryBlockEntity;
-import com.imoonday.on1chest.init.ModBlocks;
+import com.imoonday.on1chest.init.ModBlockEntities;
 import com.imoonday.on1chest.utils.ConnectBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockRenderType;
@@ -66,7 +66,7 @@ public abstract class StorageMemoryBlock extends BlockWithEntity implements Conn
     @Nullable
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {
-        return checkType(type, ModBlocks.STORAGE_MEMORY_BLOCK_ENTITY, StorageMemoryBlockEntity::tick);
+        return checkType(type, ModBlockEntities.STORAGE_MEMORY_BLOCK_ENTITY, StorageMemoryBlockEntity::tick);
     }
 
     @Override

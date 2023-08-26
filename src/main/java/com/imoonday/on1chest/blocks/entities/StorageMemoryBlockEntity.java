@@ -1,7 +1,7 @@
 package com.imoonday.on1chest.blocks.entities;
 
 import com.imoonday.on1chest.blocks.StorageMemoryBlock;
-import com.imoonday.on1chest.init.ModBlocks;
+import com.imoonday.on1chest.init.ModBlockEntities;
 import com.imoonday.on1chest.utils.ImplementedInventory;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -30,7 +30,7 @@ public class StorageMemoryBlockEntity extends BlockEntity implements Implemented
     }
 
     public StorageMemoryBlockEntity(BlockPos pos, BlockState state) {
-        this(ModBlocks.STORAGE_MEMORY_BLOCK_ENTITY, pos, state);
+        this(ModBlockEntities.STORAGE_MEMORY_BLOCK_ENTITY, pos, state);
     }
 
     public StorageMemoryBlockEntity(BlockPos pos, BlockState state, int level) {

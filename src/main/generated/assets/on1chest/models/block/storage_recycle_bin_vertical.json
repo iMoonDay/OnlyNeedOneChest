@@ -1,0 +1,9 @@
+{
+  "parent": "minecraft:block/orientable_with_bottom",
+  "textures": {
+    "bottom": "minecraft:block/furnace_top",
+    "front": "on1chest:block/storage_recycle_bin_front_vertical",
+    "side": "minecraft:block/furnace_top",
+    "top": "minecraft:block/furnace_top"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "111",
+    "121",
+    "131"
+  ],
+  "key": {
+    "1": {
+      "tag": "minecraft:stone_tool_materials"
+    },
+    "2": {
+      "item": "minecraft:dropper"
+    },
+    "3": {
+      "item": "minecraft:hopper"
+    }
+  },
+  "result": {
+    "item": "on1chest:storage_recycle_bin",
+    "count": 1
+  }
+}

@@ -1,9 +1,6 @@
 package com.imoonday.on1chest;
 
-import com.imoonday.on1chest.init.ModBlocks;
-import com.imoonday.on1chest.init.ModGameRules;
-import com.imoonday.on1chest.init.ModItems;
-import com.imoonday.on1chest.init.ModScreens;
+import com.imoonday.on1chest.init.*;
 import com.imoonday.on1chest.utils.IScreenDataReceiver;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -15,7 +12,9 @@ public class OnlyNeedOneChest implements ModInitializer {
     /**
      * BUG:
      * TODO:
-     * 1.兼容REI,JEI,EMI等自动补全配方
+     * 兼容REI,JEI,EMI等自动补全配方
+     * 容器识别器：识别后方的容器方块并让访问器正常使用
+     * 漏斗线缆：吸收上方一格内的掉落物并存入最近的内存块中
      */
 
     public static final Identifier C2S = id("c2s");
@@ -23,6 +22,7 @@ public class OnlyNeedOneChest implements ModInitializer {
     @Override
     public void onInitialize() {
         ModBlocks.register();
+        ModBlockEntities.register();
         ModItems.register();
         ModScreens.register();
         ModGameRules.register();

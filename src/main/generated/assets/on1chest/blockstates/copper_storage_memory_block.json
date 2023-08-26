@@ -1,0 +1,28 @@
+{
+  "variants": {
+    "activated=false,used_capacity=full": {
+      "model": "on1chest:block/copper_storage_memory_block_closed"
+    },
+    "activated=false,used_capacity=high": {
+      "model": "on1chest:block/copper_storage_memory_block_closed"
+    },
+    "activated=false,used_capacity=low": {
+      "model": "on1chest:block/copper_storage_memory_block_closed"
+    },
+    "activated=false,used_capacity=zero": {
+      "model": "on1chest:block/copper_storage_memory_block_closed"
+    },
+    "activated=true,used_capacity=full": {
+      "model": "on1chest:block/copper_storage_memory_block_full"
+    },
+    "activated=true,used_capacity=high": {
+      "model": "on1chest:block/copper_storage_memory_block_high"
+    },
+    "activated=true,used_capacity=low": {
+      "model": "on1chest:block/copper_storage_memory_block_low"
+    },
+    "activated=true,used_capacity=zero": {
+      "model": "on1chest:block/copper_storage_memory_block_zero"
+    }
+  }
+}

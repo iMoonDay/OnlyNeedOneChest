@@ -1,7 +1,7 @@
 package com.imoonday.on1chest.blocks.entities;
 
 import com.imoonday.on1chest.blocks.StorageMemoryBlock;
-import com.imoonday.on1chest.init.ModBlocks;
+import com.imoonday.on1chest.init.ModBlockEntities;
 import com.imoonday.on1chest.init.ModGameRules;
 import com.imoonday.on1chest.screen.StorageAssessorScreenHandler;
 import com.imoonday.on1chest.utils.CombinedItemStack;
@@ -19,11 +19,13 @@ import net.minecraft.screen.ScreenHandler;
 import net.minecraft.text.Text;
 import net.minecraft.util.ItemScatterer;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -38,13 +40,10 @@ public class StorageAccessorBlockEntity extends BlockEntity implements NamedScre
     }
 
     public StorageAccessorBlockEntity(BlockPos pos, BlockState state) {
-        super(ModBlocks.STORAGE_ACCESSOR_BLOCK_ENTITY, pos, state);
+        super(ModBlockEntities.STORAGE_ACCESSOR_BLOCK_ENTITY, pos, state);
     }
 
     public static void tick(World world, BlockPos pos, BlockState state, StorageAccessorBlockEntity blockEntity) {
-        if (world.isClient) {
-            return;
-        }
         blockEntity.inventory.clear();
         blockEntity.getAllInventories(world, pos).forEach(blockEntity.inventory::add);
         blockEntity.inventory.refresh();
@@ -70,34 +69,12 @@ public class StorageAccessorBlockEntity extends BlockEntity implements NamedScre
         return new StorageAssessorScreenHandler(syncId, playerInventory, this);
     }
 
-    public List<BlockPos> getConnectedBlocks(World world, BlockPos pos) {
-        if (world == null || pos == null) {
-            return List.of();
-        }
-        Direction[] directions = {Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST, Direction.UP, Direction.DOWN};
-        List<BlockPos> result = new ArrayList<>();
-        Queue<BlockPos> queue = new LinkedList<>();
-        queue.add(pos);
-        while (!queue.isEmpty()) {
-            BlockPos currentPos = queue.poll();
-            for (Direction direction : directions) {
-                BlockPos adjacentPos = currentPos.offset(direction);
-                BlockState adjacentState = world.getBlockState(adjacentPos);
-                if ((adjacentState.getBlock() instanceof ConnectBlock) && !result.contains(adjacentPos)) {
-                    result.add(adjacentPos);
-                    queue.add(adjacentPos);
-                }
-            }
-        }
-        return result;
-    }
-
     public List<Inventory> getAllInventories(World world, BlockPos pos) {
         if (world == null || pos == null) {
             return List.of();
         }
         int limit = world.getGameRules().getInt(ModGameRules.MAX_MEMORY_RANGE);
-        return limit <= 0 ? new ArrayList<>() : getConnectedBlocks(world, pos).stream().filter(blockPos -> world.getBlockState(blockPos).getBlock() instanceof StorageMemoryBlock && world.getBlockState(blockPos).get(StorageMemoryBlock.ACTIVATED) && world.getBlockEntity(blockPos) instanceof StorageMemoryBlockEntity).map(blockPos -> (StorageMemoryBlockEntity) world.getBlockEntity(blockPos)).limit(limit).collect(Collectors.toCollection(ArrayList::new));
+        return limit <= 0 ? new ArrayList<>() : ConnectBlock.getConnectedBlocks(world, pos).stream().filter(pair -> pair.getLeft().getBlockState(pair.getRight()).getBlock() instanceof StorageMemoryBlock && pair.getLeft().getBlockState(pair.getRight()).get(StorageMemoryBlock.ACTIVATED) && pair.getLeft().getBlockEntity(pair.getRight()) instanceof StorageMemoryBlockEntity).map(pair -> (StorageMemoryBlockEntity) pair.getLeft().getBlockEntity(pair.getRight())).limit(limit).collect(Collectors.toCollection(ArrayList::new));
     }
 
     public MultiInventory getInventory() {
@@ -145,11 +122,7 @@ public class StorageAccessorBlockEntity extends BlockEntity implements NamedScre
         if (stack != null && inventory != null) {
             ItemStack stack1 = stack.getActualStack();
             ItemStack itemStack = inventory.insertItem(stack1);
-            if (itemStack.isEmpty()) {
-                return null;
-            } else {
-                return new CombinedItemStack(itemStack);
-            }
+            return itemStack.isEmpty() ? null : new CombinedItemStack(itemStack);
         }
         return stack;
     }

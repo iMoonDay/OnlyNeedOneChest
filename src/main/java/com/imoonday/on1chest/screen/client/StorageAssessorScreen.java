@@ -4,8 +4,8 @@ import com.imoonday.on1chest.OnlyNeedOneChest;
 import com.imoonday.on1chest.client.OnlyNeedOneChestClient;
 import com.imoonday.on1chest.config.Config;
 import com.imoonday.on1chest.mixin.CheckboxWidgetAccessor;
-import com.imoonday.on1chest.mixin.ClickableWidgetAccessor;
 import com.imoonday.on1chest.screen.StorageAssessorScreenHandler;
+import com.imoonday.on1chest.screen.widgets.ButtonIconWidget;
 import com.imoonday.on1chest.utils.*;
 import com.mojang.blaze3d.systems.RenderSystem;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
@@ -17,9 +17,7 @@ import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.CheckboxWidget;
-import net.minecraft.client.gui.widget.IconButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
@@ -28,7 +26,6 @@ import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.screen.slot.Slot;
-import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
@@ -46,13 +43,12 @@ import java.util.function.Function;
 public class StorageAssessorScreen extends HandledScreen<StorageAssessorScreenHandler> implements IScreenDataReceiver {
 
     protected TextFieldWidget searchBox;
-    protected IconButtonWidget settingButton;
-    protected IconButtonWidget sortButton;
-    protected IconButtonWidget filtersButton;
-    protected IconButtonWidget noSortButton;
-    protected IconButtonWidget forceUpdateButton;
-    protected IconButtonWidget themeButton;
-    protected Map<IconButtonWidget, Function<ButtonWidget, Boolean>> rightClickButtonFunctions = new HashMap<>();
+    protected ButtonIconWidget settingButton;
+    protected ButtonIconWidget sortButton;
+    protected ButtonIconWidget filtersButton;
+    protected ButtonIconWidget noSortButton;
+    protected ButtonIconWidget forceUpdateButton;
+    protected ButtonIconWidget themeButton;
     protected final CheckboxWidget[] filterWidgets = new CheckboxWidget[ItemStackFilter.values().length];
     protected float scrollPosition;
     protected boolean scrolling;
@@ -140,26 +136,23 @@ public class StorageAssessorScreen extends HandledScreen<StorageAssessorScreenHa
         refreshItemList = true;
     }
 
-    private IconButtonWidget createIconButtonWidget(String fileName, Function<ButtonWidget, Boolean> function, Function<ButtonWidget, Boolean> rightClickFunction, Text tooltip) {
-        IconButtonWidget.Builder builder = IconButtonWidget.builder(Text.empty(), OnlyNeedOneChest.id("textures/button/" + fileName + ".png"), button -> {
+    private ButtonIconWidget createIconButtonWidget(String fileName, Function<ButtonIconWidget, Boolean> function, Function<ButtonIconWidget, Boolean> rightClickFunction, Text tooltip) {
+        ButtonIconWidget widget = new ButtonIconWidget(this.x - 16, this.y + this.buttonYOffset, 16, 16, OnlyNeedOneChest.id("textures/button/" + fileName + ".png"), null).addClickAction(0, button -> {
             if (function.apply(button)) {
                 this.refreshItemList = true;
             }
         });
-        builder.iconSize(16, 16);
-        builder.textureSize(16, 16);
-        IconButtonWidget widget = builder.build();
-        widget.setPosition(this.x - 16, this.y + this.buttonYOffset);
         this.buttonYOffset += 17;
-        ((ClickableWidgetAccessor) widget).setHeight(16);
-        widget.setWidth(16);
-        widget.setAlpha(0);
         if (tooltip != null) {
             widget.setTooltip(Tooltip.of(tooltip));
         }
         widget.visible = Config.getInstance().isDisplayButtonWidgets();
         if (rightClickFunction != null) {
-            this.rightClickButtonFunctions.put(widget, rightClickFunction);
+            widget.addClickAction(1, button -> {
+                if (rightClickFunction.apply(button)) {
+                    refreshItemList = true;
+                }
+            });
         }
         this.addDrawableChild(widget);
         return widget;
@@ -267,26 +260,12 @@ public class StorageAssessorScreen extends HandledScreen<StorageAssessorScreenHa
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (!this.searchBox.isMouseOver(mouseX, mouseY)) {
+        if (!this.searchBox.mouseClicked(mouseX, mouseY, button)) {
             this.setFocused(null);
         }
         if (button == 0 && this.isClickInScrollbar(mouseX, mouseY)) {
             this.scrolling = true;
             return true;
-        }
-        if (button == 1) {
-            boolean clicked = false;
-            for (Map.Entry<IconButtonWidget, Function<ButtonWidget, Boolean>> entry : this.rightClickButtonFunctions.entrySet()) {
-                if (entry.getKey().isMouseOver(mouseX, mouseY)) {
-                    clicked = true;
-                    if (entry.getValue().apply(entry.getKey())) {
-                        refreshItemList = true;
-                    }
-                }
-            }
-            if (clicked) {
-                MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0f));
-            }
         }
         if (selectedSlot > -1) {
             switch (button) {

@@ -127,3 +127,29 @@ publishing {
         // retrieving dependencies.
     }
 }
+
+loom {
+    runs {
+        // 添加一个新的 gradle 任务，会运行数据生成 API：“gradlew runDatagenClient”
+        datagenClient {
+            inherit client
+            name "Data Generation"
+            vmArg "-Dfabric-api.datagen"
+            vmArg "-Dfabric-api.datagen.output-dir=${file("src/main/generated")}"
+            vmArg "-Dfabric-api.datagen.modid=${modid}"
+
+            runDir "build/datagen"
+        }
+    }
+}
+
+// 将数据生成的文件添加到 jar 中。
+sourceSets {
+    main {
+        resources {
+            srcDirs += [
+                    'src/main/generated'
+            ]
+        }
+    }
+}

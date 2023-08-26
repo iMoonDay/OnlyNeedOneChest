@@ -1,7 +1,7 @@
 package com.imoonday.on1chest.blocks;
 
 import com.imoonday.on1chest.blocks.entities.StorageAccessorBlockEntity;
-import com.imoonday.on1chest.init.ModBlocks;
+import com.imoonday.on1chest.init.ModBlockEntities;
 import com.imoonday.on1chest.utils.ConnectBlock;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
@@ -54,7 +54,7 @@ public class StorageAccessorBlock extends BlockWithEntity implements ConnectBloc
     @Nullable
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {
-        return checkType(type, ModBlocks.STORAGE_ACCESSOR_BLOCK_ENTITY, StorageAccessorBlockEntity::tick);
+        return world.isClient ? null : checkType(type, ModBlockEntities.STORAGE_ACCESSOR_BLOCK_ENTITY, StorageAccessorBlockEntity::tick);
     }
 
     @Override

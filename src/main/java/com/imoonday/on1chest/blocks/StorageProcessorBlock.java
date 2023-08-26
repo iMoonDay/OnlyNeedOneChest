@@ -2,7 +2,7 @@ package com.imoonday.on1chest.blocks;
 
 import com.imoonday.on1chest.blocks.entities.StorageAccessorBlockEntity;
 import com.imoonday.on1chest.blocks.entities.StorageProcessorBlockEntity;
-import com.imoonday.on1chest.init.ModBlocks;
+import com.imoonday.on1chest.init.ModBlockEntities;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
@@ -50,6 +50,6 @@ public class StorageProcessorBlock extends StorageAccessorBlock {
     @Nullable
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {
-        return checkType(type, ModBlocks.STORAGE_PROCESSOR_BLOCK_ENTITY, StorageAccessorBlockEntity::tick);
+        return world.isClient ? null : checkType(type, ModBlockEntities.STORAGE_PROCESSOR_BLOCK_ENTITY, StorageAccessorBlockEntity::tick);
     }
 }

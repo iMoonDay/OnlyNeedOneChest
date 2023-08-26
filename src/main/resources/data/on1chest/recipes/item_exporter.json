@@ -1,0 +1,26 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " 1 ",
+    "232",
+    "242"
+  ],
+  "key": {
+    "1": {
+      "item": "on1chest:connection_cable"
+    },
+    "2": {
+      "tag": "minecraft:planks"
+    },
+    "3": {
+      "item": "on1chest:storage_blank_block"
+    },
+    "4": {
+      "item": "minecraft:hopper"
+    }
+  },
+  "result": {
+    "item": "on1chest:item_exporter",
+    "count": 1
+  }
+}

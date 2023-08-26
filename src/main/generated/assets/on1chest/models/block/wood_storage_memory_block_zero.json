@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "end": "on1chest:block/storage_blank_block",
+    "side": "on1chest:block/wood_storage_memory_block_zero"
+  }
+}

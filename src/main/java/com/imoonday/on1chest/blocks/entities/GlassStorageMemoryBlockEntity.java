@@ -1,7 +1,7 @@
 package com.imoonday.on1chest.blocks.entities;
 
 import com.imoonday.on1chest.blocks.memories.GlassStorageMemoryBlock;
-import com.imoonday.on1chest.init.ModBlocks;
+import com.imoonday.on1chest.init.ModBlockEntities;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.item.ItemStack;
@@ -21,15 +21,12 @@ public class GlassStorageMemoryBlockEntity extends StorageMemoryBlockEntity {
     public float uniqueOffset;
 
     public GlassStorageMemoryBlockEntity(BlockPos pos, BlockState state) {
-        super(ModBlocks.GLASS_STORAGE_MEMORY_BLOCK_ENTITY, pos, state);
+        super(ModBlockEntities.GLASS_STORAGE_MEMORY_BLOCK_ENTITY, pos, state);
         this.uniqueOffset = Random.create().nextFloat() * (float) Math.PI * 2.0f;
     }
 
     public static void tick(World world, BlockPos pos, BlockState state, GlassStorageMemoryBlockEntity entity) {
         StorageMemoryBlockEntity.tick(world, pos, state, entity);
-        if (world.isClient) {
-            return;
-        }
         if (!state.get(GlassStorageMemoryBlock.ACTIVATED)) {
             entity.displayItem = ItemStack.EMPTY;
             world.updateListeners(pos, state, state, Block.NOTIFY_LISTENERS);

@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "121",
+    "131",
+    "131"
+  ],
+  "key": {
+    "1": {
+      "item": "minecraft:quartz"
+    },
+    "2": {
+      "item": "minecraft:diamond"
+    },
+    "3": {
+      "item": "on1chest:connection_cable"
+    }
+  },
+  "result": {
+    "item": "on1chest:wireless_connector",
+    "count": 2
+  }
+}

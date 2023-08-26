@@ -19,6 +19,7 @@ import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.util.Pair;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MathHelper;
@@ -54,7 +55,14 @@ public class StorageAssessorScreenHandler extends AbstractRecipeScreenHandler<Re
             if (world instanceof ServerWorld serverWorld) {
                 BlockPos pos = this.accessor.getPos();
                 tryForceLoadChunk(serverWorld, pos);
-                this.accessor.getConnectedBlocks(world, pos).forEach(blockPos -> tryForceLoadChunk(serverWorld, blockPos));
+                for (Pair<World, BlockPos> pair : ConnectBlock.getConnectedBlocks(world, pos)) {
+                    World world1 = pair.getLeft();
+                    if (world != world1) {
+                        tryForceLoadChunk((ServerWorld) world1, pair.getRight());
+                    } else {
+                        tryForceLoadChunk(serverWorld, pair.getRight());
+                    }
+                }
             }
         }
     }

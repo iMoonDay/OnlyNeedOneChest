@@ -1,0 +1,82 @@
+{
+  "variants": {
+    "facing=down,status=connected": {
+      "model": "on1chest:block/wireless_connector_connected",
+      "x": 180
+    },
+    "facing=down,status=off": {
+      "model": "on1chest:block/wireless_connector",
+      "x": 180
+    },
+    "facing=down,status=on": {
+      "model": "on1chest:block/wireless_connector_on",
+      "x": 180
+    },
+    "facing=east,status=connected": {
+      "model": "on1chest:block/wireless_connector_connected",
+      "x": 90,
+      "y": 90
+    },
+    "facing=east,status=off": {
+      "model": "on1chest:block/wireless_connector",
+      "x": 90,
+      "y": 90
+    },
+    "facing=east,status=on": {
+      "model": "on1chest:block/wireless_connector_on",
+      "x": 90,
+      "y": 90
+    },
+    "facing=north,status=connected": {
+      "model": "on1chest:block/wireless_connector_connected",
+      "x": 90
+    },
+    "facing=north,status=off": {
+      "model": "on1chest:block/wireless_connector",
+      "x": 90
+    },
+    "facing=north,status=on": {
+      "model": "on1chest:block/wireless_connector_on",
+      "x": 90
+    },
+    "facing=south,status=connected": {
+      "model": "on1chest:block/wireless_connector_connected",
+      "x": 90,
+      "y": 180
+    },
+    "facing=south,status=off": {
+      "model": "on1chest:block/wireless_connector",
+      "x": 90,
+      "y": 180
+    },
+    "facing=south,status=on": {
+      "model": "on1chest:block/wireless_connector_on",
+      "x": 90,
+      "y": 180
+    },
+    "facing=up,status=connected": {
+      "model": "on1chest:block/wireless_connector_connected"
+    },
+    "facing=up,status=off": {
+      "model": "on1chest:block/wireless_connector"
+    },
+    "facing=up,status=on": {
+      "model": "on1chest:block/wireless_connector_on"
+    },
+    "facing=west,status=connected": {
+      "model": "on1chest:block/wireless_connector_connected",
+      "x": 90,
+      "y": 270
+    },
+    "facing=west,status=off": {
+      "model": "on1chest:block/wireless_connector",
+      "x": 90,
+      "y": 270
+    },
+    "facing=west,status=on": {
+      "model": "on1chest:block/wireless_connector_on",
+      "x": 90,
+      "y": 270
+    }
+  }
+}
