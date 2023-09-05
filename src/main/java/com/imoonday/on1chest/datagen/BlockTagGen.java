@@ -1,4 +1,4 @@
-package com.imoonday.on1chest.data;
+package com.imoonday.on1chest.datagen;
 
 import com.imoonday.on1chest.init.ModBlocks;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
@@ -28,7 +28,8 @@ public class BlockTagGen extends FabricTagProvider<Block> {
         getOrCreateTagBuilder(BlockTags.PICKAXE_MINEABLE)
                 .add(ModBlocks.OBSIDIAN_STORAGE_MEMORY_BLOCK)
                 .add(ModBlocks.STORAGE_RECYCLE_BIN)
-                .add(ModBlocks.WIRELESS_CONNECTOR);
+                .add(ModBlocks.WIRELESS_CONNECTOR)
+                .add(ModBlocks.RECIPE_PROCESSOR);
         getOrCreateTagBuilder(BlockTags.AXE_MINEABLE)
                 .add(ModBlocks.STORAGE_BLANK_BLOCK)
                 .add(ModBlocks.STORAGE_ACCESSOR_BLOCK)

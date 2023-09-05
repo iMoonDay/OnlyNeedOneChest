@@ -11,6 +11,19 @@
       "entries": [
         {
           "type": "minecraft:item",
+          "functions": [
+            {
+              "function": "minecraft:copy_nbt",
+              "ops": [
+                {
+                  "op": "replace",
+                  "source": "network",
+                  "target": "BlockEntityTag.network"
+                }
+              ],
+              "source": "block_entity"
+            }
+          ],
           "name": "on1chest:wireless_connector"
         }
       ],

@@ -2,6 +2,8 @@ package com.imoonday.on1chest.screen;
 
 import com.imoonday.on1chest.blocks.entities.StorageAccessorBlockEntity;
 import com.imoonday.on1chest.init.ModScreens;
+import com.imoonday.on1chest.utils.CombinedItemStack;
+import com.imoonday.on1chest.utils.IAutoCraftingHandler;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.CraftingInventory;
@@ -9,6 +11,8 @@ import net.minecraft.inventory.CraftingResultInventory;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.inventory.RecipeInputInventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtList;
 import net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket;
 import net.minecraft.recipe.CraftingRecipe;
 import net.minecraft.recipe.Recipe;
@@ -22,9 +26,11 @@ import net.minecraft.screen.slot.Slot;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.world.World;
 
+import java.util.List;
 import java.util.Optional;
 
-public class StorageProcessorScreenHandler extends StorageAssessorScreenHandler {
+//@IPNPlayerSideOnly
+public class StorageProcessorScreenHandler extends StorageAssessorScreenHandler implements IAutoCraftingHandler {
 
     private final RecipeInputInventory input = new CraftingInventory(this, 3, 3);
     private final CraftingResultInventory result = new CraftingResultInventory();
@@ -177,5 +183,61 @@ public class StorageProcessorScreenHandler extends StorageAssessorScreenHandler 
     @Override
     public boolean canUse(PlayerEntity player) {
         return true;
+    }
+
+    @Override
+    public void receive(NbtCompound nbt) {
+        super.receive(nbt);
+        if (nbt.contains("i")) {
+            ItemStack[][] stacks = new ItemStack[9][];
+            NbtList list = nbt.getList("i", 10);
+            for (int i = 0; i < list.size(); i++) {
+                NbtCompound compound = list.getCompound(i);
+                byte slot = compound.getByte("s");
+                byte l = compound.getByte("l");
+                stacks[slot] = new ItemStack[l];
+                for (int j = 0; j < l; j++) {
+                    NbtCompound tag = compound.getCompound("i" + j);
+                    stacks[slot][j] = ItemStack.fromNbt(tag);
+                }
+            }
+
+            for (int i = 0; i < 9; i++) {
+                if (stacks[i] != null) {
+                    ItemStack stack = ItemStack.EMPTY;
+                    for (int j = 0; j < stacks[i].length; j++) {
+                        ItemStack pulled = accessor.takeStack(stacks[i][j]);
+                        if (!pulled.isEmpty()) {
+                            stack = pulled;
+                            break;
+                        }
+                    }
+                    if (stack.isEmpty()) {
+                        for (int j = 0; j < stacks[i].length; j++) {
+                            boolean br = false;
+                            for (int k = 0; k < player.getInventory().size(); k++) {
+                                if (ItemStack.canCombine(player.getInventory().getStack(k), stacks[i][j])) {
+                                    stack = player.getInventory().removeStack(k, 1);
+                                    br = true;
+                                    break;
+                                }
+                            }
+                            if (br) {
+                                break;
+                            }
+                        }
+                    }
+                    if (!stack.isEmpty()) {
+                        input.setStack(i, stack);
+                    }
+                }
+            }
+
+        }
+    }
+
+    @Override
+    public List<CombinedItemStack> getStoredItems() {
+        return itemList;
     }
 }

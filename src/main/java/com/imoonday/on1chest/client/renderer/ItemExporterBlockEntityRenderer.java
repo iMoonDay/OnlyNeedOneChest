@@ -1,7 +1,7 @@
 package com.imoonday.on1chest.client.renderer;
 
 import com.imoonday.on1chest.blocks.ItemExporterBlock;
-import com.imoonday.on1chest.blocks.entities.ItemExporterBlockEntity;
+import com.imoonday.on1chest.blocks.entities.AbstractTransferBlockEntity;
 import com.imoonday.on1chest.config.Config;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.block.entity.BlockEntityRenderer;
@@ -14,7 +14,7 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.RotationAxis;
 import net.minecraft.world.World;
 
-public class ItemExporterBlockEntityRenderer implements BlockEntityRenderer<ItemExporterBlockEntity> {
+public class ItemExporterBlockEntityRenderer implements BlockEntityRenderer<AbstractTransferBlockEntity> {
 
     private final ItemRenderer itemRenderer;
 
@@ -23,7 +23,7 @@ public class ItemExporterBlockEntityRenderer implements BlockEntityRenderer<Item
     }
 
     @Override
-    public void render(ItemExporterBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
+    public void render(AbstractTransferBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
         if (!Config.getInstance().isRenderTargetItem()) {
             return;
         }

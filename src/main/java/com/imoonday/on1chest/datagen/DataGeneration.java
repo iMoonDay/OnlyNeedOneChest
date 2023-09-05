@@ -1,4 +1,4 @@
-package com.imoonday.on1chest.data;
+package com.imoonday.on1chest.datagen;
 
 import net.fabricmc.fabric.api.datagen.v1.DataGeneratorEntrypoint;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataGenerator;

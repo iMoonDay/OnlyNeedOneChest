@@ -13,6 +13,7 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.*;
@@ -61,10 +62,16 @@ public class RemoteAccessorItem extends Item {
     }
 
     @Nullable
-    public BlockPos getPos(ItemStack stack) {
+    public Pair<World, BlockPos> getPosition(MinecraftServer server, ItemStack stack) {
         NbtCompound nbt = stack.getNbt();
         if (nbt != null && nbt.contains("world", NbtElement.STRING_TYPE) && nbt.contains("x", NbtElement.INT_TYPE) && nbt.contains("y", NbtElement.INT_TYPE) && nbt.contains("z", NbtElement.INT_TYPE)) {
-            return new BlockPos(nbt.getInt("x"), nbt.getInt("y"), nbt.getInt("z"));
+            RegistryKey<World> registryKey = RegistryKey.of(RegistryKeys.WORLD, Identifier.tryParse(nbt.getString("world")));
+            if (registryKey != null) {
+                ServerWorld serverWorld = server.getWorld(registryKey);
+                if (serverWorld != null) {
+                    return new Pair<>(serverWorld, new BlockPos(nbt.getInt("x"), nbt.getInt("y"), nbt.getInt("z")));
+                }
+            }
         }
         return null;
     }

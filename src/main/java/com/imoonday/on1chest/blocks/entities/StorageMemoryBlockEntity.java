@@ -8,6 +8,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.inventory.Inventories;
+import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
@@ -18,6 +19,8 @@ import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.stream.IntStream;
 
 public class StorageMemoryBlockEntity extends BlockEntity implements ImplementedInventory {
 
@@ -53,6 +56,24 @@ public class StorageMemoryBlockEntity extends BlockEntity implements Implemented
     @Override
     public DefaultedList<ItemStack> getItems() {
         return inventory;
+    }
+
+    public boolean copyFrom(Inventory inventory) {
+        int size = inventory.size();
+        if (size != this.inventory.size()) {
+            return false;
+        }
+        if (IntStream.range(0, size).mapToObj(inventory::getStack).allMatch(ItemStack::isEmpty)) {
+            return true;
+        }
+        this.inventory.clear();
+        for (int i = 0; i < size; i++) {
+            ItemStack stack = inventory.getStack(i);
+            if (!stack.isEmpty()) {
+                this.inventory.set(i, stack.copy());
+            }
+        }
+        return true;
     }
 
     @Override
@@ -115,11 +136,6 @@ public class StorageMemoryBlockEntity extends BlockEntity implements Implemented
 
     private void updateInventory() {
         this.inventory = createInventory();
-    }
-
-    @Override
-    public int getMaxCountPerStack() {
-        return Integer.MAX_VALUE;
     }
 
     public StorageMemoryBlock.UsedCapacity getUsedCapacity() {

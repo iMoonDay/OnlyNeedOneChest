@@ -118,6 +118,11 @@ public class StorageAccessorBlockEntity extends BlockEntity implements NamedScre
         return null;
     }
 
+    public ItemStack takeStack(ItemStack itemStack) {
+        CombinedItemStack stack = takeStack(new CombinedItemStack(itemStack), 1);
+        return stack == null ? ItemStack.EMPTY : stack.getActualStack();
+    }
+
     public CombinedItemStack insertStack(CombinedItemStack stack) {
         if (stack != null && inventory != null) {
             ItemStack stack1 = stack.getActualStack();

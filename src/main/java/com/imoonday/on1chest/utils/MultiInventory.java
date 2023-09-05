@@ -21,6 +21,15 @@ public class MultiInventory implements Inventory {
     private int invSize;
     private boolean using;
 
+    public MultiInventory() {
+
+    }
+
+    public MultiInventory(List<Inventory> inventories) {
+        inventories.forEach(this::add);
+        this.refresh();
+    }
+
     @Override
     public int size() {
         return invSize;

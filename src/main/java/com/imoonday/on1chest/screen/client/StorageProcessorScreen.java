@@ -6,6 +6,9 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
+//@IPNPlayerSideOnly
+//@IPNGuiHint(button = IPNButton.CONTINUOUS_CRAFTING, horizontalOffset = 59, bottom = -24)
+//@IPNGuiHint(button = IPNButton.SORT, horizontalOffset = -12, bottom = 12)
 public class StorageProcessorScreen extends StorageAssessorScreen {
 
     public StorageProcessorScreen(StorageAssessorScreenHandler handler, PlayerInventory inventory, Text title) {

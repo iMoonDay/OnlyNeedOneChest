@@ -1,11 +1,13 @@
-// 1.20.1	2023-08-26T19:27:57.718529	Only Need One Chest/Block Loot Tables
+// 1.20.1	2023-09-06T01:15:03.7346563	Only Need One Chest/Block Loot Tables
 86d9febea8cade81236b33a8d3b21c8fc1f21826 data\on1chest\loot_tables\blocks\glass_storage_memory_block.json
+bed14505b162540838e650870ae80d99ccbaead4 data\on1chest\loot_tables\blocks\quick_crafting_table.json
 4cc514b0aa09d9aca355159f247fb19a91a54514 data\on1chest\loot_tables\blocks\connection_cable.json
 b075d19d1b0900c7154966a361e4676c1a98ab52 data\on1chest\loot_tables\blocks\diamond_storage_memory_block.json
 f97f05057b7c4105862305f0add0574a14e2f281 data\on1chest\loot_tables\blocks\netherite_storage_memory_block.json
 940ddd929e4c72041646df3e27a6d315faed6999 data\on1chest\loot_tables\blocks\wood_storage_memory_block.json
-d0317ed45e0f760184bddb9d23d7be6e3b5357b2 data\on1chest\loot_tables\blocks\wireless_connector.json
+387ab2c7f1d698c133e272cd45550a29d3321e33 data\on1chest\loot_tables\blocks\recipe_processor.json
 69bc9569e0d4ec90433200928ec47d88fee18d3c data\on1chest\loot_tables\blocks\gold_storage_memory_block.json
+1348e919411e52bc7392480293c20d013bd9b4e5 data\on1chest\loot_tables\blocks\wireless_connector.json
 297de087ec6ca7d9305de351d7187d78a87c26e6 data\on1chest\loot_tables\blocks\memory_extractor.json
 59b428ee6f37c8ce203e7d6732e1b88fccb0126a data\on1chest\loot_tables\blocks\copper_storage_memory_block.json
 dea091408b7fee3e7d96115b7042863cbb90f29f data\on1chest\loot_tables\blocks\storage_accessor_block.json

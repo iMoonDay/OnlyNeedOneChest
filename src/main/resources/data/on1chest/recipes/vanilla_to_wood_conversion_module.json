@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "111",
+    "121",
+    "111"
+  ],
+  "key": {
+    "1": {
+      "tag": "minecraft:planks"
+    },
+    "2": {
+      "item": "on1chest:storage_blank_block"
+    }
+  },
+  "result": {
+    "item": "on1chest:vanilla_to_wood_conversion_module",
+    "count": 2
+  }
+}

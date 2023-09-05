@@ -40,6 +40,9 @@ import java.util.List;
 import java.util.*;
 import java.util.function.Function;
 
+//@IPNPlayerSideOnly
+//@IPNGuiHint(button = IPNButton.CONTINUOUS_CRAFTING, hide = true, bottom = 1000)
+//@IPNGuiHint(button = IPNButton.MOVE_TO_CONTAINER, bottom = -24)
 public class StorageAssessorScreen extends HandledScreen<StorageAssessorScreenHandler> implements IScreenDataReceiver {
 
     protected TextFieldWidget searchBox;
@@ -200,8 +203,8 @@ public class StorageAssessorScreen extends HandledScreen<StorageAssessorScreenHa
     }
 
     public Slot getSelectedSlot() {
-        Slot s = this.focusedSlot;
-        if (s != null) return s;
+        Slot slot = this.focusedSlot;
+        if (slot != null) return slot;
         if (selectedSlot > -1 && handler.getSlotByID(selectedSlot).stack != null) {
             fakeSelectedSlot.inventory.setStack(0, handler.getSlotByID(selectedSlot).stack.getStack());
             return fakeSelectedSlot;
@@ -226,6 +229,13 @@ public class StorageAssessorScreen extends HandledScreen<StorageAssessorScreenHa
         }
         if (this.searchBox.isFocused() && this.searchBox.isVisible() && keyCode != GLFW.GLFW_KEY_ESCAPE) {
             return true;
+        }
+        if (this.client != null && selectedSlot > -1) {
+            CombinedItemStack stack = this.handler.getSlotByID(selectedSlot).stack;
+            if (this.client.options.dropKey.matchesKey(keyCode, scanCode) && stack != null) {
+                storageSlotClick(stack, SlotAction.THROWN, hasControlDown());
+                return true;
+            }
         }
         return super.keyPressed(keyCode, scanCode, modifiers);
     }
@@ -297,7 +307,7 @@ public class StorageAssessorScreen extends HandledScreen<StorageAssessorScreenHa
                     return true;
                 }
                 case GLFW.GLFW_MOUSE_BUTTON_MIDDLE -> {
-                    if (this.handler.getCursorStack().isEmpty() && this.handler.getSlotByID(selectedSlot).stack != null) {
+                    if (this.handler.getSlotByID(selectedSlot).stack != null && this.handler.getCursorStack().isEmpty()) {
                         storageSlotClick(this.handler.getSlotByID(selectedSlot).stack, SlotAction.COPY, false);
                         return true;
                     }

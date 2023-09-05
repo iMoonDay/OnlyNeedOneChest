@@ -14,15 +14,7 @@ repositories {
     // for more information about repositories.
     maven { url "https://maven.shedaniel.me/" }
     maven { url "https://maven.terraformersmc.com/releases/" }
-//    maven { url "https://maven.architectury.dev/" }
-//    maven {
-//        name = "Ladysnake Libs"
-//        url = 'https://maven.ladysnake.org/releases'
-//    }
-//    maven {
-//        name = "Jared's maven"
-//        url = "https://maven.blamejared.com/"
-//    }
+    maven { url "https://cursemaven.com" }
 }
 
 dependencies {
@@ -42,30 +34,20 @@ dependencies {
     }
     modApi "com.terraformersmc:modmenu:7.1.0"
 
-//    modCompileOnly("me.shedaniel:RoughlyEnoughItems-api-fabric:${project.rei_version}") {
-//        exclude(group: "net.fabricmc.fabric-api")
-//        exclude(group: "me.shedaniel.cloth")
-//        exclude(group: "dev.architectury")
-//    }
-//    modCompileOnly("me.shedaniel:RoughlyEnoughItems-default-plugin-fabric:${project.rei_version}") {
-//        exclude(group: "net.fabricmc.fabric-api")
-//        exclude(group: "me.shedaniel.cloth")
-//        exclude(group: "dev.architectury")
-//    }
-//    modRuntimeOnly("me.shedaniel:RoughlyEnoughItems-fabric:${project.rei_version}") {
-//        exclude(group: "net.fabricmc.fabric-api")
-//        exclude(group: "me.shedaniel.cloth")
-//        exclude(group: "dev.architectury")
-//    }
-//
-//    modImplementation("dev.architectury:architectury-fabric:9.0.7")
-//    modCompileOnly "dev.emi:emi-fabric:1.0.5+1.20.1:api"
-//    modLocalRuntime "dev.emi:emi-fabric:1.0.5+1.20.1"
-//
-//    modCompileOnlyApi("mezz.jei:jei-1.20.1-common-api:15.2.0.22")
-//    modCompileOnlyApi("mezz.jei:jei-1.20.1-fabric-api:15.2.0.22")
-//
-//    modRuntimeOnly("mezz.jei:jei-1.20.1-fabric:15.2.0.22")
+    modCompileOnly("me.shedaniel:RoughlyEnoughItems-api-fabric:${project.rei_version}") {
+        exclude(group: "net.fabricmc.fabric-api")
+    }
+    modCompileOnly("me.shedaniel:RoughlyEnoughItems-default-plugin-fabric:${project.rei_version}") {
+        exclude(group: "net.fabricmc.fabric-api")
+    }
+    modRuntimeOnly("me.shedaniel:RoughlyEnoughItems-fabric:${project.rei_version}") {
+        exclude(group: "net.fabricmc.fabric-api")
+    }
+
+    modCompileOnly "dev.emi:emi-fabric:${project.emi_version}+${project.minecraft_version}:api"
+    modLocalRuntime "dev.emi:emi-fabric:${project.emi_version}+${project.minecraft_version}"
+
+//    modImplementation "curse.maven:inventory-profiles-next-495267:4547557"
 }
 
 processResources {

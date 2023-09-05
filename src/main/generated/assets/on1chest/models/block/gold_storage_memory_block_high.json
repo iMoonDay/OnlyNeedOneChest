@@ -1,7 +1,7 @@
 {
   "parent": "minecraft:block/cube_column",
   "textures": {
-    "end": "on1chest:block/storage_blank_block",
+    "end": "on1chest:block/gold_storage_memory_block_end",
     "side": "on1chest:block/gold_storage_memory_block_high"
   }
 }

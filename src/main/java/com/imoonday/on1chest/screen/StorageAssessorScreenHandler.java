@@ -27,6 +27,7 @@ import net.minecraft.world.World;
 
 import java.util.*;
 
+//@IPNPlayerSideOnly
 public class StorageAssessorScreenHandler extends AbstractRecipeScreenHandler<RecipeInputInventory> implements IScreenDataReceiver, InteractHandler {
 
     protected StorageAccessorBlockEntity accessor;
@@ -209,15 +210,13 @@ public class StorageAssessorScreenHandler extends AbstractRecipeScreenHandler<Re
         }
         boolean canInsert = true;
         if (stack.getItem() instanceof RemoteAccessorItem accessorItem) {
-            BlockPos pos = accessorItem.getPos(stack);
-            if (pos != null) {
+            Pair<World, BlockPos> position = accessorItem.getPosition(((ServerPlayerEntity) player).server, stack);
+            if (position != null) {
+                World world = accessor.getWorld();
                 BlockPos accessorPos = accessor.getPos();
-                if (pos.equals(accessorPos)) {
-                    World world = accessor.getWorld();
-                    if (world != null) {
-                        if (!player.getWorld().getRegistryKey().equals(world.getRegistryKey()) || player.getPos().distanceTo(accessorPos.toCenterPos()) > 8) {
-                            canInsert = false;
-                        }
+                if (position.getLeft().equals(world) && position.getRight().equals(accessorPos)) {
+                    if (!player.getWorld().getRegistryKey().equals(world.getRegistryKey()) || player.getPos().distanceTo(accessorPos.toCenterPos()) > 8) {
+                        canInsert = false;
                     }
                 } else {
                     return true;
@@ -314,7 +313,7 @@ public class StorageAssessorScreenHandler extends AbstractRecipeScreenHandler<Re
     }
 
     @Override
-    public void onInteract(CombinedItemStack clicked, SlotAction act, boolean shift) {
+    public void onInteract(CombinedItemStack clicked, SlotAction act, boolean mod) {
         ((ServerPlayerEntity) player).updateLastActionTime();
         if (accessor == null) {
             return;
@@ -337,7 +336,7 @@ public class StorageAssessorScreenHandler extends AbstractRecipeScreenHandler<Re
             case RIGHT_CLICK -> {
                 ItemStack stack = getCursorStack();
                 if (clicked == null) return;
-                if (shift) {
+                if (mod) {
                     CombinedItemStack pulled = accessor.takeStack(clicked, 1);
                     if (pulled != null) {
                         ItemStack itemstack = pulled.getActualStack();
@@ -393,6 +392,14 @@ public class StorageAssessorScreenHandler extends AbstractRecipeScreenHandler<Re
                         accessor.insertOrDrop(itemstack);
                     }
                     player.getInventory().markDirty();
+                }
+            }
+            case THROWN -> {
+                if (clicked == null) return;
+                CombinedItemStack pulled = accessor.takeStack(clicked, mod ? clicked.getMaxCount() : 1);
+                if (pulled != null) {
+                    ItemStack itemstack = pulled.getActualStack();
+                    player.dropItem(itemstack, true);
                 }
             }
         }

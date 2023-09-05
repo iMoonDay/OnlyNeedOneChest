@@ -1,7 +1,9 @@
 package com.imoonday.on1chest.init;
 
 import com.imoonday.on1chest.OnlyNeedOneChest;
+import com.imoonday.on1chest.items.RecipeRecordCardItem;
 import com.imoonday.on1chest.items.RemoteAccessorItem;
+import com.imoonday.on1chest.items.VanillaToWoodConversionModuleItem;
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
@@ -19,6 +21,7 @@ public class ModItems {
 
     public static final RegistryKey<ItemGroup> STORAGES = RegistryKey.of(RegistryKeys.ITEM_GROUP, OnlyNeedOneChest.id("storages"));
 
+    public static final Item VANILLA_TO_WOOD_CONVERSION_MODULE = register("vanilla_to_wood_conversion_module", new VanillaToWoodConversionModuleItem(new FabricItemSettings()));
     public static final Item WOOD_TO_COPPER_EXPAND_MODULE = register("wood_to_copper_expansion_module", new Item(new FabricItemSettings()));
     public static final Item COPPER_TO_IRON_EXPAND_MODULE = register("copper_to_iron_expansion_module", new Item(new FabricItemSettings()));
     public static final Item IRON_TO_GOLD_EXPAND_MODULE = register("iron_to_gold_expansion_module", new Item(new FabricItemSettings()));
@@ -28,6 +31,8 @@ public class ModItems {
 
     public static final Item BASIC_REMOTE_ACCESSOR = register("basic_remote_accessor", new RemoteAccessorItem(new FabricItemSettings().maxCount(1), false));
     public static final Item ADVANCED_REMOTE_ACCESSOR = register("advanced_remote_accessor", new RemoteAccessorItem(new FabricItemSettings().maxCount(1), true));
+
+    public static final Item RECIPE_RECORD_CARD = register("recipe_record_card", new RecipeRecordCardItem(new FabricItemSettings().maxCount(1)));
 
     public static void register() {
         Registry.register(Registries.ITEM_GROUP, STORAGES, FabricItemGroup.builder().displayName(Text.translatable("group.on1chest.storages")).icon(() -> new ItemStack(ModBlocks.STORAGE_ACCESSOR_BLOCK)).build());

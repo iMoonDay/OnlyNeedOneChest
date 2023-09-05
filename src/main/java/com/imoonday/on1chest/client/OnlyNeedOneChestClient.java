@@ -4,6 +4,7 @@ import com.imoonday.on1chest.OnlyNeedOneChest;
 import com.imoonday.on1chest.client.renderer.GlassStorageMemoryBlockEntityRenderer;
 import com.imoonday.on1chest.client.renderer.ItemExporterBlockEntityRenderer;
 import com.imoonday.on1chest.client.renderer.MemoryExtractorBlockEntityRenderer;
+import com.imoonday.on1chest.client.renderer.RecipeProcessorBlockEntityRenderer;
 import com.imoonday.on1chest.config.Config;
 import com.imoonday.on1chest.init.ModBlockEntities;
 import com.imoonday.on1chest.init.ModBlocks;
@@ -41,15 +42,24 @@ public class OnlyNeedOneChestClient implements ClientModInitializer {
         ModScreens.registerClient();
         registerGlobalReceiver();
         registerCountDisplay();
-        BlockEntityRendererFactories.register(ModBlockEntities.GLASS_STORAGE_MEMORY_BLOCK_ENTITY, GlassStorageMemoryBlockEntityRenderer::new);
-        BlockEntityRendererFactories.register(ModBlockEntities.ITEM_EXPORTER_BLOCK_ENTITY, ItemExporterBlockEntityRenderer::new);
-        BlockEntityRendererFactories.register(ModBlockEntities.MEMORY_EXTRACTOR_BLOCK_ENTITY, MemoryExtractorBlockEntityRenderer::new);
-        BlockRenderLayerMap.INSTANCE.putBlock(ModBlocks.GLASS_STORAGE_MEMORY_BLOCK, RenderLayer.getTranslucent());
+        registerRenderers();
+        registerKeys();
+    }
+
+    private static void registerKeys() {
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             while (screenKey.wasPressed()) {
                 client.setScreen(Config.createConfigScreen(client.currentScreen));
             }
         });
+    }
+
+    private static void registerRenderers() {
+        BlockEntityRendererFactories.register(ModBlockEntities.GLASS_STORAGE_MEMORY_BLOCK_ENTITY, GlassStorageMemoryBlockEntityRenderer::new);
+        BlockEntityRendererFactories.register(ModBlockEntities.ITEM_EXPORTER_BLOCK_ENTITY, ItemExporterBlockEntityRenderer::new);
+        BlockEntityRendererFactories.register(ModBlockEntities.MEMORY_EXTRACTOR_BLOCK_ENTITY, MemoryExtractorBlockEntityRenderer::new);
+        BlockEntityRendererFactories.register(ModBlockEntities.RECIPE_PROCESSOR_BLOCK_ENTITY, RecipeProcessorBlockEntityRenderer::new);
+        BlockRenderLayerMap.INSTANCE.putBlock(ModBlocks.GLASS_STORAGE_MEMORY_BLOCK, RenderLayer.getTranslucent());
     }
 
     @Environment(EnvType.CLIENT)

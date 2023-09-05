@@ -72,8 +72,9 @@ public class GlassStorageMemoryBlockEntityRenderer implements BlockEntityRendere
         //旋转角度(-1为自动旋转)
         float rotationDegrees = config.getRotationDegrees();
 
-        double scale = 1 / Math.cbrt(itemCount);
-        int faceCount = (int) Math.ceil(Math.cbrt(itemCount));
+        int a = autoSpacing ? itemCount : minCube(itemCount);
+        double scale = 1 / Math.cbrt(a);
+        int faceCount = (int) Math.ceil(Math.cbrt(a));
         double[][][][] positions = new double[faceCount][faceCount][faceCount][3];
         float[][][] speeds = new float[faceCount][faceCount][faceCount];
         for (int x = 0; x < faceCount; x++) {
@@ -102,6 +103,15 @@ public class GlassStorageMemoryBlockEntityRenderer implements BlockEntityRendere
                 }
             }
         }
-
     }
+
+    public static int minCube(int n) {
+        assert n > 0;
+        int i = 1;
+        while (i * i * i < n) {
+            i++;
+        }
+        return i * i * i;
+    }
+
 }

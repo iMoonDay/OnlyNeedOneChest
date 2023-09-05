@@ -3,7 +3,7 @@ package com.imoonday.on1chest.init;
 import com.imoonday.on1chest.OnlyNeedOneChest;
 import com.imoonday.on1chest.blocks.*;
 import com.imoonday.on1chest.blocks.memories.*;
-import com.imoonday.on1chest.data.BlockTagGen;
+import com.imoonday.on1chest.datagen.BlockTagGen;
 import com.imoonday.on1chest.utils.ConnectBlock;
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
 import net.minecraft.block.Block;
@@ -33,6 +33,8 @@ public class ModBlocks {
     public static final Block STORAGE_ACCESSOR_BLOCK = register("storage_accessor_block", new StorageAccessorBlock(FabricBlockSettings.copyOf(Blocks.OAK_PLANKS).burnable()));
     public static final Block STORAGE_PROCESSOR_BLOCK = register("storage_processor_block", new StorageProcessorBlock(FabricBlockSettings.copyOf(Blocks.OAK_PLANKS).burnable()));
     public static final Block STORAGE_RECYCLE_BIN = register("storage_recycle_bin", new StorageRecycleBinBlock(FabricBlockSettings.copyOf(Blocks.COBBLESTONE)));
+    public static final Block RECIPE_PROCESSOR = register("recipe_processor", new RecipeProcessorBlock(FabricBlockSettings.copyOf(Blocks.COBBLESTONE)));
+    public static final Block QUICK_CRAFTING_TABLE = register("quick_crafting_table", new QuickCraftingTableBlock(FabricBlockSettings.copyOf(Blocks.CRAFTING_TABLE)));
 
     public static final Block CONNECTION_CABLE = register("connection_cable", new ConnectionCableBlock(FabricBlockSettings.create().mapColor(MapColor.OAK_TAN).sounds(BlockSoundGroup.WOOD).strength(2)));
     public static final Block ITEM_EXPORTER = register("item_exporter", new ItemExporterBlock(FabricBlockSettings.copyOf(Blocks.OAK_PLANKS)));

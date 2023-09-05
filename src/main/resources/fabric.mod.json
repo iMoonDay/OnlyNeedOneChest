@@ -15,7 +15,7 @@
   "environment": "*",
   "entrypoints": {
     "fabric-datagen": [
-      "com.imoonday.on1chest.data.DataGeneration"
+      "com.imoonday.on1chest.datagen.DataGeneration"
     ],
     "client": [
       "com.imoonday.on1chest.client.OnlyNeedOneChestClient"
@@ -25,6 +25,12 @@
     ],
     "modmenu": [
       "com.imoonday.on1chest.config.ModMenuIntegration"
+    ],
+    "rei_client": [
+      "com.imoonday.on1chest.rei.REIPlugin"
+    ],
+    "emi": [
+      "com.imoonday.on1chest.emi.EMIPlugin"
     ]
   },
   "mixins": [

@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "on1chest:item/vanilla_to_wood_conversion_module"
+  }
+}

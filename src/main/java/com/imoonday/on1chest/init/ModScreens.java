@@ -1,14 +1,8 @@
 package com.imoonday.on1chest.init;
 
 import com.imoonday.on1chest.OnlyNeedOneChest;
-import com.imoonday.on1chest.screen.StorageAssessorScreenHandler;
-import com.imoonday.on1chest.screen.StorageProcessorScreenHandler;
-import com.imoonday.on1chest.screen.StorageRecycleBinScreenHandler;
-import com.imoonday.on1chest.screen.WirelessNetworkScreenHandler;
-import com.imoonday.on1chest.screen.client.StorageAssessorScreen;
-import com.imoonday.on1chest.screen.client.StorageProcessorScreen;
-import com.imoonday.on1chest.screen.client.StorageRecycleBinScreen;
-import com.imoonday.on1chest.screen.client.WirelessNetworkScreen;
+import com.imoonday.on1chest.screen.*;
+import com.imoonday.on1chest.screen.client.*;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerType;
@@ -25,6 +19,7 @@ public class ModScreens {
     public static final ScreenHandlerType<StorageProcessorScreenHandler> STORAGE_PROCESSOR_SCREEN_HANDLER = register("storage_processor", StorageProcessorScreenHandler::new);
     public static final ScreenHandlerType<StorageRecycleBinScreenHandler> STORAGE_RECYCLE_BIN_SCREEN_HANDLER = registerExtended("recycle_bin", StorageRecycleBinScreenHandler::new);
     public static final ScreenHandlerType<WirelessNetworkScreenHandler> WIRELESS_NETWORK_SCREEN_HANDLER = register("wireless_network", WirelessNetworkScreenHandler::new);
+    public static final ScreenHandlerType<RecipeProcessorScreenHandler> RECIPE_PROCESSOR_SCREEN_HANDLER = register("recipe_processor", RecipeProcessorScreenHandler::new);
 
     public static void register() {
 
@@ -36,6 +31,7 @@ public class ModScreens {
         HandledScreens.register(STORAGE_PROCESSOR_SCREEN_HANDLER, StorageProcessorScreen::new);
         HandledScreens.register(STORAGE_RECYCLE_BIN_SCREEN_HANDLER, StorageRecycleBinScreen::new);
         HandledScreens.register(WIRELESS_NETWORK_SCREEN_HANDLER, WirelessNetworkScreen::new);
+        HandledScreens.register(RECIPE_PROCESSOR_SCREEN_HANDLER, RecipeProcessorScreen::new);
     }
 
     private static <T extends ScreenHandler> ScreenHandlerType<T> register(String id, ScreenHandlerType.Factory<T> factory) {

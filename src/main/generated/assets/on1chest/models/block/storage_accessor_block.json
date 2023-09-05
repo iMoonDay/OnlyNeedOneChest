@@ -1,6 +1,7 @@
 {
-  "parent": "minecraft:block/cube_all",
+  "parent": "minecraft:block/cube_column",
   "textures": {
-    "all": "on1chest:block/storage_accessor_block"
+    "end": "on1chest:block/storage_accessor_block_end",
+    "side": "on1chest:block/storage_accessor_block"
   }
 }

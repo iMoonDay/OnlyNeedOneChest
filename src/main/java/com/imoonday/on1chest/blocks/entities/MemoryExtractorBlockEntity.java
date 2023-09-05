@@ -5,56 +5,29 @@ import com.imoonday.on1chest.blocks.StorageMemoryBlock;
 import com.imoonday.on1chest.init.ModBlockEntities;
 import com.imoonday.on1chest.utils.ConnectBlock;
 import com.imoonday.on1chest.utils.PositionPredicate;
-import net.minecraft.block.Block;
+import com.imoonday.on1chest.utils.RecipeFilter;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.ChestBlock;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.network.listener.ClientPlayPacketListener;
-import net.minecraft.network.packet.Packet;
-import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
-import net.minecraft.registry.Registries;
-import net.minecraft.util.Identifier;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.List;
 
-public class MemoryExtractorBlockEntity extends BlockEntity {
-
-    private int cooldown;
-    private Item target;
-    public float uniqueOffset;
-    private boolean matchMode;
+public class MemoryExtractorBlockEntity extends AbstractTransferBlockEntity {
 
     public MemoryExtractorBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.MEMORY_EXTRACTOR_BLOCK_ENTITY, pos, state);
     }
 
-    public Item getTarget() {
-        return target;
-    }
-
-    public boolean setTarget(Item target) {
-        if (this.target == target) {
-            return false;
-        }
-        this.target = target;
-        return true;
-    }
-
     public static void tick(World world, BlockPos pos, BlockState state, MemoryExtractorBlockEntity entity) {
-        if (entity.uniqueOffset == 0) {
-            entity.uniqueOffset = world.random.nextFloat() * 360;
-            world.updateListeners(pos, state, state, Block.NOTIFY_LISTENERS);
-        }
+        tickUpdate(world, pos, state, entity);
         if (--entity.cooldown <= 0) {
             Direction opposite = state.get(MemoryExtractorBlock.FACING).getOpposite();
             BlockPos offset = pos.offset(opposite);
@@ -62,7 +35,8 @@ public class MemoryExtractorBlockEntity extends BlockEntity {
             if (inventories.isEmpty()) {
                 return;
             }
-            if (world.getBlockEntity(offset) instanceof Inventory inventory) {
+            BlockEntity blockEntity = world.getBlockEntity(offset);
+            if (blockEntity instanceof Inventory inventory) {
                 BlockState blockState = world.getBlockState(offset);
                 if (blockState.getBlock() instanceof ChestBlock chestBlock) {
                     Inventory largeInv = ChestBlock.getInventory(chestBlock, blockState, world, offset, true);
@@ -77,10 +51,16 @@ public class MemoryExtractorBlockEntity extends BlockEntity {
                         if (stack.isEmpty()) {
                             continue;
                         }
-                        if (entity.target != null && !stack.isOf(entity.target)) {
+                        Item target;
+                        boolean tested = false;
+                        if (entity.matchMode && blockEntity instanceof RecipeFilter filter && filter.shouldFilter()) {
+                            if (!filter.testIngredient(((ServerWorld) world).getServer(), stack)) {
+                                continue;
+                            }
+                            tested = true;
+                        } else if ((target = entity.target) != null && !stack.isOf(target)) {
                             continue;
                         }
-
                         for (int j = 0; j < inventory.size(); j++) {
                             ItemStack invStack = inventory.getStack(j);
                             if (ItemStack.canCombine(invStack, stack) && invStack.getCount() < invStack.getMaxCount()) {
@@ -99,7 +79,7 @@ public class MemoryExtractorBlockEntity extends BlockEntity {
                                 }
                             }
                         }
-                        if (entity.matchMode && !inventory.containsAny(stack1 -> ItemStack.areItemsEqual(stack, stack1))) {
+                        if (!tested && entity.matchMode && !inventory.containsAny(stack1 -> ItemStack.areItemsEqual(stack, stack1))) {
                             continue;
                         }
                         if (!stack.isEmpty()) {
@@ -120,55 +100,5 @@ public class MemoryExtractorBlockEntity extends BlockEntity {
                 entity.cooldown = 5;
             }
         }
-    }
-
-
-    @Override
-    protected void writeNbt(NbtCompound nbt) {
-        super.writeNbt(nbt);
-        nbt.putInt("cooldown", cooldown);
-        nbt.putString("target", Registries.ITEM.getId(target).toString());
-        nbt.putFloat("uniqueOffset", uniqueOffset);
-        nbt.putBoolean("matchMode", matchMode);
-    }
-
-    @Override
-    public void readNbt(NbtCompound nbt) {
-        super.readNbt(nbt);
-        if (nbt.contains("cooldown", NbtElement.INT_TYPE)) {
-            this.cooldown = nbt.getInt("cooldown");
-        }
-        if (nbt.contains("target", NbtElement.STRING_TYPE)) {
-            String id = nbt.getString("target");
-            Identifier identifier = Identifier.tryParse(id);
-            if (identifier != null) {
-                this.target = Registries.ITEM.get(identifier);
-            }
-        }
-        if (nbt.contains("uniqueOffset", NbtElement.FLOAT_TYPE)) {
-            this.uniqueOffset = nbt.getFloat("uniqueOffset");
-        }
-        if (nbt.contains("matchMode", NbtElement.BYTE_TYPE)) {
-            this.matchMode = nbt.getBoolean("matchMode");
-        }
-    }
-
-    @Nullable
-    @Override
-    public Packet<ClientPlayPacketListener> toUpdatePacket() {
-        return BlockEntityUpdateS2CPacket.create(this);
-    }
-
-    @Override
-    public NbtCompound toInitialChunkDataNbt() {
-        return createNbt();
-    }
-
-    public boolean isMatchMode() {
-        return matchMode;
-    }
-
-    public void setMatchMode(boolean matchMode) {
-        this.matchMode = matchMode;
     }
 }

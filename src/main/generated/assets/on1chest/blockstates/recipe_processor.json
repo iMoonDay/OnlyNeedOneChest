@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "on1chest:block/recipe_processor"
+    }
+  }
+}

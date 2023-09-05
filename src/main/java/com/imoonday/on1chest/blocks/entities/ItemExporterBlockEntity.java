@@ -5,60 +5,34 @@ import com.imoonday.on1chest.blocks.StorageMemoryBlock;
 import com.imoonday.on1chest.init.ModBlockEntities;
 import com.imoonday.on1chest.utils.ConnectBlock;
 import com.imoonday.on1chest.utils.PositionPredicate;
-import net.minecraft.block.Block;
+import com.imoonday.on1chest.utils.RecipeFilter;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.ChestBlock;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.network.listener.ClientPlayPacketListener;
-import net.minecraft.network.packet.Packet;
-import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
-import net.minecraft.registry.Registries;
-import net.minecraft.util.Identifier;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.List;
 
-public class ItemExporterBlockEntity extends BlockEntity {
-
-    private int cooldown;
-    private Item target;
-    public float uniqueOffset;
-    private boolean matchMode;
+public class ItemExporterBlockEntity extends AbstractTransferBlockEntity {
 
     public ItemExporterBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.ITEM_EXPORTER_BLOCK_ENTITY, pos, state);
     }
 
-    public Item getTarget() {
-        return target;
-    }
-
-    public boolean setTarget(Item target) {
-        if (this.target == target) {
-            return false;
-        }
-        this.target = target;
-        return true;
-    }
-
-    public static void tick(World world, BlockPos pos, BlockState state, ItemExporterBlockEntity entity) {
-        if (entity.uniqueOffset == 0) {
-            entity.uniqueOffset = world.random.nextFloat() * 360;
-            world.updateListeners(pos, state, state, Block.NOTIFY_LISTENERS);
-        }
+    public static void tick(World world, BlockPos pos, BlockState state, AbstractTransferBlockEntity entity) {
+        tickUpdate(world, pos, state, entity);
         if (--entity.cooldown <= 0) {
             Direction opposite = state.get(ItemExporterBlock.FACING).getOpposite();
             BlockPos offset = pos.offset(opposite);
-            if (world.getBlockEntity(offset) instanceof Inventory inventory) {
+            BlockEntity blockEntity = world.getBlockEntity(offset);
+            if (blockEntity instanceof Inventory inventory) {
                 BlockState blockState = world.getBlockState(offset);
                 if (blockState.getBlock() instanceof ChestBlock chestBlock) {
                     Inventory largeInv = ChestBlock.getInventory(chestBlock, blockState, world, offset, true);
@@ -72,10 +46,17 @@ public class ItemExporterBlockEntity extends BlockEntity {
                     if (stack.isEmpty()) {
                         continue;
                     }
-                    if (entity.target != null && !stack.isOf(entity.target)) {
+                    Item target;
+                    boolean tested = false;
+                    if (entity.matchMode && blockEntity instanceof RecipeFilter filter && filter.shouldFilter()) {
+                        if (!filter.testOutput(((ServerWorld) world).getServer(), stack)) {
+                            continue;
+                        }
+                        tested = true;
+                    } else if ((target = entity.target) != null && !stack.isOf(target)) {
                         continue;
                     }
-                    List<Inventory> inventories = ConnectBlock.getConnectedBlocks(world, pos, PositionPredicate.create(world, offset).add((world1, pos1) -> world1.getBlockEntity(pos1) instanceof StorageMemoryBlockEntity && Arrays.stream(Direction.values()).anyMatch(direction -> world1.getBlockEntity(pos1.offset(direction)) instanceof ItemExporterBlockEntity exporter && exporter.getCachedState().get(ItemExporterBlock.FACING) == direction && stack.getItem() == exporter.target))).stream().filter(pair -> pair.getLeft().getBlockState(pair.getRight()).getBlock() instanceof StorageMemoryBlock && pair.getLeft().getBlockState(pair.getRight()).get(StorageMemoryBlock.ACTIVATED) && pair.getLeft().getBlockEntity(pair.getRight()) instanceof StorageMemoryBlockEntity).map(pair -> (Inventory) pair.getLeft().getBlockEntity(pair.getRight())).toList();
+                    List<Inventory> inventories = ConnectBlock.getConnectedBlocks(world, pos, PositionPredicate.create(world, offset).add((world1, pos1) -> world1.getBlockEntity(pos1) instanceof StorageMemoryBlockEntity && Arrays.stream(Direction.values()).anyMatch(direction -> world1.getBlockEntity(pos1.offset(direction)) instanceof AbstractTransferBlockEntity exporter && exporter.getCachedState().get(ItemExporterBlock.FACING) == direction && stack.getItem() == exporter.target))).stream().filter(pair -> pair.getLeft().getBlockState(pair.getRight()).getBlock() instanceof StorageMemoryBlock && pair.getLeft().getBlockState(pair.getRight()).get(StorageMemoryBlock.ACTIVATED) && pair.getLeft().getBlockEntity(pair.getRight()) instanceof StorageMemoryBlockEntity).map(pair -> (Inventory) pair.getLeft().getBlockEntity(pair.getRight())).toList();
                     if (inventories.isEmpty()) {
                         return;
                     }
@@ -98,7 +79,7 @@ public class ItemExporterBlockEntity extends BlockEntity {
                                 }
                             }
                         }
-                        if (entity.matchMode && !validInv.containsAny(stack1 -> ItemStack.areItemsEqual(stack, stack1))) {
+                        if (!tested && entity.matchMode && !validInv.containsAny(stack1 -> ItemStack.areItemsEqual(stack, stack1))) {
                             continue;
                         }
                         if (!stack.isEmpty()) {
@@ -121,52 +102,4 @@ public class ItemExporterBlockEntity extends BlockEntity {
         }
     }
 
-    @Override
-    protected void writeNbt(NbtCompound nbt) {
-        super.writeNbt(nbt);
-        nbt.putInt("cooldown", cooldown);
-        nbt.putString("target", Registries.ITEM.getId(target).toString());
-        nbt.putFloat("uniqueOffset", uniqueOffset);
-        nbt.putBoolean("matchMode", matchMode);
-    }
-
-    @Override
-    public void readNbt(NbtCompound nbt) {
-        super.readNbt(nbt);
-        if (nbt.contains("cooldown", NbtElement.INT_TYPE)) {
-            this.cooldown = nbt.getInt("cooldown");
-        }
-        if (nbt.contains("target", NbtElement.STRING_TYPE)) {
-            String id = nbt.getString("target");
-            Identifier identifier = Identifier.tryParse(id);
-            if (identifier != null) {
-                this.target = Registries.ITEM.get(identifier);
-            }
-        }
-        if (nbt.contains("uniqueOffset", NbtElement.FLOAT_TYPE)) {
-            this.uniqueOffset = nbt.getFloat("uniqueOffset");
-        }
-        if (nbt.contains("matchMode", NbtElement.BYTE_TYPE)) {
-            this.matchMode = nbt.getBoolean("matchMode");
-        }
-    }
-
-    @Nullable
-    @Override
-    public Packet<ClientPlayPacketListener> toUpdatePacket() {
-        return BlockEntityUpdateS2CPacket.create(this);
-    }
-
-    @Override
-    public NbtCompound toInitialChunkDataNbt() {
-        return createNbt();
-    }
-
-    public boolean isMatchMode() {
-        return matchMode;
-    }
-
-    public void setMatchMode(boolean matchMode) {
-        this.matchMode = matchMode;
-    }
 }
