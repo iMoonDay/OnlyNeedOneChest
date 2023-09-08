@@ -31,9 +31,9 @@ import java.util.stream.IntStream;
 
 public class StorageAccessorBlockEntity extends BlockEntity implements NamedScreenHandlerFactory {
 
-    private final MultiInventory inventory = new MultiInventory();
-    private final Map<CombinedItemStack, Long> items = new HashMap<>();
-    private boolean updateItems = true;
+    protected final MultiInventory inventory = new MultiInventory();
+    protected final Map<CombinedItemStack, Long> items = new HashMap<>();
+    protected boolean updateItems = true;
 
     public StorageAccessorBlockEntity(BlockEntityType<? extends StorageAccessorBlockEntity> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
@@ -43,18 +43,18 @@ public class StorageAccessorBlockEntity extends BlockEntity implements NamedScre
         super(ModBlockEntities.STORAGE_ACCESSOR_BLOCK_ENTITY, pos, state);
     }
 
-    public static void tick(World world, BlockPos pos, BlockState state, StorageAccessorBlockEntity blockEntity) {
-        blockEntity.inventory.clear();
-        blockEntity.getAllInventories(world, pos).forEach(blockEntity.inventory::add);
-        blockEntity.inventory.refresh();
-        if (blockEntity.updateItems) {
-            blockEntity.items.clear();
-            IntStream.range(0, blockEntity.inventory.size())
-                    .mapToObj(blockEntity.inventory::getStack)
+    public static void tick(World world, BlockPos pos, BlockState state, StorageAccessorBlockEntity entity) {
+        entity.inventory.clear();
+        entity.getAllMemories(world, pos).forEach(entity.inventory::add);
+        entity.inventory.refresh();
+        if (entity.updateItems) {
+            entity.items.clear();
+            IntStream.range(0, entity.inventory.size())
+                    .mapToObj(entity.inventory::getStack)
                     .filter(s -> !s.isEmpty())
                     .map(CombinedItemStack::new)
-                    .forEach(s -> blockEntity.items.merge(s, s.getCount(), Long::sum));
-            blockEntity.updateItems = false;
+                    .forEach(s -> entity.items.merge(s, s.getCount(), Long::sum));
+            entity.updateItems = false;
         }
     }
 
@@ -69,7 +69,7 @@ public class StorageAccessorBlockEntity extends BlockEntity implements NamedScre
         return new StorageAssessorScreenHandler(syncId, playerInventory, this);
     }
 
-    public List<Inventory> getAllInventories(World world, BlockPos pos) {
+    public List<Inventory> getAllMemories(World world, BlockPos pos) {
         if (world == null || pos == null) {
             return List.of();
         }

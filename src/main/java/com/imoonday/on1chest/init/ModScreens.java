@@ -20,6 +20,7 @@ public class ModScreens {
     public static final ScreenHandlerType<StorageRecycleBinScreenHandler> STORAGE_RECYCLE_BIN_SCREEN_HANDLER = registerExtended("recycle_bin", StorageRecycleBinScreenHandler::new);
     public static final ScreenHandlerType<WirelessNetworkScreenHandler> WIRELESS_NETWORK_SCREEN_HANDLER = register("wireless_network", WirelessNetworkScreenHandler::new);
     public static final ScreenHandlerType<RecipeProcessorScreenHandler> RECIPE_PROCESSOR_SCREEN_HANDLER = register("recipe_processor", RecipeProcessorScreenHandler::new);
+    public static final ScreenHandlerType<QuickCraftingScreenHandler> QUICK_CRAFTING_SCREEN_HANDLER = register("quick_crafting", QuickCraftingScreenHandler::new);
 
     public static void register() {
 
@@ -32,6 +33,7 @@ public class ModScreens {
         HandledScreens.register(STORAGE_RECYCLE_BIN_SCREEN_HANDLER, StorageRecycleBinScreen::new);
         HandledScreens.register(WIRELESS_NETWORK_SCREEN_HANDLER, WirelessNetworkScreen::new);
         HandledScreens.register(RECIPE_PROCESSOR_SCREEN_HANDLER, RecipeProcessorScreen::new);
+        HandledScreens.register(QUICK_CRAFTING_SCREEN_HANDLER, QuickCraftingScreen::new);
     }
 
     private static <T extends ScreenHandler> ScreenHandlerType<T> register(String id, ScreenHandlerType.Factory<T> factory) {

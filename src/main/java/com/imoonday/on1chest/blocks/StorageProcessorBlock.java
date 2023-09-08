@@ -36,7 +36,7 @@ public class StorageProcessorBlock extends StorageAccessorBlock {
         }
         if (!world.isClient) {
             if (player.isSneaking()) {
-                List<Inventory> inventories = processorBlock.getAllInventories(world, pos);
+                List<Inventory> inventories = processorBlock.getAllMemories(world, pos);
                 int size = processorBlock.getInventory().size();
                 int occupied = size - processorBlock.getFreeSlotCount();
                 player.sendMessage(Text.literal("%d/%d(%d)".formatted(occupied, size, inventories.size())), true);
