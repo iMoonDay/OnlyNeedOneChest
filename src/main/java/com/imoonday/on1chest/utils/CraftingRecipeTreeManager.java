@@ -3,6 +3,9 @@ package com.imoonday.on1chest.utils;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemStackSet;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtList;
 import net.minecraft.recipe.CraftingRecipe;
 import net.minecraft.recipe.Ingredient;
 import net.minecraft.recipe.RecipeManager;
@@ -12,13 +15,16 @@ import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.world.World;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class CraftingRecipeTreeManager {
 
+    private static CraftingRecipeTreeManager MANAGER;
     private final RecipeManager recipeManager;
     private final DynamicRegistryManager registryManager;
     private List<CraftingRecipe> recipes;
     private ItemStack2RecipesMap cache;
+    public ItemStack2ObjectMap<RecipeTree> recipeTreeMap;
 
     private CraftingRecipeTreeManager(RecipeManager recipeManager, DynamicRegistryManager registryManager) {
         this.recipeManager = recipeManager;
@@ -26,20 +32,29 @@ public class CraftingRecipeTreeManager {
         loadRecipes();
     }
 
-    public static CraftingRecipeTreeManager get(World world) {
-        return new CraftingRecipeTreeManager(world.getRecipeManager(), world.getRegistryManager());
+    public static CraftingRecipeTreeManager getOrCreate(RecipeManager recipeManager, DynamicRegistryManager registryManager) {
+        if (MANAGER == null) {
+            MANAGER = new CraftingRecipeTreeManager(recipeManager, registryManager);
+        }
+        return MANAGER;
+    }
+
+    public static CraftingRecipeTreeManager getOrCreate(World world) {
+        MANAGER = getOrCreate(world.getRecipeManager(), world.getRegistryManager());
+        return MANAGER;
     }
 
     private void loadRecipes() {
         this.recipes = new ArrayList<>(recipeManager.listAllOfType(RecipeType.CRAFTING));
-        this.cache = new ItemStack2RecipesMap();
+        this.cache = new ItemStack2RecipesMap(false);
+        this.recipeTreeMap = new ItemStack2ObjectMap<>(true);
         for (CraftingRecipe recipe : this.recipes) {
-            ItemStack stack = recipe.getOutput(registryManager).copyWithCount(1);
+            ItemStack stack = recipe.getOutput(registryManager);
             if (stack.isEmpty()) {
                 continue;
             }
-            DefaultedList<Ingredient> ingredients = recipe.getIngredients();
-            this.cache.putOrAdd(stack, ingredients);
+            this.cache.putOrAdd(stack.copyWithCount(1), recipe.getIngredients());
+            this.recipeTreeMap.putIfAbsent(stack.copy(), new RecipeTree(stack.copy(), recipeManager, registryManager));
         }
     }
 
@@ -56,19 +71,19 @@ public class CraftingRecipeTreeManager {
     }
 
     public void reload() {
-        this.recipes.clear();
         loadRecipes();
     }
 
     public CraftResult getCraftResult(Inventory inventory, ItemStack result, Collection<ItemStack> except) {
         Set<ItemStack> exceptStacks = ItemStackSet.create();
         exceptStacks.addAll(except);
-        return getCraftResult(getStacks(inventory, exceptStacks), result, result, new HashMap<>(), 20);
+        return getCraftResult(getStacks(inventory, exceptStacks), result, result, ItemStackSet.create(), 20);
     }
 
-    private CraftResult getCraftResult(Set<ItemStack> itemStacks, ItemStack source, ItemStack result, Map<ItemStack, ItemStack> except, int depth) {
-        CraftResult craftResult = CraftResult.empty();
+    private CraftResult getCraftResult(Set<ItemStack> itemStacks, ItemStack source, ItemStack result, Set<ItemStack> except, int depth) {
+        CraftResult craftResult = new CraftResult();
         if (depth-- <= 0) {
+            System.out.println("递归溢出");
             return craftResult;
         }
         ItemStack copy = result.copy();
@@ -85,7 +100,7 @@ public class CraftingRecipeTreeManager {
                 }
                 DefaultedList<Ingredient> ingredients = recipe.getIngredients();
                 int count = getOutputCount(recipe);
-                CraftResult tempResult = CraftResult.empty();
+                CraftResult tempResult = new CraftResult();
                 Map<Ingredient, Integer> missing = new HashMap<>();
                 for (Ingredient ingredient : ingredients) {
                     if (ingredient.isEmpty()) {
@@ -148,22 +163,16 @@ public class CraftingRecipeTreeManager {
                         int costCount = entry.getValue();
                         boolean found = false;
                         for (ItemStack itemStack : ingredient.getMatchingStacks()) {
-                            if (except.entrySet().stream().anyMatch(entry1 -> ItemStack.canCombine(entry1.getValue(), result) && ItemStack.canCombine(entry1.getKey(), itemStack))) {
+                            if (source == result) {
+                                except.clear();
+                            }
+                            if (except.contains(itemStack)) {
                                 continue;
                             }
-                            if (ItemStack.canCombine(itemStack, source)) {
+                            if (ItemStack.canCombine(itemStack, source) || ItemStack.canCombine(itemStack, result)) {
                                 continue;
                             }
-                            boolean exist = false;
-                            for (Map.Entry<ItemStack, ItemStack> stackEntry : except.entrySet()) {
-                                if (ItemStack.canCombine(result, stackEntry.getKey()) && ItemStack.canCombine(itemStack, stackEntry.getValue())) {
-                                    exist = true;
-                                    break;
-                                }
-                            }
-                            if (!exist) {
-                                except.put(result, itemStack);
-                            }
+                            except.add(itemStack);
                             CraftResult childCraftResult = getCraftResult(itemStacks, source, itemStack.copyWithCount(costCount), except, depth);
                             if (childCraftResult.isCrafted()) {
                                 tempResult.addCosts(childCraftResult.getCost());
@@ -205,14 +214,8 @@ public class CraftingRecipeTreeManager {
                     lastStacks.addAll(itemStacks);
                     continue;
                 }
-                if (source == result) {
-                    System.out.println(except);
-                }
                 return CraftResult.fail(missingList);
             }
-        }
-        if (source == result) {
-            System.out.println(except);
         }
         return craftResult;
     }
@@ -249,7 +252,7 @@ public class CraftingRecipeTreeManager {
         Set<ItemStack> itemStacks = ItemStackSet.create();
         for (int i = 0; i < inventory.size(); i++) {
             ItemStack itemStack = inventory.getStack(i).copy();
-            if (except.contains(itemStack)) {
+            if (except != null && except.contains(itemStack)) {
                 continue;
             }
             if (!itemStacks.contains(itemStack)) {
@@ -270,21 +273,8 @@ public class CraftingRecipeTreeManager {
         private final Set<ItemStack> remainder = ItemStackSet.create();
         private final Set<Map<Ingredient, Integer>> missing = new HashSet<>();
 
-        public CraftResult(ItemStack cost, ItemStack remainder) {
-            if (cost != null) {
-                this.cost.add(cost);
-            }
-            if (remainder != null) {
-                this.remainder.add(remainder);
-            }
-        }
-
-        public static CraftResult empty() {
-            return new CraftResult(null, null);
-        }
-
         public static CraftResult fail(List<Map<Ingredient, Integer>> missing) {
-            CraftResult craftResult = CraftResult.empty();
+            CraftResult craftResult = new CraftResult();
             List<Map<Ingredient, Integer>> list = new ArrayList<>(missing);
             Set<Map<Ingredient, Integer>> result = new HashSet<>();
             HashMap<Map<Ingredient, Integer>, Integer> count = new HashMap<>();
@@ -303,6 +293,78 @@ public class CraftingRecipeTreeManager {
                 }
             }
             craftResult.missing.addAll(result);
+            return craftResult;
+        }
+
+        public NbtCompound toNbt() {
+            NbtCompound nbtCompound = new NbtCompound();
+            NbtList cost = new NbtList();
+            this.cost.forEach(stack -> cost.add(stack.writeNbt(new NbtCompound())));
+            NbtList remainder = new NbtList();
+            this.remainder.forEach(stack -> remainder.add(stack.writeNbt(new NbtCompound())));
+            NbtList missing = new NbtList();
+            for (Map<Ingredient, Integer> map : this.missing) {
+                NbtList ingredients = new NbtList();
+                for (Map.Entry<Ingredient, Integer> entry : map.entrySet()) {
+                    Ingredient ingredient = entry.getKey();
+                    Integer count = entry.getValue();
+                    NbtList stacks = new NbtList();
+                    for (ItemStack stack : ingredient.getMatchingStacks()) {
+                        stacks.add(stack.writeNbt(new NbtCompound()));
+                    }
+                    NbtCompound nbtCompound1 = new NbtCompound();
+                    nbtCompound1.put("stacks", stacks);
+                    nbtCompound1.putInt("count", count);
+                    ingredients.add(nbtCompound1);
+                }
+                missing.add(ingredients);
+            }
+            nbtCompound.put("cost", cost);
+            nbtCompound.put("remainder", remainder);
+            nbtCompound.put("missing", missing);
+            return nbtCompound;
+        }
+
+        public static CraftResult fromNbt(NbtCompound nbtCompound) {
+            CraftResult craftResult = new CraftResult();
+            if (nbtCompound.contains("cost", NbtElement.LIST_TYPE)) {
+                craftResult.addCosts(nbtCompound.getList("cost", NbtElement.COMPOUND_TYPE).stream().filter(element -> element instanceof NbtCompound).map(element -> ((NbtCompound) element)).map(ItemStack::fromNbt).filter(stack -> stack != null && !stack.isEmpty()).collect(Collectors.toSet()));
+            }
+            if (nbtCompound.contains("remainder", NbtElement.LIST_TYPE)) {
+                craftResult.addRemainders(nbtCompound.getList("remainder", NbtElement.COMPOUND_TYPE).stream().filter(element -> element instanceof NbtCompound).map(element -> ((NbtCompound) element)).map(ItemStack::fromNbt).filter(stack -> stack != null && !stack.isEmpty()).collect(Collectors.toSet()));
+            }
+            if (nbtCompound.contains("missing", NbtElement.LIST_TYPE)) {
+                Set<Map<Ingredient, Integer>> missing = new HashSet<>();
+                NbtList list = nbtCompound.getList("missing", NbtElement.LIST_TYPE);
+                for (NbtElement nbtElement : list) {
+                    if (nbtElement instanceof NbtList list1) {
+                        Map<Ingredient, Integer> ingredients = new HashMap<>();
+                        for (NbtElement element : list1) {
+                            if (element instanceof NbtCompound compound) {
+                                if (compound.contains("count", NbtElement.INT_TYPE) && compound.contains("stacks", NbtElement.LIST_TYPE)) {
+                                    int count = compound.getInt("count");
+                                    NbtList list2 = compound.getList("stacks", NbtElement.COMPOUND_TYPE);
+                                    Set<ItemStack> itemStacks = ItemStackSet.create();
+                                    for (NbtElement element1 : list2) {
+                                        if (element1 instanceof NbtCompound stack) {
+                                            ItemStack itemStack = ItemStack.fromNbt(stack);
+                                            if (!itemStack.isEmpty()) {
+                                                itemStacks.add(itemStack);
+                                            }
+                                        }
+                                    }
+                                    Ingredient ingredient = Ingredient.ofStacks(itemStacks.stream());
+                                    if (!ingredient.isEmpty()) {
+                                        ingredients.put(ingredient, count);
+                                    }
+                                }
+                            }
+                        }
+                        missing.add(ingredients);
+                    }
+                }
+                craftResult.missing.addAll(missing);
+            }
             return craftResult;
         }
 
@@ -371,6 +433,18 @@ public class CraftingRecipeTreeManager {
 
         public boolean isMissing() {
             return !this.missing.isEmpty();
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof CraftResult that)) return false;
+            return Objects.equals(cost, that.cost) && Objects.equals(remainder, that.remainder) && Objects.equals(missing, that.missing);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(cost, remainder, missing);
         }
     }
 }

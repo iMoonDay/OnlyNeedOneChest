@@ -7,13 +7,16 @@
     "GameRulesInvoker",
     "HopperBlockEntityMixin",
     "IntRuleInvoker",
+    "ItemStackMixin",
     "ModelProviderMixin",
+    "PacketByteBufMixin",
     "ScreenHandlerInvoker",
     "SlotAccessor"
   ],
   "client": [
     "CheckboxWidgetAccessor",
     "ClickableWidgetAccessor",
+    "ClientPlayNetworkHandlerMixin",
     "TooltipComponentMixin"
   ],
   "injectors": {

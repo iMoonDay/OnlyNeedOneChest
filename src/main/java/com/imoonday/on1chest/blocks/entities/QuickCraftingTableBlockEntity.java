@@ -11,13 +11,9 @@ import net.minecraft.item.ItemStackSet;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class QuickCraftingTableBlockEntity extends StorageAccessorBlockEntity {
 
@@ -25,13 +21,9 @@ public class QuickCraftingTableBlockEntity extends StorageAccessorBlockEntity {
         super(ModBlockEntities.QUICK_CRAFTING_TABLE_BLOCK_ENTITY, pos, state);
     }
 
-    public static void tick(World world, BlockPos pos, BlockState state, QuickCraftingTableBlockEntity entity) {
-        StorageAccessorBlockEntity.tick(world, pos, state, entity);
-    }
-
     public CraftingRecipeTreeManager getManager() {
         if (world != null) {
-            return CraftingRecipeTreeManager.get(world);
+            return CraftingRecipeTreeManager.getOrCreate(world);
         }
         return null;
     }
@@ -47,24 +39,55 @@ public class QuickCraftingTableBlockEntity extends StorageAccessorBlockEntity {
         return new QuickCraftingScreenHandler(syncId, playerInventory, this);
     }
 
-    public CraftingRecipeTreeManager.CraftResult getCraftResult(ItemStack stack) {
-        return this.getManager().getCraftResult(inventory, stack, new HashSet<>());
-    }
-
-    public List<CraftingRecipeTreeManager.CraftResult> getCraftResults(ItemStack stack, int limit) {
-        int i = 0;
-        List<CraftingRecipeTreeManager.CraftResult> craftResults = new ArrayList<>();
+    public List<CraftingRecipeTreeManager.CraftResult> getCraftResults(ItemStack stack, int maxSize) {
+        Set<CraftingRecipeTreeManager.CraftResult> craftResults = new HashSet<>();
+        Set<ItemStack> cost = ItemStackSet.create();
         Set<ItemStack> except = ItemStackSet.create();
-        while (i++ < limit) {
+        Set<Set<ItemStack>> excepted = new HashSet<>();
+        List<Set<ItemStack>> powerSet = getPowerSet(cost);
+        while (craftResults.size() < maxSize) {
             CraftingRecipeTreeManager.CraftResult craftResult = this.getManager().getCraftResult(inventory, stack, except);
-            if (craftResult.isCrafted()) {
-                except.addAll(craftResult.getCost());
-                craftResults.add(craftResult);
-                continue;
+            if (!except.isEmpty()) {
+                excepted.add(except);
             }
-            break;
+            if (craftResult.isCrafted()) {
+                craftResults.add(craftResult);
+                int size = cost.size();
+                cost.addAll(craftResult.getCost());
+                if (size != cost.size()) {
+                    powerSet = getPowerSet(cost);
+                    powerSet.removeAll(excepted);
+                    powerSet.sort(Comparator.comparingInt(Set::size));
+                }
+            }
+            if (powerSet.isEmpty()) {
+                if (craftResults.isEmpty()) {
+                    craftResults.add(craftResult);
+                }
+                break;
+            }
+            except = powerSet.remove(0);
         }
-        return craftResults;
+        return new ArrayList<>(craftResults);
     }
 
+    public static List<Set<ItemStack>> getPowerSet(Set<ItemStack> set) {
+        List<Set<ItemStack>> result = new ArrayList<>();
+        if (set == null || set.isEmpty()) {
+            return result;
+        }
+        List<ItemStack> list = new ArrayList<>(set);
+        int n = list.size();
+        int max = 1 << n;
+        for (int i = 1; i < max; i++) {
+            Set<ItemStack> subSet = ItemStackSet.create();
+            for (int j = 0; j < n; j++) {
+                if ((i & (1 << j)) != 0) {
+                    subSet.add(list.get(j));
+                }
+            }
+            result.add(subSet);
+        }
+        return result;
+    }
 }

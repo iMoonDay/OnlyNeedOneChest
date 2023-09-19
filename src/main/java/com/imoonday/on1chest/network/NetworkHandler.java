@@ -25,4 +25,9 @@ public class NetworkHandler {
             ServerPlayNetworking.send(serverPlayer, OnlyNeedOneChestClient.S2C, buf);
         }
     }
+
+    public static void updateRecipeManager(ServerPlayerEntity player) {
+        ServerPlayNetworking.send(player, OnlyNeedOneChestClient.UPDATE_RECIPE, PacketByteBufs.empty());
+    }
+
 }

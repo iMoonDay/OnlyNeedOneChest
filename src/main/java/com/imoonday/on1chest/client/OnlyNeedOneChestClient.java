@@ -11,6 +11,7 @@ import com.imoonday.on1chest.init.ModBlocks;
 import com.imoonday.on1chest.init.ModScreens;
 import com.imoonday.on1chest.screen.client.StorageAssessorScreen;
 import com.imoonday.on1chest.utils.CombinedItemStack;
+import com.imoonday.on1chest.utils.CraftingRecipeTreeManager;
 import com.imoonday.on1chest.utils.IScreenDataReceiver;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
@@ -19,6 +20,7 @@ import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
@@ -33,6 +35,7 @@ import org.lwjgl.glfw.GLFW;
 public class OnlyNeedOneChestClient implements ClientModInitializer {
 
     public static final Identifier S2C = OnlyNeedOneChest.id("s2c");
+    public static final Identifier UPDATE_RECIPE = OnlyNeedOneChest.id("update_recipe");
     public static KeyBinding screenKey = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.on1chest.setting_screen", GLFW.GLFW_KEY_N, "group.on1chest.storages"));
     private static CombinedItemStack selectedStack = null;
 
@@ -44,6 +47,15 @@ public class OnlyNeedOneChestClient implements ClientModInitializer {
         registerCountDisplay();
         registerRenderers();
         registerKeys();
+        registerRecipeTreeManagerEvents();
+    }
+
+    private static void registerRecipeTreeManagerEvents() {
+        ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
+            if (client.world != null && CraftingRecipeTreeManager.getOrCreate(client.world) != null) {
+                System.out.println("On1chest：客户端配方加载成功");
+            }
+        });
     }
 
     private static void registerKeys() {
@@ -98,6 +110,19 @@ public class OnlyNeedOneChestClient implements ClientModInitializer {
                 }
             });
         });
+        ClientPlayNetworking.registerGlobalReceiver(UPDATE_RECIPE, (client, handler, buf, sender) -> {
+            client.execute(() -> {
+                if (client.world != null) {
+                    CraftingRecipeTreeManager.getOrCreate(client.world).reload();
+                    System.out.println("On1chest：服务端配方重载成功");
+                }
+                if (client.currentScreen instanceof IScreenDataReceiver receiver) {
+                    receiver.update();
+                    System.out.println("On1chest：服务端配方同步完成");
+                }
+            });
+        });
+
     }
 
 

@@ -2,6 +2,7 @@ package com.imoonday.on1chest.screen;
 
 import com.imoonday.on1chest.blocks.entities.QuickCraftingTableBlockEntity;
 import com.imoonday.on1chest.init.ModScreens;
+import com.imoonday.on1chest.network.NetworkHandler;
 import com.imoonday.on1chest.utils.CombinedItemStack;
 import com.imoonday.on1chest.utils.CraftingRecipeTreeManager;
 import com.imoonday.on1chest.utils.IScreenDataReceiver;
@@ -13,6 +14,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtList;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.util.math.MathHelper;
@@ -23,8 +25,9 @@ import java.util.List;
 public class QuickCraftingScreenHandler extends ScreenHandler implements IScreenDataReceiver {
 
     protected final Inventory result = new SimpleInventory(1);
+    private final PlayerEntity player;
     private final QuickCraftingTableBlockEntity entity;
-    private final List<CraftingRecipeTreeManager.CraftResult> craftResults = new ArrayList<>();
+    public final List<CraftingRecipeTreeManager.CraftResult> craftResults = new ArrayList<>();
 
     public QuickCraftingScreenHandler(int syncId, PlayerInventory playerInventory) {
         this(syncId, playerInventory, null);
@@ -32,6 +35,7 @@ public class QuickCraftingScreenHandler extends ScreenHandler implements IScreen
 
     public QuickCraftingScreenHandler(int syncId, PlayerInventory playerInventory, QuickCraftingTableBlockEntity entity) {
         super(ModScreens.QUICK_CRAFTING_SCREEN_HANDLER, syncId);
+        this.player = playerInventory.player;
         this.entity = entity;
         int i;
         int j;
@@ -47,33 +51,81 @@ public class QuickCraftingScreenHandler extends ScreenHandler implements IScreen
     }
 
     public void updateResult(ItemStack stack, boolean remove, boolean max) {
-        ItemStack currentStack = this.result.getStack(0);
-        if (ItemStack.canCombine(stack, currentStack)) {
-            stack.setCount(MathHelper.clamp(currentStack.getCount() + (remove ? -1 : 1), 1, currentStack.getMaxCount()));
-        } else if (remove) {
-            return;
+        ItemStack cursorStack = this.getCursorStack();
+        if (!cursorStack.isEmpty()) {
+            stack = cursorStack.copy();
+            remove = false;
+            max = false;
+        } else {
+            ItemStack currentStack = this.result.getStack(0);
+            if (ItemStack.canCombine(stack, currentStack)) {
+                stack.setCount(MathHelper.clamp(currentStack.getCount() + (remove ? -1 : 1), 1, currentStack.getMaxCount()));
+            } else if (remove) {
+                NetworkHandler.sendToClient(player, new NbtCompound());
+                return;
+            }
         }
         if (!max) {
             this.craftResults.clear();
             this.craftResults.addAll(this.entity.getCraftResults(stack, 10));
-            if (!this.craftResults.isEmpty()) {
+            if (isCraftedList(this.craftResults)) {
                 this.result.setStack(0, stack.copy());
             } else if (!ItemStack.canCombine(stack, this.result.getStack(0))) {
                 this.result.setStack(0, Items.BARRIER.getDefaultStack());
+            } else {
+                NetworkHandler.sendToClient(player, new NbtCompound());
+                return;
             }
         } else if (remove) {
             this.craftResults.clear();
             this.result.removeStack(0);
         } else {
-            int maxCount = stack.getMaxCount();
-            List<CraftingRecipeTreeManager.CraftResult> craftResults = new ArrayList<>();
-            while (craftResults.isEmpty() && maxCount > 0) {
-                craftResults = this.entity.getCraftResults(stack.copyWithCount(maxCount--), 10);
+            int left = 1;
+            int right = stack.getMaxCount();
+            while (left <= right) {
+                int mid = (left + right) / 2;
+                List<CraftingRecipeTreeManager.CraftResult> craftResults = this.entity.getCraftResults(stack.copyWithCount(mid), 10);
+                if (isCraftedList(craftResults)) {
+                    left = mid + 1;
+                } else {
+                    right = mid - 1;
+                }
             }
-            if (!craftResults.isEmpty()) {
-                this.craftResults.clear();
-                this.craftResults.addAll(craftResults);
-                this.result.setStack(0, stack.copyWithCount(maxCount + 1));
+            if (right > 0) {
+                List<CraftingRecipeTreeManager.CraftResult> finalResult = this.entity.getCraftResults(stack.copyWithCount(right), 10);
+                if (isCraftedList(finalResult)) {
+                    this.craftResults.clear();
+                    this.craftResults.addAll(finalResult);
+                    this.result.setStack(0, stack.copyWithCount(right));
+                }
+            }
+        }
+        updateResultsToClient();
+    }
+
+    private static boolean isCraftedList(List<CraftingRecipeTreeManager.CraftResult> finalResult) {
+        return finalResult.stream().anyMatch(CraftingRecipeTreeManager.CraftResult::isCrafted);
+    }
+
+    private void updateResultsToClient() {
+        NbtCompound nbtCompound = new NbtCompound();
+        NbtList list = new NbtList();
+        this.craftResults.forEach(craftResult -> list.add(craftResult.toNbt()));
+        nbtCompound.put("results", list);
+        NetworkHandler.sendToClient(player, nbtCompound);
+    }
+
+    public void updateResultsFromServer(NbtCompound nbtCompound) {
+        if (nbtCompound.contains("results", NbtElement.LIST_TYPE)) {
+            this.craftResults.clear();
+            NbtList list = nbtCompound.getList("results", NbtElement.COMPOUND_TYPE);
+            for (NbtElement nbtElement : list) {
+                if (nbtElement instanceof NbtCompound nbtCompound1) {
+                    CraftingRecipeTreeManager.CraftResult craftResult = CraftingRecipeTreeManager.CraftResult.fromNbt(nbtCompound1);
+                    if (!craftResult.isEmpty()) {
+                        this.craftResults.add(craftResult);
+                    }
+                }
             }
         }
     }
@@ -144,6 +196,9 @@ public class QuickCraftingScreenHandler extends ScreenHandler implements IScreen
         @Override
         public void onTakeItem(PlayerEntity player, ItemStack stack) {
             super.onTakeItem(player, stack);
+            if (QuickCraftingScreenHandler.this.entity == null) {
+                return;
+            }
             List<CraftingRecipeTreeManager.CraftResult> list = QuickCraftingScreenHandler.this.craftResults;
             if (list.isEmpty()) {
                 return;
@@ -156,6 +211,7 @@ public class QuickCraftingScreenHandler extends ScreenHandler implements IScreen
                 QuickCraftingScreenHandler.this.entity.insertOrDrop(itemStack);
             }
             QuickCraftingScreenHandler.this.craftResults.clear();
+            updateResultsToClient();
         }
     }
 }
