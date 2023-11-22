@@ -4,6 +4,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,6 +18,8 @@ public class MultiInventory implements Inventory {
 
     private final List<Inventory> inventories = new ArrayList<>();
     private final List<ItemStack[]> dupDetector = new ArrayList<>();
+    @Nullable
+    private List<MultiInventoryChangedListener> listeners;
     private int[] invSizes = new int[0];
     private int invSize;
     private boolean using;
@@ -42,27 +45,45 @@ public class MultiInventory implements Inventory {
 
     @Override
     public ItemStack getStack(int slot) {
-        return getFromSlot(slot, Inventory::getStack, ItemStack.EMPTY);
+        return getFromSlot(slot, Inventory::getStack, ItemStack.EMPTY, false);
     }
 
     @Override
     public ItemStack removeStack(int slot, int amount) {
-        return getFromSlot(slot, (inventory, i) -> inventory.removeStack(i, amount), ItemStack.EMPTY);
+        return getFromSlot(slot, (inventory, i) -> inventory.removeStack(i, amount), ItemStack.EMPTY, true);
     }
 
     @Override
     public ItemStack removeStack(int slot) {
-        return getFromSlot(slot, Inventory::removeStack, ItemStack.EMPTY);
+        return getFromSlot(slot, Inventory::removeStack, ItemStack.EMPTY, true);
     }
 
     @Override
     public void setStack(int slot, ItemStack stack) {
-        runFromSlot(slot, (inventory, i) -> inventory.setStack(i, stack));
+        runFromSlot(slot, (inventory, i) -> inventory.setStack(i, stack), true);
     }
 
     @Override
     public void markDirty() {
         inventories.forEach(Inventory::markDirty);
+        if (this.listeners != null) {
+            for (MultiInventoryChangedListener listener : this.listeners) {
+                listener.onInventoryChanged(this);
+            }
+        }
+    }
+
+    public void addListener(MultiInventoryChangedListener listener) {
+        if (this.listeners == null) {
+            this.listeners = new ArrayList<>();
+        }
+        this.listeners.add(listener);
+    }
+
+    public void removeListener(MultiInventoryChangedListener listener) {
+        if (this.listeners != null) {
+            this.listeners.remove(listener);
+        }
     }
 
     @Override
@@ -82,12 +103,12 @@ public class MultiInventory implements Inventory {
 
     @Override
     public boolean isValid(int slot, ItemStack stack) {
-        return getFromSlot(slot, (inventory, i) -> inventory.isValid(i, stack), false);
+        return getFromSlot(slot, (inventory, i) -> inventory.isValid(i, stack), false, false);
     }
 
     @Override
     public boolean canTransferTo(Inventory hopperInventory, int slot, ItemStack stack) {
-        return getFromSlot(slot, (inventory, i) -> inventory.canTransferTo(hopperInventory, i, stack), false);
+        return getFromSlot(slot, (inventory, i) -> inventory.canTransferTo(hopperInventory, i, stack), false, false);
     }
 
     @Override
@@ -126,7 +147,7 @@ public class MultiInventory implements Inventory {
                 }
             }
             return stack;
-        }, stack);
+        }, stack, true);
     }
 
     public ItemStack insertItem(ItemStack stack) {
@@ -169,6 +190,7 @@ public class MultiInventory implements Inventory {
                 }
             }
         }
+        markDirty();
         return stack;
     }
 
@@ -225,7 +247,7 @@ public class MultiInventory implements Inventory {
         dupDetector.clear();
     }
 
-    private <T> T getFromSlot(int slot, BiFunction<Inventory, Integer, T> function, T defaultValue) {
+    private <T> T getFromSlot(int slot, BiFunction<Inventory, Integer, T> function, T defaultValue, boolean markDirty) {
         if (using || slot >= invSize) {
             return defaultValue;
         }
@@ -235,6 +257,9 @@ public class MultiInventory implements Inventory {
                 slot -= invSizes[i];
             } else {
                 T valid = function.apply(inventories.get(i), slot);
+                if (markDirty) {
+                    markDirty();
+                }
                 using = false;
                 return valid;
             }
@@ -243,7 +268,7 @@ public class MultiInventory implements Inventory {
         return defaultValue;
     }
 
-    private void runFromSlot(int slot, BiConsumer<Inventory, Integer> consumer) {
+    private void runFromSlot(int slot, BiConsumer<Inventory, Integer> consumer, boolean markDirty) {
         if (using || slot >= invSize) {
             return;
         }
@@ -253,6 +278,9 @@ public class MultiInventory implements Inventory {
                 slot -= invSizes[i];
             } else {
                 consumer.accept(inventories.get(i), slot);
+                if (markDirty) {
+                    markDirty();
+                }
                 using = false;
                 return;
             }
@@ -269,5 +297,9 @@ public class MultiInventory implements Inventory {
                 ", invSize=" + invSize +
                 ", using=" + using +
                 '}';
+    }
+
+    public interface MultiInventoryChangedListener {
+        void onInventoryChanged(MultiInventory inventory);
     }
 }

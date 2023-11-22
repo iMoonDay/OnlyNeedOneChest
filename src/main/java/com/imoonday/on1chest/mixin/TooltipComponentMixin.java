@@ -1,5 +1,6 @@
 package com.imoonday.on1chest.mixin;
 
+import com.imoonday.on1chest.client.gui.tooltip.IngredientTooltip;
 import com.imoonday.on1chest.client.gui.tooltip.RecipeTooltipComponent;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
 import net.minecraft.client.item.TooltipData;
@@ -15,6 +16,8 @@ public interface TooltipComponentMixin {
     private static void of(TooltipData data, CallbackInfoReturnable<TooltipComponent> cir) {
         if (data instanceof RecipeTooltipComponent.RecipeTooltipData recipeTooltipData) {
             cir.setReturnValue(new RecipeTooltipComponent(recipeTooltipData));
+        } else if (data instanceof IngredientTooltip tooltip) {
+            cir.setReturnValue(tooltip);
         }
     }
 }

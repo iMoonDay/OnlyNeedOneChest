@@ -11,6 +11,7 @@ import net.minecraft.item.ItemStackSet;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -19,6 +20,10 @@ public class QuickCraftingTableBlockEntity extends StorageAccessorBlockEntity {
 
     public QuickCraftingTableBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.QUICK_CRAFTING_TABLE_BLOCK_ENTITY, pos, state);
+    }
+
+    public static void tick(World world, BlockPos pos, BlockState state, QuickCraftingTableBlockEntity entity) {
+        StorageAccessorBlockEntity.tick(world, pos, state, entity);
     }
 
     public CraftingRecipeTreeManager getManager() {

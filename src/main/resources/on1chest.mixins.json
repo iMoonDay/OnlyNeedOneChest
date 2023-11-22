@@ -17,6 +17,7 @@
     "CheckboxWidgetAccessor",
     "ClickableWidgetAccessor",
     "ClientPlayNetworkHandlerMixin",
+    "IconWidgetAccessor",
     "TooltipComponentMixin"
   ],
   "injectors": {

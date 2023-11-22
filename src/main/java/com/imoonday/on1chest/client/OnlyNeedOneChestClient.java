@@ -1,6 +1,5 @@
 package com.imoonday.on1chest.client;
 
-import com.imoonday.on1chest.OnlyNeedOneChest;
 import com.imoonday.on1chest.client.renderer.GlassStorageMemoryBlockEntityRenderer;
 import com.imoonday.on1chest.client.renderer.ItemExporterBlockEntityRenderer;
 import com.imoonday.on1chest.client.renderer.MemoryExtractorBlockEntityRenderer;
@@ -9,6 +8,7 @@ import com.imoonday.on1chest.config.Config;
 import com.imoonday.on1chest.init.ModBlockEntities;
 import com.imoonday.on1chest.init.ModBlocks;
 import com.imoonday.on1chest.init.ModScreens;
+import com.imoonday.on1chest.network.NetworkHandler;
 import com.imoonday.on1chest.screen.client.StorageAssessorScreen;
 import com.imoonday.on1chest.utils.CombinedItemStack;
 import com.imoonday.on1chest.utils.CraftingRecipeTreeManager;
@@ -17,26 +17,18 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactories;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
-import org.lwjgl.glfw.GLFW;
 
 public class OnlyNeedOneChestClient implements ClientModInitializer {
 
-    public static final Identifier S2C = OnlyNeedOneChest.id("s2c");
-    public static final Identifier UPDATE_RECIPE = OnlyNeedOneChest.id("update_recipe");
-    public static KeyBinding screenKey = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.on1chest.setting_screen", GLFW.GLFW_KEY_N, "group.on1chest.storages"));
     private static CombinedItemStack selectedStack = null;
 
     @Override
@@ -46,22 +38,21 @@ public class OnlyNeedOneChestClient implements ClientModInitializer {
         registerGlobalReceiver();
         registerCountDisplay();
         registerRenderers();
-        registerKeys();
+        KeyBindings.registerKeys();
         registerRecipeTreeManagerEvents();
     }
 
     private static void registerRecipeTreeManagerEvents() {
         ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
-            if (client.world != null && CraftingRecipeTreeManager.getOrCreate(client.world) != null) {
-                System.out.println("On1chest：客户端配方加载成功");
-            }
-        });
-    }
-
-    private static void registerKeys() {
-        ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            while (screenKey.wasPressed()) {
-                client.setScreen(Config.createConfigScreen(client.currentScreen));
+            if (client.world != null) {
+                try {
+                    CraftingRecipeTreeManager manager = CraftingRecipeTreeManager.getOrCreate(client.world);
+                    if (manager != null) {
+                        System.out.println("On1chest：客户端配方加载成功");
+                    }
+                } catch (Throwable t) {
+                    t.printStackTrace();
+                }
             }
         });
     }
@@ -102,7 +93,7 @@ public class OnlyNeedOneChestClient implements ClientModInitializer {
 
     @Environment(EnvType.CLIENT)
     private void registerGlobalReceiver() {
-        ClientPlayNetworking.registerGlobalReceiver(S2C, (client, handler, buf, sender) -> {
+        ClientPlayNetworking.registerGlobalReceiver(NetworkHandler.S2C, (client, handler, buf, sender) -> {
             NbtCompound nbt = buf.readUnlimitedNbt();
             client.execute(() -> {
                 if (client.currentScreen instanceof IScreenDataReceiver receiver) {
@@ -110,7 +101,7 @@ public class OnlyNeedOneChestClient implements ClientModInitializer {
                 }
             });
         });
-        ClientPlayNetworking.registerGlobalReceiver(UPDATE_RECIPE, (client, handler, buf, sender) -> {
+        ClientPlayNetworking.registerGlobalReceiver(NetworkHandler.UPDATE_RECIPE, (client, handler, buf, sender) -> {
             client.execute(() -> {
                 if (client.world != null) {
                     CraftingRecipeTreeManager.getOrCreate(client.world).reload();

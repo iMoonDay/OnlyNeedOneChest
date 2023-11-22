@@ -8,12 +8,13 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.Identifier;
 
 public class OnlyNeedOneChest implements ModInitializer {
 
-    public static final Identifier C2S = id("c2s");
+    public static boolean clothConfig = FabricLoader.getInstance().isModLoaded("cloth-config");
 
     @Override
     public void onInitialize() {
@@ -42,7 +43,7 @@ public class OnlyNeedOneChest implements ModInitializer {
     }
 
     private void registerGlobalReceiver() {
-        ServerPlayNetworking.registerGlobalReceiver(C2S, (server, player, handler, buf, sender) -> {
+        ServerPlayNetworking.registerGlobalReceiver(NetworkHandler.C2S, (server, player, handler, buf, sender) -> {
             NbtCompound nbt = buf.readUnlimitedNbt();
             server.execute(() -> {
                 if (player.currentScreenHandler instanceof IScreenDataReceiver receiver) {

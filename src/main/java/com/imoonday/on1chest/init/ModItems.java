@@ -7,17 +7,18 @@ import com.imoonday.on1chest.items.VanillaToWoodConversionModuleItem;
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.item.ItemStack;
+import net.minecraft.item.*;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.text.Text;
 
+import java.util.Arrays;
+
 public class ModItems {
+
+    private static final ItemConvertible[] TESTING_ITEMS = {ModBlocks.QUICK_CRAFTING_TABLE};
 
     public static final RegistryKey<ItemGroup> STORAGES = RegistryKey.of(RegistryKeys.ITEM_GROUP, OnlyNeedOneChest.id("storages"));
 
@@ -39,12 +40,16 @@ public class ModItems {
         ModBlocks.BLOCK_WITH_ITEMS.forEach((id, block) -> {
             BlockItem blockItem = new BlockItem(block, new FabricItemSettings());
             Registry.register(Registries.ITEM, OnlyNeedOneChest.id(id), blockItem);
-            ItemGroupEvents.modifyEntriesEvent(STORAGES).register(entries -> entries.add(blockItem));
+            if (Arrays.stream(TESTING_ITEMS).noneMatch(itemConvertible -> itemConvertible == block || itemConvertible == blockItem)) {
+                ItemGroupEvents.modifyEntriesEvent(STORAGES).register(entries -> entries.add(blockItem));
+            }
         });
     }
 
     public static Item register(String id, Item item) {
-        ItemGroupEvents.modifyEntriesEvent(STORAGES).register(entries -> entries.add(item));
+        if (Arrays.stream(TESTING_ITEMS).noneMatch(itemConvertible -> itemConvertible == item)) {
+            ItemGroupEvents.modifyEntriesEvent(STORAGES).register(entries -> entries.add(item));
+        }
         return Registry.register(Registries.ITEM, OnlyNeedOneChest.id(id), item);
     }
 }

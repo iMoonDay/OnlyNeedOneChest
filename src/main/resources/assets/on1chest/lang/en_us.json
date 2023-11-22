@@ -38,7 +38,7 @@
   "block.on1chest.wireless_connector.title": "Connection Port",
   "block.on1chest.connection_cable": "Connection Cable",
   "block.on1chest.recipe_processor": "Recipe Processor",
-  "block.on1chest.quick_crafting_table": "Quick Crafting Table",
+  "block.on1chest.quick_crafting_table": "Quick Crafting Table(Under Development)",
   "sort.on1chest.tooltip": "Sort by %s (%s)",
   "sort.on1chest.order.reverse": "Reverse Order",
   "sort.on1chest.order.positive": "Positive Order",

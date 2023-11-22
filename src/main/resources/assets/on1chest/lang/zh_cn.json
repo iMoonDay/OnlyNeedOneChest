@@ -38,7 +38,7 @@
   "block.on1chest.wireless_connector.title": "连接端口",
   "block.on1chest.connection_cable": "连接线缆",
   "block.on1chest.recipe_processor": "配方处理器",
-  "block.on1chest.quick_crafting_table": "快捷合成台",
+  "block.on1chest.quick_crafting_table": "快捷合成台(开发中)",
   "sort.on1chest.tooltip": "排序方式：%s (%s)",
   "sort.on1chest.order.reverse": "逆序",
   "sort.on1chest.order.positive": "正序",

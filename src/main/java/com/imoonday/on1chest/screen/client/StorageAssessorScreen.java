@@ -88,7 +88,7 @@ public class StorageAssessorScreen extends HandledScreen<StorageAssessorScreenHa
             }
             return false;
         }, null, Text.translatable("screen.on1chest.button.setting"));
-        this.settingButton.visible = true;
+        this.settingButton.visible = OnlyNeedOneChest.clothConfig;
 
         this.sortButton = createIconButtonWidget("sort", button -> {
             Config.getInstance().setComparator(Config.getInstance().getComparator().next());

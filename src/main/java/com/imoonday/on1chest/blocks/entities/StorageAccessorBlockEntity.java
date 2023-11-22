@@ -6,6 +6,7 @@ import com.imoonday.on1chest.init.ModGameRules;
 import com.imoonday.on1chest.screen.StorageAssessorScreenHandler;
 import com.imoonday.on1chest.utils.CombinedItemStack;
 import com.imoonday.on1chest.utils.ConnectBlock;
+import com.imoonday.on1chest.utils.ItemStack2ObjectMap;
 import com.imoonday.on1chest.utils.MultiInventory;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
@@ -40,7 +41,7 @@ public class StorageAccessorBlockEntity extends BlockEntity implements NamedScre
     }
 
     public StorageAccessorBlockEntity(BlockPos pos, BlockState state) {
-        super(ModBlockEntities.STORAGE_ACCESSOR_BLOCK_ENTITY, pos, state);
+        this(ModBlockEntities.STORAGE_ACCESSOR_BLOCK_ENTITY, pos, state);
     }
 
     public static void tick(World world, BlockPos pos, BlockState state, StorageAccessorBlockEntity entity) {
@@ -143,5 +144,22 @@ public class StorageAccessorBlockEntity extends BlockEntity implements NamedScre
         if (itemStack != null && world != null) {
             ItemScatterer.spawn(world, pos.getX() + .5f, pos.getY() + .5f, pos.getZ() + .5f, itemStack.getActualStack());
         }
+    }
+
+    public boolean contains(ItemStack2ObjectMap<Integer> stacks) {
+        this.updateItems = true;
+        ItemStack2ObjectMap<Boolean> stackMap = stacks.map(ItemStack::copyWithCount, (stack, integer) -> false, (stack, aBoolean) -> false);
+        for (ItemStack itemStack : stackMap.keySet()) {
+            for (Map.Entry<CombinedItemStack, Long> entry : this.items.entrySet()) {
+                ItemStack stack = entry.getKey().getStack();
+                if (ItemStack.canCombine(itemStack, stack)) {
+                    if (entry.getValue() >= itemStack.getCount()) {
+                        stackMap.put(itemStack, true);
+                    }
+                    break;
+                }
+            }
+        }
+        return !stackMap.containsValue(false);
     }
 }
