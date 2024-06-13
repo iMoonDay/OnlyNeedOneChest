@@ -10,6 +10,7 @@ import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.display.SimpleGridMenuDisplay;
 import me.shedaniel.rei.api.common.entry.EntryStack;
+import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
@@ -33,23 +34,32 @@ public class ReiTransferHandler implements TransferHandler {
             List<Integer> missing = new ArrayList<>();
             int width = recipe instanceof SimpleGridMenuDisplay ? ((SimpleGridMenuDisplay) recipe).getWidth() : Integer.MAX_VALUE;
             Set<CombinedItemStack> stored = new HashSet<>(handler.getStoredItems());
+            Map<CombinedItemStack, Integer> consumed = new HashMap<>();
+            Map<Integer, Integer> consumedInventory = new HashMap<>();
             {
                 int i = 0;
                 for (ItemStack[] list : stacks) {
                     if (list.length > 0) {
                         boolean found = false;
                         for (ItemStack stack : list) {
-                            if (stack != null && context.getMinecraft().player.getInventory().getSlotWithStack(stack) != -1) {
-                                found = true;
-                                break;
+                            if (stack != null) {
+                                PlayerInventory inventory = context.getMinecraft().player.getInventory();
+                                int slot = inventory.getSlotWithStack(stack);
+                                if (slot != -1 && inventory.getStack(slot).getCount() - consumedInventory.getOrDefault(slot, 0) > 0) {
+                                    found = true;
+                                    consumedInventory.put(slot, consumedInventory.getOrDefault(slot, 0) + 1);
+                                    break;
+                                }
                             }
                         }
 
                         if (!found) {
                             for (ItemStack stack : list) {
                                 CombinedItemStack s = new CombinedItemStack(stack);
-                                if (stored.contains(s)) {
+                                Optional<CombinedItemStack> optional = stored.stream().filter(s1 -> s1.canCombineWith(s)).findFirst();
+                                if (optional.isPresent() && optional.get().getCount() - consumed.getOrDefault(s, 0) > 0) {
                                     found = true;
+                                    consumed.put(s, consumed.getOrDefault(s, 0) + 1);
                                     break;
                                 }
                             }
@@ -62,7 +72,7 @@ public class ReiTransferHandler implements TransferHandler {
                     i++;
                 }
             }
-            if (context.isActuallyCrafting()) {
+            if (context.isActuallyCrafting() && missing.isEmpty()) {
                 NbtCompound compound = new NbtCompound();
                 NbtList list = new NbtList();
                 for (int i = 0; i < stacks.length; ++i) {
@@ -85,6 +95,7 @@ public class ReiTransferHandler implements TransferHandler {
                     }
                 }
                 compound.put("i", list);
+                compound.putBoolean("m", context.isStackedCrafting());
                 handler.sendMessage(compound);
             }
             if (!missing.isEmpty()) {

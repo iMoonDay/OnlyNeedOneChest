@@ -61,6 +61,7 @@ public class StorageAssessorScreen extends HandledScreen<StorageAssessorScreenHa
     protected boolean forceUpdate;
     private Comparator<CombinedItemStack> sortComp;
     private int buttonYOffset;
+    protected boolean drawTitle = true;
 
     public StorageAssessorScreen(StorageAssessorScreenHandler handler, PlayerInventory inventory, Text title) {
         super(handler, inventory, title);
@@ -92,13 +93,12 @@ public class StorageAssessorScreen extends HandledScreen<StorageAssessorScreenHa
 
         this.sortButton = createIconButtonWidget("sort", button -> {
             Config.getInstance().setComparator(Config.getInstance().getComparator().next());
+            if (Config.getInstance().getComparator().ordinal() == 0) {
+                Config.getInstance().setReversed(!Config.getInstance().isReversed());
+            }
             button.setTooltip(Tooltip.of(Text.translatable("sort.on1chest.tooltip", Text.translatable(Config.getInstance().getComparator().translationKey), Text.translatable("sort.on1chest.order." + (Config.getInstance().isReversed() ? "reverse" : "positive")))));
             return true;
-        }, button -> {
-            Config.getInstance().setReversed(!Config.getInstance().isReversed());
-            button.setTooltip(Tooltip.of(Text.translatable("sort.on1chest.tooltip", Text.translatable(Config.getInstance().getComparator().translationKey), Text.translatable("sort.on1chest.order." + (Config.getInstance().isReversed() ? "reverse" : "positive")))));
-            return true;
-        }, Text.translatable("sort.on1chest.tooltip", Text.translatable(Config.getInstance().getComparator().translationKey), Text.translatable("sort.on1chest.order." + (Config.getInstance().isReversed() ? "reverse" : "positive"))));
+        }, null, Text.translatable("sort.on1chest.tooltip", Text.translatable(Config.getInstance().getComparator().translationKey), Text.translatable("sort.on1chest.order." + (Config.getInstance().isReversed() ? "reverse" : "positive"))));
 
         this.filtersButton = createIconButtonWidget("filters", button -> {
             Config.getInstance().setDisplayFilterWidgets(!Config.getInstance().isDisplayFilterWidgets());
@@ -415,7 +415,10 @@ public class StorageAssessorScreen extends HandledScreen<StorageAssessorScreenHa
 
     @Override
     protected void drawForeground(DrawContext context, int mouseX, int mouseY) {
-        super.drawForeground(context, mouseX, mouseY);
+        context.drawText(this.textRenderer, this.title, this.titleX, this.titleY, 0x404040, false);
+        if (drawTitle) {
+            context.drawText(this.textRenderer, this.playerInventoryTitle, this.playerInventoryTitleX, this.playerInventoryTitleY, 0x404040, false);
+        }
         context.getMatrices().push();
         selectedSlot = drawSlots(context, mouseX, mouseY);
         context.getMatrices().pop();

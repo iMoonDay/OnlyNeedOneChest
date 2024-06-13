@@ -35,6 +35,8 @@ public class StorageProcessorScreenHandler extends StorageAssessorScreenHandler 
     private final RecipeInputInventory input = new CraftingInventory(this, 3, 3);
     private final CraftingResultInventory result = new CraftingResultInventory();
     protected ScreenHandlerContext context;
+    private boolean continuousCrafting;
+    private ItemStack[][] lastRecipe;
 
     public StorageProcessorScreenHandler(int syncId, PlayerInventory playerInventory) {
         this(syncId, playerInventory, ScreenHandlerContext.EMPTY, null);
@@ -144,6 +146,22 @@ public class StorageProcessorScreenHandler extends StorageAssessorScreenHandler 
 
                 player.dropItem(slotStack, false);
 
+                if (continuousCrafting) {
+                    if (input.isEmpty() && lastRecipe != null) {
+                        fillInputs(lastRecipe, true);
+                        return ItemStack.EMPTY;
+                    } else {
+                        lastRecipe = new ItemStack[9][];
+                        List<ItemStack> inputStacks = input.getInputStacks();
+                        for (int i = 0; i < inputStacks.size(); i++) {
+                            ItemStack inputStack = inputStacks.get(i);
+                            if (!inputStack.isEmpty()) {
+                                lastRecipe[i] = new ItemStack[]{inputStack.copyWithCount(1)};
+                            }
+                        }
+                    }
+                }
+
                 return itemStack;
             } else if (index > 0 && index < 10) {
                 if (accessor == null) return ItemStack.EMPTY;
@@ -188,7 +206,14 @@ public class StorageProcessorScreenHandler extends StorageAssessorScreenHandler 
     @Override
     public void receive(NbtCompound nbt) {
         super.receive(nbt);
+        if (nbt.contains("c")) {
+            continuousCrafting = nbt.getBoolean("c");
+        }
         if (nbt.contains("i")) {
+            for (ItemStack stack : input.getInputStacks()) {
+                accessor.insertOrDrop(stack);
+            }
+            input.clear();
             ItemStack[][] stacks = new ItemStack[9][];
             NbtList list = nbt.getList("i", 10);
             for (int i = 0; i < list.size(); i++) {
@@ -201,7 +226,88 @@ public class StorageProcessorScreenHandler extends StorageAssessorScreenHandler 
                     stacks[slot][j] = ItemStack.fromNbt(tag);
                 }
             }
+            fillInputs(stacks, nbt.getBoolean("m"));
+        }
+    }
 
+    public void fillInputs(ItemStack[][] stacks, boolean stacked) {
+        if (stacked) {
+            boolean[] full = new boolean[9];
+            repeat:
+            while (true) {
+                boolean allFull = true;
+                for (int i = 0; i < 9; i++) {
+                    if (stacks[i] != null && stacks[i].length > 0 && !full[i]) {
+                        allFull = false;
+                        break;
+                    }
+                }
+                if (allFull) {
+                    break;
+                }
+                for (int i = 0; i < 9; i++) {
+                    if (stacks[i] != null && stacks[i].length > 0 && !full[i]) {
+                        ItemStack stack = ItemStack.EMPTY;
+                        for (int j = 0; j < stacks[i].length; j++) {
+                            ItemStack pulled = accessor.takeStack(stacks[i][j]);
+                            if (!pulled.isEmpty()) {
+                                stack = pulled;
+                                break;
+                            }
+                        }
+                        if (stack.isEmpty()) {
+                            PlayerInventory inventory = player.getInventory();
+                            for (int j = 0; j < stacks[i].length; j++) {
+                                boolean br = false;
+                                for (int k = 0; k < inventory.size(); k++) {
+                                    if (ItemStack.canCombine(inventory.getStack(k), stacks[i][j])) {
+                                        stack = inventory.removeStack(k, 1);
+                                        br = true;
+                                        break;
+                                    }
+                                }
+                                if (br) {
+                                    break;
+                                }
+                            }
+                        }
+                        if (!stack.isEmpty()) {
+                            ItemStack inputStack = input.getStack(i);
+                            if (ItemStack.canCombine(stack, inputStack)) {
+                                inputStack.increment(stack.split(inputStack.getMaxCount() - inputStack.getCount()).getCount());
+                                if (!stack.isEmpty()) {
+                                    accessor.insertOrDrop(stack);
+                                    full[i] = true;
+                                }
+                            } else {
+                                accessor.insertOrDrop(inputStack);
+                                input.setStack(i, stack);
+                            }
+                        } else {
+                            break repeat;
+                        }
+                    }
+                }
+            }
+            int maxCount = 0;
+            int minCount = Integer.MAX_VALUE;
+            for (int i = 0; i < 9; i++) {
+                int count = input.getStack(i).getCount();
+                if (count > 0) {
+                    maxCount = Math.max(maxCount, count);
+                    minCount = Math.min(minCount, count);
+                }
+            }
+            if (maxCount != minCount) {
+                for (int i = 0; i < 9; i++) {
+                    ItemStack stack = input.getStack(i);
+                    int count = stack.getCount();
+                    if (count > minCount) {
+                        accessor.insertOrDrop(stack.split(count - minCount));
+                    }
+                }
+            }
+        } else {
             for (int i = 0; i < 9; i++) {
                 if (stacks[i] != null) {
                     ItemStack stack = ItemStack.EMPTY;
@@ -213,11 +319,12 @@ public class StorageProcessorScreenHandler extends StorageAssessorScreenHandler 
                         }
                     }
                     if (stack.isEmpty()) {
+                        PlayerInventory inventory = player.getInventory();
                         for (int j = 0; j < stacks[i].length; j++) {
                             boolean br = false;
-                            for (int k = 0; k < player.getInventory().size(); k++) {
-                                if (ItemStack.canCombine(player.getInventory().getStack(k), stacks[i][j])) {
-                                    stack = player.getInventory().removeStack(k, 1);
+                            for (int k = 0; k < inventory.size(); k++) {
+                                if (ItemStack.canCombine(inventory.getStack(k), stacks[i][j])) {
+                                    stack = inventory.removeStack(k, 1);
                                     br = true;
                                     break;
                                 }
@@ -232,7 +339,6 @@ public class StorageProcessorScreenHandler extends StorageAssessorScreenHandler 
                     }
                 }
             }
-
         }
     }
 
