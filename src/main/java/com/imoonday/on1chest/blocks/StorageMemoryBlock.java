@@ -14,6 +14,7 @@ import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
@@ -31,6 +32,8 @@ import org.jetbrains.annotations.Nullable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static com.imoonday.on1chest.blocks.entities.StorageMemoryBlockEntity.MAX_LEVEL;
 
 public abstract class StorageMemoryBlock extends BlockWithEntity implements ConnectBlock {
 
@@ -85,16 +88,21 @@ public abstract class StorageMemoryBlock extends BlockWithEntity implements Conn
                 ItemStack stack = player.getStackInHand(hand);
                 StorageMemoryBlock memoryBlock = getLevelUpEntries().get(stack.getItem());
                 if (canLevelUp() && memoryBlock != null) {
-                    if (!player.isCreative()) {
-                        stack.decrement(1);
+                    if (levelUp(world, pos, state, memoryBlock.getDefaultState())) {
+                        if (!player.getAbilities().creativeMode) {
+                            stack.decrement(1);
+                        }
+                        world.playSound(null, pos, SoundEvents.ENTITY_PLAYER_LEVELUP, SoundCategory.BLOCKS, 1.0f, 1.0f);
                     }
-                    world.setBlockState(pos, memoryBlock.getDefaultState().with(USED_CAPACITY, state.get(USED_CAPACITY)).with(ACTIVATED, state.get(ACTIVATED)), Block.NOTIFY_LISTENERS);
-                    world.playSound(null, pos, SoundEvents.ENTITY_PLAYER_LEVELUP, SoundCategory.BLOCKS, 1.0f, 1.0f);
                 }
                 player.sendMessage(Text.literal(entity.getOccupiedSize() + "/" + entity.getStorageSize()), true);
             }
         }
         return ActionResult.success(world.isClient);
+    }
+
+    public boolean levelUp(World world, BlockPos pos, BlockState oldState, BlockState newState) {
+        return world.setBlockState(pos, newState.with(USED_CAPACITY, oldState.get(USED_CAPACITY)).with(ACTIVATED, oldState.get(ACTIVATED)), Block.NOTIFY_LISTENERS);
     }
 
     @Override
@@ -103,7 +111,8 @@ public abstract class StorageMemoryBlock extends BlockWithEntity implements Conn
             BlockEntity blockEntity = world.getBlockEntity(pos);
             if (blockEntity instanceof StorageMemoryBlockEntity entity) {
                 if (newState.getBlock() instanceof StorageMemoryBlock block) {
-                    entity.updateLevel(block);
+                    entity.updateLevel(block.getLevel());
+                    entity.markDirty();
                 } else {
                     ItemScatterer.spawn(world, pos, entity);
                     world.updateComparators(pos, this);
@@ -128,7 +137,20 @@ public abstract class StorageMemoryBlock extends BlockWithEntity implements Conn
     @Override
     public void appendTooltip(ItemStack stack, @Nullable BlockView world, List<Text> tooltip, TooltipContext options) {
         super.appendTooltip(stack, world, tooltip, options);
-        tooltip.add(Text.translatable("block.on1chest.storage_memory_block.tooltip", 27 * (this.getLevel() + 1)).formatted(Formatting.GRAY));
+        int level = this.getLevel();
+        NbtCompound blockEntityTag = stack.getSubNbt("BlockEntityTag");
+        if (blockEntityTag != null && blockEntityTag.contains("Level")) {
+            level = blockEntityTag.getInt("Level");
+        } else {
+            NbtCompound nbt = stack.getNbt();
+            if (nbt != null && nbt.contains("CompressionLevel")) {
+                level = nbt.getInt("CompressionLevel");
+            }
+        }
+        if (level > MAX_LEVEL) {
+            level = MAX_LEVEL;
+        }
+        tooltip.add(Text.translatable("block.on1chest.storage_memory_block.tooltip", 27 * (level + 1)).formatted(Formatting.GRAY));
     }
 
     public enum UsedCapacity implements StringIdentifiable {

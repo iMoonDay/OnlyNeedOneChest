@@ -19,12 +19,13 @@ import net.minecraft.client.gui.widget.ToggleButtonWidget;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
+import net.minecraft.nbt.NbtByte;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.recipe.CraftingRecipe;
 import net.minecraft.recipe.Ingredient;
 import net.minecraft.registry.Registries;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
@@ -60,7 +61,7 @@ public class QuickCraftingScreen extends HandledScreen<QuickCraftingScreenHandle
     private int currentPage;
     private int pageCount;
     private boolean calculating;
-    private int calculateTime;
+    private int calculatingTime;
     private int resultOffset;
 
     public QuickCraftingScreen(QuickCraftingScreenHandler handler, PlayerInventory inventory, Text title) {
@@ -89,15 +90,7 @@ public class QuickCraftingScreen extends HandledScreen<QuickCraftingScreenHandle
         drawCraftResults(context, mouseX, mouseY, delta);
         drawCalculating(context);
         drawCraftButtonTooltip(context, mouseX, mouseY);
-        drawCalculateTime(context);
         this.drawMouseoverTooltip(context, mouseX, mouseY);
-    }
-
-    private void drawCalculateTime(DrawContext context) {
-        if (!calculating && calculateTime > 0) {
-            String text = "本次耗时约:%ss".formatted(String.valueOf(calculateTime / 20.0f));
-            context.drawText(textRenderer, text, this.x + this.backgroundWidth - textRenderer.getWidth(text) - 6, this.y + 6, Color.GRAY.getRGB(), false);
-        }
     }
 
     private void drawCraftMode(DrawContext context) {
@@ -110,16 +103,19 @@ public class QuickCraftingScreen extends HandledScreen<QuickCraftingScreenHandle
         if (this.craftButton.isHovered() && this.handler.selectedResult != null) {
             Set<ItemStack> remainder = this.handler.selectedResult.getRemainder();
             if (!remainder.isEmpty()) {
-                context.drawTooltip(textRenderer, List.of(Text.literal("剩余材料：").formatted(Formatting.GREEN)), Optional.of(new IngredientTooltip(Ingredient.ofStacks(remainder.stream()))), mouseX, mouseY);
+                context.drawTooltip(textRenderer, List.of(Text.translatable("screen.on1chest.remaining_items").formatted(Formatting.GREEN)), Optional.of(new IngredientTooltip(Ingredient.ofStacks(remainder.stream()))), mouseX, mouseY);
             } else if (QuickCraftingScreenHandler.isCraftedList(this.handler.craftResults)) {
-                context.drawTooltip(textRenderer, Text.literal("无剩余材料").formatted(Formatting.YELLOW), mouseX, mouseY);
+                context.drawTooltip(textRenderer, Text.translatable("screen.on1chest.no_remaining").formatted(Formatting.YELLOW), mouseX, mouseY);
             }
         }
     }
 
     private void drawCalculating(DrawContext context) {
-        if (calculating && calculateTime > 10) {
-            context.drawText(textRenderer, "计算中(%ds)%s".formatted(calculateTime / 20, ".".repeat(calculateTime % 40 / 10)), this.x + 8, this.y + 18, Color.WHITE.getRGB(), true);
+        if (calculating && calculatingTime > 10) {
+            this.handler.result.removeStack(0);
+            this.handler.craftResults.clear();
+            MutableText text = Text.translatable("screen.on1chest.calculating", calculatingTime / 20).append(".".repeat(calculatingTime % 40 / 10));
+            context.drawText(textRenderer, text, this.x + 8, this.y + 18, Color.WHITE.getRGB(), true);
         }
     }
 
@@ -143,7 +139,14 @@ public class QuickCraftingScreen extends HandledScreen<QuickCraftingScreenHandle
             for (int i = 0; i < this.overflow.length; i++) {
                 boolean overflow = this.overflow[i];
                 if (overflow) {
-                    context.fill(this.x + 114, this.y + i * 18 + 17, this.x + 115, this.y + i * 18 + 33, Color.GREEN.getRGB());
+                    int x1 = this.x + 114;
+                    int y1 = this.y + i * 18 + 17;
+                    int x2 = this.x + 115;
+                    int y2 = this.y + i * 18 + 33;
+                    context.fill(x1, y1, x2, y2, Color.GREEN.getRGB());
+                    if (mouseX >= x1 && mouseX <= x2 && mouseY >= y1 && mouseY <= y2) {
+                        context.drawTooltip(textRenderer, Text.translatable("screen.on1chest.overflow_tooltip").formatted(Formatting.RED), mouseX, mouseY);
+                    }
                 }
             }
         }
@@ -177,15 +180,11 @@ public class QuickCraftingScreen extends HandledScreen<QuickCraftingScreenHandle
         this.prevPageButton.visible = false;
         this.addDrawableChild(this.prevPageButton);
         this.craftButton = new ButtonIconWidget(this.x + 123, this.y + 37, 12, 12, CRAFT_ID, CRAFT_ON_ID);
-        this.craftButton.addClickAction(0, widget -> {
-            NbtCompound nbtCompound = new NbtCompound();
-            nbtCompound.putBoolean("Confirm", hasShiftDown());
-            NetworkHandler.sendToServer(nbtCompound);
-        });
+        this.craftButton.addClickAction(0, widget -> NetworkHandler.sendToServer("Confirm", NbtByte.of(hasShiftDown())));
         this.craftButton.visible = false;
         this.addDrawableChild(this.craftButton);
         this.increaseButton = new ButtonIconWidget(this.x + 147, this.y + 16, 17, 11, TEXTURE, TEXTURE);
-        this.increaseButton.addClickAction(0, widget -> onClickStack(0, this.handler.result.getStack(0).copyWithCount(1)));
+        this.increaseButton.addClickAction(0, widget -> onClickStack(0, this.handler.result.getStack(0).copyWithCount(1), true));
         this.increaseButton.setTextureWidth(256);
         this.increaseButton.setTextureHeight(256);
         this.increaseButton.setTextureV(190);
@@ -194,7 +193,7 @@ public class QuickCraftingScreen extends HandledScreen<QuickCraftingScreenHandle
         this.increaseButton.visible = false;
         this.addDrawableChild(this.increaseButton);
         this.decreaseButton = new ButtonIconWidget(this.x + 147, this.y + 59, 17, 11, TEXTURE, TEXTURE);
-        this.decreaseButton.addClickAction(0, widget -> onClickStack(1, this.handler.result.getStack(0).copyWithCount(1)));
+        this.decreaseButton.addClickAction(0, widget -> onClickStack(1, this.handler.result.getStack(0).copyWithCount(1), true));
         this.decreaseButton.setTextureWidth(256);
         this.decreaseButton.setTextureHeight(256);
         this.decreaseButton.setTextureV(176);
@@ -302,9 +301,9 @@ public class QuickCraftingScreen extends HandledScreen<QuickCraftingScreenHandle
                 List<CraftingRecipe> recipes = null;
                 boolean missingRecipe = this.client != null && this.client.world != null && (recipes = CraftingRecipeTreeManager.getOrCreate(this.client.world).getRecipe(widget.getStack())).isEmpty();
                 if (missingRecipe) {
-                    context.drawTooltip(textRenderer, Text.literal("无合成配方").formatted(Formatting.RED), mouseX, mouseY);
+                    context.drawTooltip(textRenderer, Text.translatable("screen.on1chest.no_crafting_recipe").formatted(Formatting.RED), mouseX, mouseY);
                 } else if (recipes != null) {
-                    context.drawTooltip(textRenderer, Text.literal("左击尝试合成").formatted(Formatting.GREEN), mouseX, mouseY);
+                    context.drawTooltip(textRenderer, Text.translatable("screen.on1chest.click_to_craft").formatted(Formatting.GREEN), mouseX, mouseY);
                 }
             } else {
                 if (this.client != null) {
@@ -321,13 +320,13 @@ public class QuickCraftingScreen extends HandledScreen<QuickCraftingScreenHandle
             this.setFocused(null);
         }
         if (isClickInsideRecipeBook(mouseX, mouseY, false) && !this.handler.getCursorStack().isEmpty()) {
-            onClickStack(button, this.handler.getCursorStack());
+            onClickStack(button, this.handler.getCursorStack(), true);
             return true;
         }
         for (ItemStackWidget[] displayStack : this.displayStacks) {
             for (ItemStackWidget widget : displayStack) {
                 if (widget != null && widget.isMouseOver(mouseX, mouseY)) {
-                    onClickStack(button, widget.getStack());
+                    onClickStack(button, widget.getStack(), true);
                     return true;
                 }
             }
@@ -359,9 +358,7 @@ public class QuickCraftingScreen extends HandledScreen<QuickCraftingScreenHandle
         CraftingRecipeTreeManager.CraftResult selectedResult;
         if (button == 0 && !hasShiftDown() && this.handler.craftResults.size() > 1 && (selectedResult = getSelectedResult(mouseX, mouseY)) != null) {
             MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0f));
-            NbtCompound nbtCompound = new NbtCompound();
-            nbtCompound.put("Select", selectedResult.toNbt());
-            NetworkHandler.sendToServer(nbtCompound);
+            NetworkHandler.sendToServer("Select", selectedResult.toNbt());
             this.handler.selectedResult = selectedResult;
             return true;
         }
@@ -371,18 +368,12 @@ public class QuickCraftingScreen extends HandledScreen<QuickCraftingScreenHandle
                     if (widget != null) {
                         if (widget.isMouseOver(mouseX, mouseY)) {
                             MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0f));
-                            NbtCompound nbtCompound = new NbtCompound();
                             ItemStack stack = widget.getStack().copyWithCount(1);
                             if (this.client != null && this.client.world != null && CraftingRecipeTreeManager.getOrCreate(this.client.world).getRecipe(stack).isEmpty()) {
                                 return true;
                             }
-                            nbtCompound.put("Craft", stack.writeNbt(new NbtCompound()));
-                            if (!this.handler.result.getStack(0).isOf(Items.BARRIER)) {
-                                this.handler.result.removeStack(0);
-                            }
-                            NetworkHandler.sendToServer(nbtCompound);
-                            this.handler.craftResults.clear();
-                            calculateTime = 0;
+                            NetworkHandler.sendToServer("Craft", stack.writeNbt(new NbtCompound()));
+                            calculatingTime = 0;
                             calculating = true;
                             return true;
                         }
@@ -393,8 +384,10 @@ public class QuickCraftingScreen extends HandledScreen<QuickCraftingScreenHandle
         return super.mouseClicked(mouseX, mouseY, button);
     }
 
-    private void onClickStack(int button, ItemStack stack) {
-        MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0f));
+    private void onClickStack(int button, ItemStack stack, boolean playSound) {
+        if (playSound) {
+            MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0f));
+        }
         if (stack.isEmpty()) {
             return;
         }
@@ -402,12 +395,8 @@ public class QuickCraftingScreen extends HandledScreen<QuickCraftingScreenHandle
         nbtCompound.put("Craft", stack.writeNbt(new NbtCompound()));
         nbtCompound.putInt("Button", button);
         nbtCompound.putBoolean("Shift", hasShiftDown());
-        if (!this.handler.result.getStack(0).isOf(Items.BARRIER)) {
-            this.handler.result.removeStack(0);
-        }
         NetworkHandler.sendToServer(nbtCompound);
-        this.handler.craftResults.clear();
-        calculateTime = 0;
+        calculatingTime = 0;
         calculating = true;
     }
 
@@ -500,11 +489,21 @@ public class QuickCraftingScreen extends HandledScreen<QuickCraftingScreenHandle
                 }
             }
         }
+        if (isClickInsideResultSlot(mouseX, mouseY)) {
+            ItemStack stack = this.handler.result.getStack(0);
+            if (!stack.isEmpty() && QuickCraftingScreenHandler.isCraftedList(this.handler.craftResults)) {
+                onClickStack(amount > 0 ? 0 : 1, stack, false);
+            }
+        }
         return super.mouseScrolled(mouseX, mouseY, amount);
     }
 
     protected boolean isClickInsideResults(double mouseX, double mouseY) {
         return mouseX >= this.x + 8 && mouseY >= this.y + 17 && mouseX <= this.x + 113 && mouseY <= this.y + 68;
+    }
+
+    protected boolean isClickInsideResultSlot(double mouseX, double mouseY) {
+        return mouseX >= this.x + 144 && mouseY >= this.y + 31 && mouseX <= this.x + 167 && mouseY <= this.y + 54;
     }
 
     @Override
@@ -516,14 +515,6 @@ public class QuickCraftingScreen extends HandledScreen<QuickCraftingScreenHandle
             return true;
         }
         return super.keyPressed(keyCode, scanCode, modifiers);
-    }
-
-    @Override
-    public void close() {
-        NbtCompound nbtCompound = new NbtCompound();
-        nbtCompound.putBoolean("Stop", true);
-        NetworkHandler.sendToServer(nbtCompound);
-        super.close();
     }
 
     public List<ItemStack> getDisplayStacks() {
@@ -573,7 +564,7 @@ public class QuickCraftingScreen extends HandledScreen<QuickCraftingScreenHandle
     protected void handledScreenTick() {
         super.handledScreenTick();
         if (calculating) {
-            this.calculateTime++;
+            this.calculatingTime++;
         }
         if (this.nextPageButton != null) {
             this.nextPageButton.visible = this.pageCount > 1 && this.currentPage < this.pageCount - 1;

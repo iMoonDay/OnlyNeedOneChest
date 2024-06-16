@@ -21,6 +21,7 @@ public class OnlyNeedOneChest implements ModInitializer {
         ModBlocks.register();
         ModBlockEntities.register();
         ModItems.register();
+        ModRecipes.register();
         ModScreens.register();
         ModGameRules.register();
         registerGlobalReceiver();
@@ -30,14 +31,14 @@ public class OnlyNeedOneChest implements ModInitializer {
     private static void registerRecipeTreeManagerEvents() {
         ServerLifecycleEvents.SERVER_STARTED.register(server -> {
             if (CraftingRecipeTreeManager.getOrCreate(server.getRecipeManager(), server.getRegistryManager()) != null) {
-                System.out.println("On1chest：服务端配方加载成功");
+                System.out.println("On1chest: Server recipe loaded successfully");
             }
         });
         ServerLifecycleEvents.END_DATA_PACK_RELOAD.register((server, resourceManager, success) -> {
             if (success) {
                 CraftingRecipeTreeManager.getOrCreate(server.getRecipeManager(), server.getRegistryManager()).reload();
                 PlayerLookup.all(server).forEach(NetworkHandler::updateRecipeManager);
-                System.out.println("On1chest：服务端配方重载成功");
+                System.out.println("On1chest: Server recipe reloaded successfully");
             }
         });
     }

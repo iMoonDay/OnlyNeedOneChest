@@ -7,16 +7,17 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.inventory.Inventories;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtList;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
@@ -24,6 +25,7 @@ import java.util.stream.IntStream;
 
 public class StorageMemoryBlockEntity extends BlockEntity implements ImplementedInventory {
 
+    public static final int MAX_LEVEL = 999;
     protected int level = 0;
     private DefaultedList<ItemStack> inventory;
 
@@ -43,9 +45,7 @@ public class StorageMemoryBlockEntity extends BlockEntity implements Implemented
     }
 
     public static void tick(World world, BlockPos pos, BlockState state, StorageMemoryBlockEntity entity) {
-        if (world.isClient) {
-            return;
-        }
+        if (world.isClient) return;
         StorageMemoryBlock.UsedCapacity usedCapacity = entity.getUsedCapacity();
         StorageMemoryBlock.UsedCapacity usedCapacity1 = state.get(StorageMemoryBlock.USED_CAPACITY);
         if (usedCapacity != usedCapacity1) {
@@ -79,8 +79,28 @@ public class StorageMemoryBlockEntity extends BlockEntity implements Implemented
     @Override
     protected void writeNbt(NbtCompound nbt) {
         super.writeNbt(nbt);
-        Inventories.writeNbt(nbt, inventory);
+        writeNbt(nbt, inventory);
         nbt.putInt("Level", level);
+    }
+
+    public static NbtCompound writeNbt(NbtCompound nbt, DefaultedList<ItemStack> stacks) {
+        return writeNbt(nbt, stacks, true);
+    }
+
+    public static NbtCompound writeNbt(NbtCompound nbt, DefaultedList<ItemStack> stacks, boolean setIfEmpty) {
+        NbtList nbtList = new NbtList();
+        for (int i = 0; i < stacks.size(); ++i) {
+            ItemStack itemStack = stacks.get(i);
+            if (itemStack.isEmpty()) continue;
+            NbtCompound nbtCompound = new NbtCompound();
+            nbtCompound.putInt("Slot", i);
+            itemStack.writeNbt(nbtCompound);
+            nbtList.add(nbtCompound);
+        }
+        if (!nbtList.isEmpty() || setIfEmpty) {
+            nbt.put("Items", nbtList);
+        }
+        return nbt;
     }
 
     @Override
@@ -90,7 +110,17 @@ public class StorageMemoryBlockEntity extends BlockEntity implements Implemented
             this.level = nbt.getInt("Level");
         }
         updateInventory();
-        Inventories.readNbt(nbt, inventory);
+        readNbt(nbt, inventory);
+    }
+
+    public static void readNbt(NbtCompound nbt, DefaultedList<ItemStack> stacks) {
+        NbtList nbtList = nbt.getList("Items", NbtElement.COMPOUND_TYPE);
+        for (int i = 0; i < nbtList.size(); ++i) {
+            NbtCompound nbtCompound = nbtList.getCompound(i);
+            int j = nbtCompound.getInt("Slot");
+            if (j < 0 || j >= stacks.size()) continue;
+            stacks.set(j, ItemStack.fromNbt(nbtCompound));
+        }
     }
 
     @Nullable
@@ -122,11 +152,8 @@ public class StorageMemoryBlockEntity extends BlockEntity implements Implemented
         return 27 * (level + 1);
     }
 
-    public void updateLevel(StorageMemoryBlock block) {
-        this.level = block.getLevel();
-        if (this.level < 0) {
-            this.level = 0;
-        }
+    public void updateLevel(int level) {
+        this.level = MathHelper.clamp(level, 0, MAX_LEVEL);
         updateInventory();
     }
 

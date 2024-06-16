@@ -9,6 +9,7 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtString;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
 
@@ -74,9 +75,7 @@ public class WirelessNetworkScreenHandler extends ScreenHandler implements IScre
             network.setNetwork(nbt.getString("network"));
         }
         if (nbt.contains("update")) {
-            NbtCompound nbtCompound = new NbtCompound();
-            nbtCompound.putString("network", network.getNetwork());
-            NetworkHandler.sendToClient(inventory.player, nbtCompound);
+            NetworkHandler.sendToClient(inventory.player, "network", NbtString.of(network.getNetwork()));
         }
     }
 }

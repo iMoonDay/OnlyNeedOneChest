@@ -11,7 +11,6 @@ import net.minecraft.item.ItemStackSet;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -20,10 +19,6 @@ public class QuickCraftingTableBlockEntity extends StorageAccessorBlockEntity {
 
     public QuickCraftingTableBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.QUICK_CRAFTING_TABLE_BLOCK_ENTITY, pos, state);
-    }
-
-    public static void tick(World world, BlockPos pos, BlockState state, QuickCraftingTableBlockEntity entity) {
-        StorageAccessorBlockEntity.tick(world, pos, state, entity);
     }
 
     public CraftingRecipeTreeManager getManager() {
@@ -75,6 +70,24 @@ public class QuickCraftingTableBlockEntity extends StorageAccessorBlockEntity {
         }
         return new ArrayList<>(craftResults);
     }
+
+    public List<CraftingRecipeTreeManager.CraftResult> getCraftResults(ItemStack stack) {
+        Set<CraftingRecipeTreeManager.CraftResult> craftResults = new HashSet<>();
+        CraftingRecipeTreeManager.CraftResult firstCraftResult = this.getManager().getCraftResult(inventory, stack, new HashSet<>());
+        craftResults.add(firstCraftResult);
+        if (firstCraftResult.isCrafted()) {
+            List<ItemStack> cost = new ArrayList<>(firstCraftResult.getCost());
+            for (int i = 1; i <= cost.size(); i++) {
+                List<ItemStack> except = cost.subList(0, i);
+                CraftingRecipeTreeManager.CraftResult craftResult = this.getManager().getCraftResult(inventory, stack, except);
+                if (craftResult.isCrafted()) {
+                    craftResults.add(craftResult);
+                }
+            }
+        }
+        return new ArrayList<>(craftResults);
+    }
+
 
     public static List<Set<ItemStack>> getPowerSet(Set<ItemStack> set) {
         List<Set<ItemStack>> result = new ArrayList<>();

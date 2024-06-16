@@ -1,4 +1,4 @@
-// 1.20.1	2023-09-06T01:15:03.7346563	Only Need One Chest/Block Loot Tables
+// 1.20.1	2024-06-16T22:16:32.2498716	Only Need One Chest/Block Loot Tables
 86d9febea8cade81236b33a8d3b21c8fc1f21826 data\on1chest\loot_tables\blocks\glass_storage_memory_block.json
 bed14505b162540838e650870ae80d99ccbaead4 data\on1chest\loot_tables\blocks\quick_crafting_table.json
 4cc514b0aa09d9aca355159f247fb19a91a54514 data\on1chest\loot_tables\blocks\connection_cable.json
@@ -13,6 +13,7 @@ f97f05057b7c4105862305f0add0574a14e2f281 data\on1chest\loot_tables\blocks\nether
 dea091408b7fee3e7d96115b7042863cbb90f29f data\on1chest\loot_tables\blocks\storage_accessor_block.json
 869611535f76aae62abfdb7d6a4858af022c7d91 data\on1chest\loot_tables\blocks\storage_recycle_bin.json
 6e7b2f5317611fd2916a977690308e435284e204 data\on1chest\loot_tables\blocks\iron_storage_memory_block.json
+f4d42aba756ea621467cf10d1fdaa43ab0d2ad25 data\on1chest\loot_tables\blocks\compressed_storage_memory_block.json
 b4104f814cb0642020892d74a0df6044eafad48b data\on1chest\loot_tables\blocks\item_exporter.json
 79ecb65ba997f5ee9a860226faa11014e21f737a data\on1chest\loot_tables\blocks\storage_processor_block.json
 1fd1507f8990c6cef27f8c3b4b680d33970834f6 data\on1chest\loot_tables\blocks\obsidian_storage_memory_block.json

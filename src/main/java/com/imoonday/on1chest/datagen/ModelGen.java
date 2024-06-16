@@ -29,6 +29,7 @@ public class ModelGen extends FabricModelProvider {
         generator.registerSimpleCubeAll(RECIPE_PROCESSOR);
         registerCubeColumn(generator, STORAGE_ACCESSOR_BLOCK, TextureMap.getSubId(STORAGE_ACCESSOR_BLOCK, "_end"));
         registerCubeColumn(generator, STORAGE_PROCESSOR_BLOCK, TextureMap.getSubId(STORAGE_PROCESSOR_BLOCK, "_end"));
+        registerCubeColumn(generator, QUICK_CRAFTING_TABLE, TextureMap.getSubId(QUICK_CRAFTING_TABLE, "_end"));
         registerCooker(generator, STORAGE_RECYCLE_BIN);
         registerMemoryBlock(generator, WOOD_STORAGE_MEMORY_BLOCK, TextureMap.getId(STORAGE_BLANK_BLOCK));
         registerMemoryBlock(generator, COPPER_STORAGE_MEMORY_BLOCK, TextureMap.getSubId(COPPER_STORAGE_MEMORY_BLOCK, "_end"));
@@ -38,11 +39,10 @@ public class ModelGen extends FabricModelProvider {
         registerMemoryBlock(generator, NETHERITE_STORAGE_MEMORY_BLOCK, TextureMap.getSubId(NETHERITE_STORAGE_MEMORY_BLOCK, "_end"));
         registerMemoryBlock(generator, OBSIDIAN_STORAGE_MEMORY_BLOCK, TextureMap.getSubId(OBSIDIAN_STORAGE_MEMORY_BLOCK, "_end"));
         registerMemoryBlock(generator, GLASS_STORAGE_MEMORY_BLOCK, TextureMap.getSubId(GLASS_STORAGE_MEMORY_BLOCK, "_end"));
+        registerMemoryBlock(generator, COMPRESSED_STORAGE_MEMORY_BLOCK, TextureMap.getSubId(COMPRESSED_STORAGE_MEMORY_BLOCK, "_end"));
         registerExporter(generator);
         registerExtractor(generator);
         registerWirelessConnector(generator);
-        generator.registerStateWithModelReference(QUICK_CRAFTING_TABLE, Blocks.CRAFTING_TABLE);
-        generator.registerParentedItemModel(QUICK_CRAFTING_TABLE, ModelIds.getBlockModelId(Blocks.CRAFTING_TABLE));
     }
 
     @Override
@@ -56,6 +56,7 @@ public class ModelGen extends FabricModelProvider {
         itemModelGenerator.register(ModItems.GOLD_TO_DIAMOND_EXPAND_MODULE, Models.GENERATED);
         itemModelGenerator.register(ModItems.DIAMOND_TO_NETHERITE_EXPAND_MODULE, Models.GENERATED);
         itemModelGenerator.register(ModItems.GOLD_TO_OBSIDIAN_EXPAND_MODULE, Models.GENERATED);
+        itemModelGenerator.register(ModItems.COMPRESSION_UPGRADE_MODULE, Models.GENERATED);
         itemModelGenerator.register(ModItems.RECIPE_RECORD_CARD, Models.GENERATED);
     }
 

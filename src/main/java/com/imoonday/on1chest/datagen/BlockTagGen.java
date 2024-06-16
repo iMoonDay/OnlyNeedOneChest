@@ -25,8 +25,11 @@ public class BlockTagGen extends FabricTagProvider<Block> {
     protected void configure(RegistryWrapper.WrapperLookup arg) {
         getOrCreateTagBuilder(BlockTags.NEEDS_DIAMOND_TOOL)
                 .add(ModBlocks.OBSIDIAN_STORAGE_MEMORY_BLOCK);
+        getOrCreateTagBuilder(BlockTags.NEEDS_STONE_TOOL)
+                .add(ModBlocks.QUICK_CRAFTING_TABLE);
         getOrCreateTagBuilder(BlockTags.PICKAXE_MINEABLE)
                 .add(ModBlocks.OBSIDIAN_STORAGE_MEMORY_BLOCK)
+                .add(ModBlocks.COMPRESSED_STORAGE_MEMORY_BLOCK)
                 .add(ModBlocks.STORAGE_RECYCLE_BIN)
                 .add(ModBlocks.WIRELESS_CONNECTOR)
                 .add(ModBlocks.RECIPE_PROCESSOR);
@@ -42,7 +45,8 @@ public class BlockTagGen extends FabricTagProvider<Block> {
                 .add(ModBlocks.NETHERITE_STORAGE_MEMORY_BLOCK)
                 .add(ModBlocks.CONNECTION_CABLE)
                 .add(ModBlocks.ITEM_EXPORTER)
-                .add(ModBlocks.MEMORY_EXTRACTOR);
+                .add(ModBlocks.MEMORY_EXTRACTOR)
+                .add(ModBlocks.QUICK_CRAFTING_TABLE);
         TAGS.forEach((block, key) -> getOrCreateTagBuilder(key).add(block));
     }
 }

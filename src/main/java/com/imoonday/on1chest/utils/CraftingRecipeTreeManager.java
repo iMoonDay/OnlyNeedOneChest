@@ -24,8 +24,7 @@ public class CraftingRecipeTreeManager {
     private final DynamicRegistryManager registryManager;
     private List<CraftingRecipe> recipes;
     private ItemStack2RecipesMap cache;
-    //    public ItemStack2ObjectMap<RecipeTree> recipeTreeMap;
-    private Thread thread;
+    private Thread loadThread;
 
     private CraftingRecipeTreeManager(RecipeManager recipeManager, DynamicRegistryManager registryManager) {
         this.recipeManager = recipeManager;
@@ -49,10 +48,9 @@ public class CraftingRecipeTreeManager {
     }
 
     private void loadRecipes() {
-        this.thread = new Thread(() -> {
+        this.loadThread = new Thread(() -> {
             this.recipes = new ArrayList<>(recipeManager.listAllOfType(RecipeType.CRAFTING));
             this.cache = new ItemStack2RecipesMap(false);
-//            this.recipeTreeMap = new ItemStack2ObjectMap<>(true);
             for (CraftingRecipe recipe : this.recipes) {
                 if (Thread.currentThread().isInterrupted()) {
                     break;
@@ -62,10 +60,9 @@ public class CraftingRecipeTreeManager {
                     continue;
                 }
                 this.cache.putOrAdd(stack.copyWithCount(1), recipe.getIngredients());
-//                this.recipeTreeMap.putIfAbsent(stack.copy(), new RecipeTree(stack.copy(), recipeManager, registryManager));
             }
         }, "Load Recipes Thread");
-        this.thread.start();
+        this.loadThread.start();
     }
 
     public List<CraftingRecipe> getRecipe(ItemStack stack) {
@@ -81,8 +78,8 @@ public class CraftingRecipeTreeManager {
     }
 
     public void reload() {
-        if (this.thread != null) {
-            this.thread.interrupt();
+        if (this.loadThread != null) {
+            this.loadThread.interrupt();
         }
         loadRecipes();
     }
@@ -94,16 +91,9 @@ public class CraftingRecipeTreeManager {
     }
 
     private CraftResult getCraftResult(Set<ItemStack> itemStacks, ItemStack source, ItemStack result, ItemStack2ObjectMap<Integer> except, ItemStack2ObjectMap<Integer> failed, int depth) {
-//        System.out.println("开始计算配方：" + result.getCount() + " " + result.getName().getString() + " 源目标：" + source.getCount() + " " + source.getName().getString());
         CraftResult craftResult = new CraftResult();
-        if (Thread.currentThread().isInterrupted()) {
-//            System.out.println("停止计算：" + result.getName().getString());
-            return craftResult;
-        }
-        if (depth-- <= 0) {
-//            System.out.println("递归溢出：" + result.getCount() + " " + result.getName().getString() + " 源目标：" + source.getCount() + " " + source.getName().getString());
-            return craftResult;
-        }
+        if (Thread.currentThread().isInterrupted()) return craftResult;
+        if (depth-- <= 0) return craftResult;
         ItemStack copy = result.copy();
         List<CraftingRecipe> recipes = this.getRecipe(copy);
         List<Map<Ingredient, Integer>> lastMissing = new ArrayList<>();
@@ -121,22 +111,14 @@ public class CraftingRecipeTreeManager {
                 CraftResult tempResult = new CraftResult();
                 Map<Ingredient, Integer> missing = new HashMap<>();
                 for (Ingredient ingredient : ingredients) {
-                    if (ingredient.isEmpty()) {
-                        continue;
-                    }
+                    if (ingredient.isEmpty()) continue;
                     boolean found = false;
                     Set<ItemStack> cost = tempResult.getCost();
                     if (ingredient.getMatchingStacks().length > 1 && !cost.isEmpty()) {
                         for (ItemStack tempStack : itemStacks) {
-                            if (!cost.contains(tempStack)) {
-                                continue;
-                            }
-                            if (tempStack.isEmpty()) {
-                                continue;
-                            }
-                            if (ItemStack.canCombine(tempStack, source)) {
-                                continue;
-                            }
+                            if (!cost.contains(tempStack)) continue;
+                            if (tempStack.isEmpty()) continue;
+                            if (ItemStack.canCombine(tempStack, source)) continue;
                             if (ingredient.test(tempStack)) {
                                 ItemStack remainder = tempStack.getRecipeRemainder().copy();
                                 tempResult.addCost(tempStack.split(1));
@@ -151,12 +133,8 @@ public class CraftingRecipeTreeManager {
                     }
                     if (!found) {
                         for (ItemStack itemStack : itemStacks) {
-                            if (itemStack.isEmpty()) {
-                                continue;
-                            }
-                            if (ItemStack.canCombine(itemStack, source)) {
-                                continue;
-                            }
+                            if (itemStack.isEmpty()) continue;
+                            if (ItemStack.canCombine(itemStack, source)) continue;
                             if (ingredient.test(itemStack)) {
                                 ItemStack remainder = itemStack.getRecipeRemainder().copy();
                                 tempResult.addCost(itemStack.split(1));
@@ -186,9 +164,7 @@ public class CraftingRecipeTreeManager {
                                 continue;
                             }
                             int parentDepth = except.getOrDefault(itemStack, -1);
-                            if (parentDepth > depth) {
-                                continue;
-                            }
+                            if (parentDepth > depth) continue;
                             if (ItemStack.canCombine(itemStack, source) || ItemStack.canCombine(itemStack, result)) {
                                 continue;
                             }
@@ -222,9 +198,7 @@ public class CraftingRecipeTreeManager {
                 }
                 copy.decrement(count);
                 anyMatch = true;
-                if (copy.isEmpty()) {
-                    break;
-                }
+                if (copy.isEmpty()) break;
             }
             if (!anyMatch) {
                 if (firstRecipe == null) {

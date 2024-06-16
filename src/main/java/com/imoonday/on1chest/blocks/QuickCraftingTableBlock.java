@@ -1,6 +1,7 @@
 package com.imoonday.on1chest.blocks;
 
 import com.imoonday.on1chest.blocks.entities.QuickCraftingTableBlockEntity;
+import com.imoonday.on1chest.blocks.entities.StorageAccessorBlockEntity;
 import com.imoonday.on1chest.init.ModBlockEntities;
 import com.imoonday.on1chest.utils.ConnectBlock;
 import net.minecraft.block.BlockRenderType;
@@ -92,6 +93,6 @@ public class QuickCraftingTableBlock extends BlockWithEntity implements ConnectB
     @Nullable
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {
-        return world.isClient ? null : checkType(type, ModBlockEntities.QUICK_CRAFTING_TABLE_BLOCK_ENTITY, QuickCraftingTableBlockEntity::tick);
+        return world.isClient ? null : checkType(type, ModBlockEntities.QUICK_CRAFTING_TABLE_BLOCK_ENTITY, StorageAccessorBlockEntity::tick);
     }
 }

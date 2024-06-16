@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "end": "on1chest:block/quick_crafting_table_end",
+    "side": "on1chest:block/quick_crafting_table"
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "414",
+    "121",
+    "434"
+  ],
+  "key": {
+    "1": {
+      "item": "minecraft:cobblestone"
+    },
+    "2": {
+      "item": "on1chest:storage_blank_block"
+    },
+    "3": {
+      "item": "minecraft:nether_star"
+    },
+    "4": {
+      "item": "minecraft:smooth_stone"
+    }
+  },
+  "result": {
+    "item": "on1chest:compression_upgrade_module",
+    "count": 1
+  }
+}

@@ -9,8 +9,10 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.nbt.NbtByte;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtString;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import org.lwjgl.glfw.GLFW;
@@ -46,9 +48,7 @@ public class WirelessNetworkScreen extends HandledScreen<WirelessNetworkScreenHa
             if (s == null) {
                 s = "";
             }
-            NbtCompound nbtCompound = new NbtCompound();
-            nbtCompound.putString("network", s);
-            NetworkHandler.sendToServer(nbtCompound);
+            NetworkHandler.sendToServer("network", NbtString.of(s));
         }));
 
         this.addDrawableChild(new ButtonIconWidget(this.x + 30, this.y + 19, 12, 12, CLEAR, CLEAR_HOVERED).addClickAction(0, button -> {
@@ -58,9 +58,7 @@ public class WirelessNetworkScreen extends HandledScreen<WirelessNetworkScreenHa
             NetworkHandler.sendToServer(nbtCompound);
         }));
 
-        NbtCompound nbtCompound = new NbtCompound();
-        nbtCompound.putBoolean("update", true);
-        NetworkHandler.sendToServer(nbtCompound);
+        NetworkHandler.sendToServer("update", NbtByte.ONE);
     }
 
     @Override

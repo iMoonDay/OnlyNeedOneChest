@@ -1,0 +1,26 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "414",
+    "121",
+    "434"
+  ],
+  "key": {
+    "1": {
+      "item": "minecraft:cobblestone"
+    },
+    "2": {
+      "item": "minecraft:chest"
+    },
+    "3": {
+      "item": "minecraft:nether_star"
+    },
+    "4": {
+      "item": "minecraft:smooth_stone"
+    }
+  },
+  "result": {
+    "item": "on1chest:compressed_storage_memory_block",
+    "count": 1
+  }
+}

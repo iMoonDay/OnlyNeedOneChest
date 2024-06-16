@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "end": "on1chest:block/compressed_storage_memory_block_end",
+    "side": "on1chest:block/compressed_storage_memory_block_full"
+  }
+}

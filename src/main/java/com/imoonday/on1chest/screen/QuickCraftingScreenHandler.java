@@ -29,7 +29,6 @@ public class QuickCraftingScreenHandler extends ScreenHandler implements IScreen
     private final QuickCraftingTableBlockEntity entity;
     public final List<CraftingRecipeTreeManager.CraftResult> craftResults = new ArrayList<>();
     public CraftingRecipeTreeManager.CraftResult selectedResult;
-    private Thread thread;
 
     public QuickCraftingScreenHandler(int syncId, PlayerInventory playerInventory) {
         this(syncId, playerInventory, null);
@@ -78,7 +77,7 @@ public class QuickCraftingScreenHandler extends ScreenHandler implements IScreen
         }
         if (!max) {
             clearResults();
-            this.craftResults.addAll(this.entity.getCraftResults(stack, 10));
+            this.craftResults.addAll(this.entity.getCraftResults(stack));
             if (isCraftedList(this.craftResults)) {
                 this.result.setStack(0, stack.copy());
             } else if (!ItemStack.canCombine(stack, this.result.getStack(0))) {
@@ -86,7 +85,7 @@ public class QuickCraftingScreenHandler extends ScreenHandler implements IScreen
             } else {
                 if (originalCount != stack.getCount()) {
                     ItemStack itemStack = stack.copyWithCount(originalCount);
-                    List<CraftingRecipeTreeManager.CraftResult> lastResult = this.entity.getCraftResults(itemStack, 10);
+                    List<CraftingRecipeTreeManager.CraftResult> lastResult = this.entity.getCraftResults(itemStack);
                     if (isCraftedList(lastResult)) {
                         clearResults();
                         this.craftResults.addAll(lastResult);
@@ -99,8 +98,9 @@ public class QuickCraftingScreenHandler extends ScreenHandler implements IScreen
         } else if (remove) {
             clearResults();
             this.result.removeStack(0);
+            updateResult(stack.copyWithCount(1), false, false);
         } else {
-            List<CraftingRecipeTreeManager.CraftResult> testResults = this.entity.getCraftResults(stack.copyWithCount(1), 10);
+            List<CraftingRecipeTreeManager.CraftResult> testResults = this.entity.getCraftResults(stack.copyWithCount(1));
             if (!isCraftedList(testResults)) {
                 clearResults();
                 this.craftResults.addAll(testResults);
@@ -110,7 +110,7 @@ public class QuickCraftingScreenHandler extends ScreenHandler implements IScreen
                 int right = stack.getMaxCount();
                 while (left <= right) {
                     int mid = (left + right) / 2;
-                    List<CraftingRecipeTreeManager.CraftResult> craftResults = this.entity.getCraftResults(stack.copyWithCount(mid), 10);
+                    List<CraftingRecipeTreeManager.CraftResult> craftResults = this.entity.getCraftResults(stack.copyWithCount(mid));
                     if (isCraftedList(craftResults)) {
                         left = mid + 1;
                     } else {
@@ -119,7 +119,7 @@ public class QuickCraftingScreenHandler extends ScreenHandler implements IScreen
                 }
                 boolean success = false;
                 if (right > 0) {
-                    List<CraftingRecipeTreeManager.CraftResult> finalResult = this.entity.getCraftResults(stack.copyWithCount(right), 10);
+                    List<CraftingRecipeTreeManager.CraftResult> finalResult = this.entity.getCraftResults(stack.copyWithCount(right));
                     if (isCraftedList(finalResult)) {
                         clearResults();
                         this.craftResults.addAll(finalResult);
@@ -140,9 +140,9 @@ public class QuickCraftingScreenHandler extends ScreenHandler implements IScreen
 
     public void updateResult(ItemStack stack) {
         ItemStack original = this.result.getStack(0).copy();
-        List<CraftingRecipeTreeManager.CraftResult> craftResults = this.entity.getCraftResults(stack, 10);
+        List<CraftingRecipeTreeManager.CraftResult> craftResults = this.entity.getCraftResults(stack);
         if (!isCraftedList(craftResults)) {
-            craftResults = this.entity.getCraftResults(original, 10);
+            craftResults = this.entity.getCraftResults(original);
             stack = original;
         }
         clearResults();
@@ -163,14 +163,9 @@ public class QuickCraftingScreenHandler extends ScreenHandler implements IScreen
     }
 
     private void updateResultsToClient() {
-        NbtCompound nbtCompound = new NbtCompound();
         NbtList list = new NbtList();
         this.craftResults.forEach(craftResult -> list.add(craftResult.toNbt()));
-        nbtCompound.put("results", list);
-        if (Thread.currentThread().isInterrupted()) {
-            return;
-        }
-        NetworkHandler.sendToClient(player, nbtCompound);
+        NetworkHandler.sendToClient(player, "results", list);
     }
 
     public void updateResultsFromServer(NbtCompound nbtCompound) {
@@ -227,25 +222,16 @@ public class QuickCraftingScreenHandler extends ScreenHandler implements IScreen
 
     @Override
     public void receive(NbtCompound nbt) {
-        if (nbt.contains("Stop") && this.thread != null) {
-            this.thread.interrupt();
-        }
         if (nbt.contains("Craft", NbtElement.COMPOUND_TYPE)) {
             NbtCompound nbtCompound = nbt.getCompound("Craft");
             ItemStack itemStack = ItemStack.fromNbt(nbtCompound);
             if (!itemStack.isEmpty()) {
                 boolean remove = nbt.contains("Button", NbtElement.INT_TYPE) && nbt.getInt("Button") == 1;
                 boolean max = nbt.contains("Shift", NbtElement.BYTE_TYPE) && nbt.getBoolean("Shift");
-                if (this.thread != null) {
-                    this.thread.interrupt();
+                this.updateResult(itemStack, remove, max);
+                if (this.selectedResult == null && isCraftedList(this.craftResults)) {
+                    this.selectedResult = this.craftResults.get(0);
                 }
-                this.thread = new Thread(() -> {
-                    this.updateResult(itemStack, remove, max);
-                    if (this.selectedResult == null && isCraftedList(this.craftResults)) {
-                        this.selectedResult = this.craftResults.get(0);
-                    }
-                }, "Update Result Thread");
-                this.thread.start();
             }
         }
         if (nbt.contains("Select", NbtElement.COMPOUND_TYPE)) {

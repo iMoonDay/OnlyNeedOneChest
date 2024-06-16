@@ -1,5 +1,5 @@
-// 1.20.1	2023-09-06T01:15:03.733656	Only Need One Chest/Tags for minecraft:block
-84253d5ceab598f6937ef63053991ebffba97541 data\minecraft\tags\blocks\mineable\pickaxe.json
-13db3265be240d783c1596622014f41e1a09609b data\on1chest\tags\blocks\connect_block.json
+// 1.20.1	2024-06-16T22:16:32.2487932	Only Need One Chest/Tags for minecraft:block
+83392e922e53bdef14bf00152d9aae5008cc9175 data\minecraft\tags\blocks\mineable\pickaxe.json
+99117107202587339f1646c10e17e27aa3bc1dc2 data\on1chest\tags\blocks\connect_block.json
 7da0251bb27da3ca6ee18c7c277157b1b78d1d8d data\minecraft\tags\blocks\needs_diamond_tool.json
-b9d17641272dad66948e793dbe62d4cb5e872508 data\minecraft\tags\blocks\mineable\axe.json
+9fdbaf51d8d65ee3231724adb716d5924e1f65a3 data\minecraft\tags\blocks\mineable\axe.json

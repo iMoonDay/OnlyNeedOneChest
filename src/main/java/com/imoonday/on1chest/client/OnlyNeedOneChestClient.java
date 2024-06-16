@@ -48,7 +48,7 @@ public class OnlyNeedOneChestClient implements ClientModInitializer {
                 try {
                     CraftingRecipeTreeManager manager = CraftingRecipeTreeManager.getOrCreate(client.world);
                     if (manager != null) {
-                        System.out.println("On1chest：客户端配方加载成功");
+                        System.out.println("On1chest: Client recipe loaded successfully");
                     }
                 } catch (Throwable t) {
                     t.printStackTrace();
@@ -105,11 +105,11 @@ public class OnlyNeedOneChestClient implements ClientModInitializer {
             client.execute(() -> {
                 if (client.world != null) {
                     CraftingRecipeTreeManager.getOrCreate(client.world).reload();
-                    System.out.println("On1chest：服务端配方重载成功");
+                    System.out.println("On1chest: Client recipe reloaded successfully");
                 }
                 if (client.currentScreen instanceof IScreenDataReceiver receiver) {
                     receiver.update();
-                    System.out.println("On1chest：服务端配方同步完成");
+                    System.out.println("On1chest: Server-side recipe synchronization completed");
                 }
             });
         });

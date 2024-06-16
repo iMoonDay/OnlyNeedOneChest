@@ -30,6 +30,7 @@ public class BlockLootTableGen extends FabricBlockLootTableProvider {
         this.addDrop(DIAMOND_STORAGE_MEMORY_BLOCK);
         this.addDrop(NETHERITE_STORAGE_MEMORY_BLOCK);
         this.addDrop(OBSIDIAN_STORAGE_MEMORY_BLOCK);
+        this.addDrop(COMPRESSED_STORAGE_MEMORY_BLOCK, LootTable.builder().pool(this.addSurvivesExplosionCondition(WIRELESS_CONNECTOR, LootPool.builder().rolls(ConstantLootNumberProvider.create(1.0f)).with(ItemEntry.builder(COMPRESSED_STORAGE_MEMORY_BLOCK).apply(CopyNbtLootFunction.builder(ContextLootNbtProvider.BLOCK_ENTITY).withOperation("Level", "CompressionLevel"))))));
         this.addDrop(WIRELESS_CONNECTOR, LootTable.builder().pool(this.addSurvivesExplosionCondition(WIRELESS_CONNECTOR, LootPool.builder().rolls(ConstantLootNumberProvider.create(1.0f)).with(ItemEntry.builder(WIRELESS_CONNECTOR).apply(CopyNbtLootFunction.builder(ContextLootNbtProvider.BLOCK_ENTITY).withOperation("network", "BlockEntityTag.network"))))));
         this.addDrop(ITEM_EXPORTER);
         this.addDrop(MEMORY_EXTRACTOR);

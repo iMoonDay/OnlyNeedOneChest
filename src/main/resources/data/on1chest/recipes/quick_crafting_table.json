@@ -1,0 +1,26 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "313",
+    "121",
+    "343"
+  ],
+  "key": {
+    "1": {
+      "item": "minecraft:diamond"
+    },
+    "2": {
+      "item": "minecraft:crafting_table"
+    },
+    "3": {
+      "item": "minecraft:redstone_block"
+    },
+    "4": {
+      "item": "on1chest:storage_accessor_block"
+    }
+  },
+  "result": {
+    "item": "on1chest:quick_crafting_table",
+    "count": 1
+  }
+}
