@@ -1,10 +1,10 @@
 package com.imoonday.on1chest.init;
 
 import com.imoonday.on1chest.OnlyNeedOneChest;
+import com.imoonday.on1chest.api.ConnectBlock;
 import com.imoonday.on1chest.blocks.*;
 import com.imoonday.on1chest.blocks.memories.*;
 import com.imoonday.on1chest.datagen.BlockTagGen;
-import com.imoonday.on1chest.utils.ConnectBlock;
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
@@ -41,6 +41,7 @@ public class ModBlocks {
     public static final Block ITEM_EXPORTER = register("item_exporter", new ItemExporterBlock(FabricBlockSettings.copyOf(Blocks.OAK_PLANKS)));
     public static final Block MEMORY_EXTRACTOR = register("memory_extractor", new MemoryExtractorBlock(FabricBlockSettings.copyOf(Blocks.OAK_PLANKS)));
     public static final Block WIRELESS_CONNECTOR = register("wireless_connector", new WirelessConnectorBlock(FabricBlockSettings.copyOf(Blocks.LIGHTNING_ROD).mapColor(MapColor.OFF_WHITE)));
+    public static final Block MEMORY_CONVERTER = register("memory_converter", new MemoryConverterBlock(FabricBlockSettings.copyOf(Blocks.OAK_PLANKS)));
 
     public static void register() {
 

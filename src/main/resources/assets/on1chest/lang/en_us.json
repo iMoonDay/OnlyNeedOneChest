@@ -11,6 +11,8 @@
   "block.on1chest.item_exporter": "Item Exporter",
   "block.on1chest.item_exporter.any": "Any",
   "block.on1chest.item_exporter.match": "Match Mode",
+  "block.on1chest.memory_converter": "Memory Converter",
+  "block.on1chest.memory_converter.tooltip": "Make any container accessible to the accessor",
   "block.on1chest.memory_extractor": "Memory Extractor",
   "block.on1chest.netherite_storage_memory_block": "Netherite Storage Memory Block",
   "block.on1chest.obsidian_storage_memory_block": "Obsidian Storage Memory Block",

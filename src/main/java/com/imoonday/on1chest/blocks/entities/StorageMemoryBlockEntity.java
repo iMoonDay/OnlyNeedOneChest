@@ -1,8 +1,9 @@
 package com.imoonday.on1chest.blocks.entities;
 
+import com.imoonday.on1chest.api.ConnectInventoryProvider;
+import com.imoonday.on1chest.api.ImplementedInventory;
 import com.imoonday.on1chest.blocks.StorageMemoryBlock;
 import com.imoonday.on1chest.init.ModBlockEntities;
-import com.imoonday.on1chest.utils.ImplementedInventory;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
@@ -23,7 +24,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.stream.IntStream;
 
-public class StorageMemoryBlockEntity extends BlockEntity implements ImplementedInventory {
+public class StorageMemoryBlockEntity extends BlockEntity implements ImplementedInventory, ConnectInventoryProvider {
 
     public static final int MAX_LEVEL = 999;
     protected int level = 0;
@@ -177,5 +178,11 @@ public class StorageMemoryBlockEntity extends BlockEntity implements Implemented
         } else {
             return StorageMemoryBlock.UsedCapacity.FULL;
         }
+    }
+
+    @Nullable
+    @Override
+    public Inventory getInventory() {
+        return this;
     }
 }

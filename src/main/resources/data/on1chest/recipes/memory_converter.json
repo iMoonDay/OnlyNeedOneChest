@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " 1 ",
+    "232",
+    "232"
+  ],
+  "key": {
+    "1": {
+      "item": "on1chest:connection_cable"
+    },
+    "2": {
+      "item": "on1chest:storage_blank_block"
+    },
+    "3": {
+      "item": "minecraft:hopper"
+    }
+  },
+  "result": {
+    "item": "on1chest:memory_converter",
+    "count": 2
+  }
+}

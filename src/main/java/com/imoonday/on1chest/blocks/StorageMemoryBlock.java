@@ -1,8 +1,8 @@
 package com.imoonday.on1chest.blocks;
 
+import com.imoonday.on1chest.api.ConnectBlock;
 import com.imoonday.on1chest.blocks.entities.StorageMemoryBlockEntity;
 import com.imoonday.on1chest.init.ModBlockEntities;
-import com.imoonday.on1chest.utils.ConnectBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
@@ -82,6 +82,7 @@ public abstract class StorageMemoryBlock extends BlockWithEntity implements Conn
         if (!world.isClient) {
             if (player.isSneaking()) {
                 world.setBlockState(pos, state.with(ACTIVATED, !state.get(ACTIVATED)), NOTIFY_LISTENERS);
+                world.playSound(null, pos, SoundEvents.BLOCK_LEVER_CLICK, SoundCategory.BLOCKS, 0.3f, state.get(ACTIVATED) ? 0.5f : 0.6f);
                 return ActionResult.SUCCESS;
             }
             if (world.getBlockEntity(pos) instanceof StorageMemoryBlockEntity entity) {

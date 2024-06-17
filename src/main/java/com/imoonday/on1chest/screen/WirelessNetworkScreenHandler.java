@@ -1,9 +1,9 @@
 package com.imoonday.on1chest.screen;
 
+import com.imoonday.on1chest.api.IScreenDataReceiver;
 import com.imoonday.on1chest.blocks.entities.WirelessConnectorBlockEntity;
 import com.imoonday.on1chest.init.ModScreens;
 import com.imoonday.on1chest.network.NetworkHandler;
-import com.imoonday.on1chest.utils.IScreenDataReceiver;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;

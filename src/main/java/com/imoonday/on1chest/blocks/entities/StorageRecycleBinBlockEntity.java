@@ -1,9 +1,9 @@
 package com.imoonday.on1chest.blocks.entities;
 
+import com.imoonday.on1chest.api.ImplementedInventory;
 import com.imoonday.on1chest.blocks.StorageRecycleBinBlock;
 import com.imoonday.on1chest.init.ModBlockEntities;
 import com.imoonday.on1chest.screen.StorageRecycleBinScreenHandler;
-import com.imoonday.on1chest.utils.ImplementedInventory;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;

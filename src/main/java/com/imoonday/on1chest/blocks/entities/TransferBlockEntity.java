@@ -17,18 +17,18 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
-public class AbstractTransferBlockEntity extends BlockEntity {
+public abstract class TransferBlockEntity extends BlockEntity {
 
     public float uniqueOffset;
     protected int cooldown;
     protected Item target;
     protected boolean matchMode;
 
-    public AbstractTransferBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
+    public TransferBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
     }
 
-    protected static void tickUpdate(World world, BlockPos pos, BlockState state, AbstractTransferBlockEntity entity) {
+    protected static void tickUpdate(World world, BlockPos pos, BlockState state, TransferBlockEntity entity) {
         boolean updateListeners = false;
         if (entity.uniqueOffset == 0) {
             entity.uniqueOffset = world.random.nextFloat() * 360;

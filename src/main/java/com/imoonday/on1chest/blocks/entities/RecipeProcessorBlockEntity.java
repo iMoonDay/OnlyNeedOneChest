@@ -1,10 +1,10 @@
 package com.imoonday.on1chest.blocks.entities;
 
+import com.imoonday.on1chest.api.ImplementedInventory;
+import com.imoonday.on1chest.api.RecipeFilter;
 import com.imoonday.on1chest.init.ModBlockEntities;
 import com.imoonday.on1chest.items.RecipeRecordCardItem;
 import com.imoonday.on1chest.screen.RecipeProcessorScreenHandler;
-import com.imoonday.on1chest.utils.ImplementedInventory;
-import com.imoonday.on1chest.utils.RecipeFilter;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;

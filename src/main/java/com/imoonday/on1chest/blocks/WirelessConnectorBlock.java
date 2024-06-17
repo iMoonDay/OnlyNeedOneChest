@@ -1,8 +1,8 @@
 package com.imoonday.on1chest.blocks;
 
+import com.imoonday.on1chest.api.ConnectBlock;
 import com.imoonday.on1chest.blocks.entities.WirelessConnectorBlockEntity;
 import com.imoonday.on1chest.init.ModBlockEntities;
-import com.imoonday.on1chest.utils.ConnectBlock;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;

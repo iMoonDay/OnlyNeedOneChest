@@ -46,7 +46,8 @@ public class BlockTagGen extends FabricTagProvider<Block> {
                 .add(ModBlocks.CONNECTION_CABLE)
                 .add(ModBlocks.ITEM_EXPORTER)
                 .add(ModBlocks.MEMORY_EXTRACTOR)
-                .add(ModBlocks.QUICK_CRAFTING_TABLE);
+                .add(ModBlocks.QUICK_CRAFTING_TABLE)
+                .add(ModBlocks.MEMORY_CONVERTER);
         TAGS.forEach((block, key) -> getOrCreateTagBuilder(key).add(block));
     }
 }

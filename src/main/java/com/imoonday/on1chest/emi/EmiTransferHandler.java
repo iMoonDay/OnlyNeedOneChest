@@ -1,8 +1,8 @@
 package com.imoonday.on1chest.emi;
 
+import com.imoonday.on1chest.api.IAutoCraftingHandler;
 import com.imoonday.on1chest.screen.StorageProcessorScreenHandler;
 import com.imoonday.on1chest.utils.CombinedItemStack;
-import com.imoonday.on1chest.utils.IAutoCraftingHandler;
 import com.mojang.blaze3d.systems.RenderSystem;
 import dev.emi.emi.api.recipe.EmiPlayerInventory;
 import dev.emi.emi.api.recipe.EmiRecipe;

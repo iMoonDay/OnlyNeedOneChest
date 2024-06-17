@@ -1,9 +1,9 @@
 package com.imoonday.on1chest;
 
+import com.imoonday.on1chest.api.IScreenDataReceiver;
 import com.imoonday.on1chest.init.*;
 import com.imoonday.on1chest.network.NetworkHandler;
 import com.imoonday.on1chest.utils.CraftingRecipeTreeManager;
-import com.imoonday.on1chest.utils.IScreenDataReceiver;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;

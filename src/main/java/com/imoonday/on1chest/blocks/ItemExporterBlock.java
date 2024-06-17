@@ -1,8 +1,9 @@
 package com.imoonday.on1chest.blocks;
 
-import com.imoonday.on1chest.blocks.entities.AbstractTransferBlockEntity;
 import com.imoonday.on1chest.blocks.entities.ItemExporterBlockEntity;
+import com.imoonday.on1chest.blocks.entities.TransferBlockEntity;
 import com.imoonday.on1chest.init.ModBlockEntities;
+import net.minecraft.block.BlockEntityProvider;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
@@ -25,40 +26,47 @@ import org.jetbrains.annotations.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ItemExporterBlock extends ConnectableBlock {
+public class ItemExporterBlock extends ConnectableBlock implements BlockEntityProvider {
 
     private static final Map<Direction, VoxelShape> BOUNDING_SHAPES = Util.make(() -> {
         Map<Direction, VoxelShape> map = new HashMap<>();
+
         VoxelShape shape = VoxelShapes.empty();
         shape = VoxelShapes.union(shape, VoxelShapes.cuboid(0.0625, 0, 0.0625, 0.9375, 0.125, 0.9375));
         shape = VoxelShapes.union(shape, VoxelShapes.cuboid(0.1875, 0.125, 0.1875, 0.8125, 0.25, 0.8125));
         shape = VoxelShapes.union(shape, VoxelShapes.cuboid(0.375, 0.25, 0.375, 0.625, 0.625, 0.625));
         map.put(Direction.UP, shape);
+
         shape = VoxelShapes.empty();
         shape = VoxelShapes.union(shape, VoxelShapes.cuboid(0.0625, 0.875, 0.0625, 0.9375, 1, 0.9375));
         shape = VoxelShapes.union(shape, VoxelShapes.cuboid(0.1875, 0.75, 0.1875, 0.8125, 0.875, 0.8125));
         shape = VoxelShapes.union(shape, VoxelShapes.cuboid(0.375, 0.375, 0.375, 0.625, 0.75, 0.625));
         map.put(Direction.DOWN, shape);
+
         shape = VoxelShapes.empty();
         shape = VoxelShapes.union(shape, VoxelShapes.cuboid(0.0625, 0.0625, 0.875, 0.9375, 0.9375, 1));
         shape = VoxelShapes.union(shape, VoxelShapes.cuboid(0.375, 0.375, 0.375, 0.625, 0.625, 0.75));
         shape = VoxelShapes.union(shape, VoxelShapes.cuboid(0.1875, 0.1875, 0.75, 0.8125, 0.8125, 0.875));
         map.put(Direction.NORTH, shape);
+
         shape = VoxelShapes.empty();
         shape = VoxelShapes.union(shape, VoxelShapes.cuboid(0.0625, 0.0625, 0, 0.9375, 0.9375, 0.125));
         shape = VoxelShapes.union(shape, VoxelShapes.cuboid(0.375, 0.375, 0.25, 0.625, 0.625, 0.625));
         shape = VoxelShapes.union(shape, VoxelShapes.cuboid(0.1875, 0.1875, 0.125, 0.8125, 0.8125, 0.25));
         map.put(Direction.SOUTH, shape);
+
         shape = VoxelShapes.empty();
         shape = VoxelShapes.union(shape, VoxelShapes.cuboid(0.875, 0.0625, 0.0625, 1, 0.9375, 0.9375));
         shape = VoxelShapes.union(shape, VoxelShapes.cuboid(0.375, 0.375, 0.375, 0.75, 0.625, 0.625));
         shape = VoxelShapes.union(shape, VoxelShapes.cuboid(0.75, 0.1875, 0.1875, 0.875, 0.8125, 0.8125));
         map.put(Direction.WEST, shape);
+
         shape = VoxelShapes.empty();
         shape = VoxelShapes.union(shape, VoxelShapes.cuboid(0, 0.0625, 0.0625, 0.125, 0.9375, 0.9375));
         shape = VoxelShapes.union(shape, VoxelShapes.cuboid(0.25, 0.375, 0.375, 0.625, 0.625, 0.625));
         shape = VoxelShapes.union(shape, VoxelShapes.cuboid(0.125, 0.1875, 0.1875, 0.25, 0.8125, 0.8125));
         map.put(Direction.EAST, shape);
+
         return map;
     });
 
@@ -83,7 +91,7 @@ public class ItemExporterBlock extends ConnectableBlock {
         if (world.isClient || type != ModBlockEntities.ITEM_EXPORTER_BLOCK_ENTITY) {
             return null;
         }
-        return (world1, pos, state1, entity) -> ItemExporterBlockEntity.tick(world1, pos, state1, (AbstractTransferBlockEntity) entity);
+        return (world1, pos, state1, entity) -> ItemExporterBlockEntity.tick(world1, pos, state1, (TransferBlockEntity) entity);
     }
 
     @Override
@@ -91,10 +99,7 @@ public class ItemExporterBlock extends ConnectableBlock {
         if (world.isClient) {
             return ActionResult.SUCCESS;
         }
-        if (hand == Hand.OFF_HAND) {
-            return ActionResult.PASS;
-        }
-        if (!(world.getBlockEntity(pos) instanceof AbstractTransferBlockEntity entity)) {
+        if (!(world.getBlockEntity(pos) instanceof TransferBlockEntity entity)) {
             return ActionResult.PASS;
         }
         ItemStack stack = player.getMainHandStack();

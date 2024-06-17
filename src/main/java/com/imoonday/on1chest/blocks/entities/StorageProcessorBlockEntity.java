@@ -11,6 +11,7 @@ import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.Nullable;
 
 public class StorageProcessorBlockEntity extends StorageAccessorBlockEntity {
+
     public StorageProcessorBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.STORAGE_PROCESSOR_BLOCK_ENTITY, pos, state);
     }

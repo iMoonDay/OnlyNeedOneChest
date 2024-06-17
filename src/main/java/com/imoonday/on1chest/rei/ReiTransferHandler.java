@@ -1,7 +1,7 @@
 package com.imoonday.on1chest.rei;
 
+import com.imoonday.on1chest.api.IAutoCraftingHandler;
 import com.imoonday.on1chest.utils.CombinedItemStack;
-import com.imoonday.on1chest.utils.IAutoCraftingHandler;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.widgets.Slot;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;

@@ -15,11 +15,12 @@ public class ModBlockEntities {
     public static final BlockEntityType<StorageAccessorBlockEntity> STORAGE_ACCESSOR_BLOCK_ENTITY = register("storage_accessor_block", StorageAccessorBlockEntity::new, ModBlocks.STORAGE_ACCESSOR_BLOCK);
     public static final BlockEntityType<StorageProcessorBlockEntity> STORAGE_PROCESSOR_BLOCK_ENTITY = register("storage_processor_block", StorageProcessorBlockEntity::new, ModBlocks.STORAGE_PROCESSOR_BLOCK);
     public static final BlockEntityType<StorageRecycleBinBlockEntity> STORAGE_RECYCLE_BIN_BLOCK_ENTITY = register("storage_recycle_bin", StorageRecycleBinBlockEntity::new, ModBlocks.STORAGE_RECYCLE_BIN);
-    public static final BlockEntityType<AbstractTransferBlockEntity> ITEM_EXPORTER_BLOCK_ENTITY = register("item_exporter", ItemExporterBlockEntity::new, ModBlocks.ITEM_EXPORTER);
+    public static final BlockEntityType<TransferBlockEntity> ITEM_EXPORTER_BLOCK_ENTITY = register("item_exporter", ItemExporterBlockEntity::new, ModBlocks.ITEM_EXPORTER);
     public static final BlockEntityType<MemoryExtractorBlockEntity> MEMORY_EXTRACTOR_BLOCK_ENTITY = register("memory_extractor", MemoryExtractorBlockEntity::new, ModBlocks.MEMORY_EXTRACTOR);
     public static final BlockEntityType<WirelessConnectorBlockEntity> WIRELESS_CONNECTOR_BLOCK_ENTITY = register("wireless_connector", WirelessConnectorBlockEntity::new, ModBlocks.WIRELESS_CONNECTOR);
     public static final BlockEntityType<RecipeProcessorBlockEntity> RECIPE_PROCESSOR_BLOCK_ENTITY = register("recipe_processor", RecipeProcessorBlockEntity::new, ModBlocks.RECIPE_PROCESSOR);
     public static final BlockEntityType<QuickCraftingTableBlockEntity> QUICK_CRAFTING_TABLE_BLOCK_ENTITY = register("quick_crafting_table", QuickCraftingTableBlockEntity::new, ModBlocks.QUICK_CRAFTING_TABLE);
+    public static final BlockEntityType<MemoryConverterBlockEntity> MEMORY_CONVERTER_BLOCK_ENTITY = register("memory_converter", MemoryConverterBlockEntity::new, ModBlocks.MEMORY_CONVERTER);
 
     public static void register() {
 

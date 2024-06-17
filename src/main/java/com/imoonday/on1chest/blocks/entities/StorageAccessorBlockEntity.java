@@ -1,11 +1,13 @@
 package com.imoonday.on1chest.blocks.entities;
 
+import com.imoonday.on1chest.api.ConnectBlock;
+import com.imoonday.on1chest.api.ConnectBlockConverter;
+import com.imoonday.on1chest.api.ConnectInventoryProvider;
 import com.imoonday.on1chest.blocks.StorageMemoryBlock;
 import com.imoonday.on1chest.init.ModBlockEntities;
 import com.imoonday.on1chest.init.ModGameRules;
 import com.imoonday.on1chest.screen.StorageAssessorScreenHandler;
 import com.imoonday.on1chest.utils.CombinedItemStack;
-import com.imoonday.on1chest.utils.ConnectBlock;
 import com.imoonday.on1chest.utils.ItemStack2ObjectMap;
 import com.imoonday.on1chest.utils.MultiInventory;
 import net.minecraft.block.BlockState;
@@ -23,21 +25,22 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class StorageAccessorBlockEntity extends BlockEntity implements NamedScreenHandlerFactory {
 
+    private static final List<MultiInventory.InsertionPredicate> INSERTION_PREDICATES = new ArrayList<>();
+    private static final List<MultiInventory.RemovalPredicate> REMOVAL_PREDICATES = new ArrayList<>();
     protected final MultiInventory inventory = new MultiInventory();
     protected final Map<CombinedItemStack, Long> items = new HashMap<>();
     protected boolean updateItems = true;
 
     public StorageAccessorBlockEntity(BlockEntityType<? extends StorageAccessorBlockEntity> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
+        inventory.addInsertionPredicate(StorageAccessorBlockEntity::canInsert);
+        inventory.addRemovalPredicate(StorageAccessorBlockEntity::canRemove);
     }
 
     public StorageAccessorBlockEntity(BlockPos pos, BlockState state) {
@@ -59,6 +62,14 @@ public class StorageAccessorBlockEntity extends BlockEntity implements NamedScre
         }
     }
 
+    private static boolean canInsert(Inventory inventory, int slot, ItemStack stack) {
+        return INSERTION_PREDICATES.stream().allMatch(predicate -> predicate.canInsert(inventory, slot, stack));
+    }
+
+    private static boolean canRemove(Inventory inventory, int slot) {
+        return REMOVAL_PREDICATES.stream().allMatch(predicate -> predicate.canRemove(inventory, slot));
+    }
+
     @Override
     public Text getDisplayName() {
         return Text.translatable(this.getCachedState().getBlock().getTranslationKey() + ".title");
@@ -75,7 +86,20 @@ public class StorageAccessorBlockEntity extends BlockEntity implements NamedScre
             return List.of();
         }
         int limit = world.getGameRules().getInt(ModGameRules.MAX_MEMORY_RANGE);
-        return limit <= 0 ? new ArrayList<>() : ConnectBlock.getConnectedBlocks(world, pos).stream().filter(pair -> pair.getLeft().getBlockState(pair.getRight()).getBlock() instanceof StorageMemoryBlock && pair.getLeft().getBlockState(pair.getRight()).get(StorageMemoryBlock.ACTIVATED) && pair.getLeft().getBlockEntity(pair.getRight()) instanceof StorageMemoryBlockEntity).map(pair -> (StorageMemoryBlockEntity) pair.getLeft().getBlockEntity(pair.getRight())).limit(limit).collect(Collectors.toCollection(ArrayList::new));
+        return limit <= 0 ? new ArrayList<>() : ConnectBlock.getConnectedBlocks(world, pos).stream().map(pair -> {
+            World world1 = pair.getLeft();
+            BlockPos pos1 = pair.getRight();
+            BlockState state = world1.getBlockState(pos1);
+            BlockEntity blockEntity = world1.getBlockEntity(pos1);
+            if (state.getBlock() instanceof StorageMemoryBlock && state.get(StorageMemoryBlock.ACTIVATED) && blockEntity instanceof StorageMemoryBlockEntity entity) {
+                return entity;
+            } else if (ConnectBlockConverter.isConverted(world1, pos1) && blockEntity instanceof Inventory inventory) {
+                return inventory;
+            } else if (blockEntity instanceof ConnectInventoryProvider provider) {
+                return provider.getInventory();
+            }
+            return null;
+        }).filter(Objects::nonNull).limit(limit).collect(Collectors.toCollection(ArrayList::new));
     }
 
     public MultiInventory getInventory() {
@@ -161,5 +185,13 @@ public class StorageAccessorBlockEntity extends BlockEntity implements NamedScre
             }
         }
         return !stackMap.containsValue(false);
+    }
+
+    public static void addInsertionPredicate(MultiInventory.InsertionPredicate insertionPredicate) {
+        INSERTION_PREDICATES.add(insertionPredicate);
+    }
+
+    public static void addRemovalPredicate(MultiInventory.RemovalPredicate removalPredicate) {
+        REMOVAL_PREDICATES.add(removalPredicate);
     }
 }

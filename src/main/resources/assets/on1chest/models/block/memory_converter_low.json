@@ -1,0 +1,6 @@
+{
+  "parent": "on1chest:block/memory_converter",
+  "textures": {
+    "base": "on1chest:block/memory_converter_low"
+  }
+}

@@ -16,6 +16,8 @@ import java.util.function.Predicate;
 
 public class MultiInventory implements Inventory {
 
+    private final List<InsertionPredicate> insertionPredicates = new ArrayList<>();
+    private final List<RemovalPredicate> removalPredicates = new ArrayList<>();
     private final List<Inventory> inventories = new ArrayList<>();
     private final List<ItemStack[]> dupDetector = new ArrayList<>();
     @Nullable
@@ -50,17 +52,27 @@ public class MultiInventory implements Inventory {
 
     @Override
     public ItemStack removeStack(int slot, int amount) {
-        return getFromSlot(slot, (inventory, i) -> inventory.removeStack(i, amount), ItemStack.EMPTY, true);
+        return getFromSlot(slot, (inventory, i) -> {
+            if (!canRemove(inventory, i)) return ItemStack.EMPTY;
+            return inventory.removeStack(i, amount);
+        }, ItemStack.EMPTY, true);
     }
 
     @Override
     public ItemStack removeStack(int slot) {
-        return getFromSlot(slot, Inventory::removeStack, ItemStack.EMPTY, true);
+        return getFromSlot(slot, (inventory, i) -> {
+            if (!canRemove(inventory, i)) return ItemStack.EMPTY;
+            return inventory.removeStack(i);
+        }, ItemStack.EMPTY, true);
     }
 
     @Override
     public void setStack(int slot, ItemStack stack) {
-        runFromSlot(slot, (inventory, i) -> inventory.setStack(i, stack), true);
+        runFromSlot(slot, (inventory, i) -> {
+            if (!inventory.getStack(i).isEmpty() && !canRemove(inventory, i)) return;
+            if (!canInsert(inventory, i, stack)) return;
+            inventory.setStack(i, stack);
+        }, true);
     }
 
     @Override
@@ -108,12 +120,15 @@ public class MultiInventory implements Inventory {
 
     @Override
     public boolean canTransferTo(Inventory hopperInventory, int slot, ItemStack stack) {
-        return getFromSlot(slot, (inventory, i) -> inventory.canTransferTo(hopperInventory, i, stack), false, false);
+        return getFromSlot(slot, (inventory, i) -> {
+            if (!canRemove(inventory, i)) return false;
+            return inventory.canTransferTo(hopperInventory, i, stack);
+        }, false, false);
     }
 
     @Override
     public int count(Item item) {
-        return (int) inventories.stream().map(inventory -> inventory.count(item)).count();
+        return inventories.stream().mapToInt(inventory -> inventory.count(item)).sum();
     }
 
     @Override
@@ -128,6 +143,7 @@ public class MultiInventory implements Inventory {
 
     public ItemStack insertItem(int slot, ItemStack stack) {
         return getFromSlot(slot, (inventory, s) -> {
+            if (!canInsert(inventory, s, stack)) return stack;
             ItemStack itemStack = inventory.getStack(s);
             if (itemStack.isEmpty()) {
                 inventory.setStack(s, stack.split(Math.min(stack.getCount(), stack.getMaxCount())));
@@ -157,6 +173,10 @@ public class MultiInventory implements Inventory {
             int i = 0;
             if (stack.isStackable()) {
                 while (!stack.isEmpty() && i < inventory.size()) {
+                    if (!canInsert(inventory, i, stack)) {
+                        ++i;
+                        continue;
+                    }
                     itemStack = inventory.getStack(i);
                     if (!itemStack.isEmpty() && ItemStack.canCombine(stack, itemStack)) {
                         int j = itemStack.getCount() + stack.getCount();
@@ -176,6 +196,10 @@ public class MultiInventory implements Inventory {
             if (!stack.isEmpty()) {
                 i = 0;
                 while (i < inventory.size()) {
+                    if (!canInsert(inventory, i, stack)) {
+                        ++i;
+                        continue;
+                    }
                     itemStack = inventory.getStack(i);
                     if (itemStack.isEmpty()) {
                         if (stack.getCount() > itemStack.getMaxCount()) {
@@ -288,6 +312,49 @@ public class MultiInventory implements Inventory {
         using = false;
     }
 
+    public void addInsertionPredicate(InsertionPredicate insertionPredicate) {
+        insertionPredicates.add(insertionPredicate);
+    }
+
+    public boolean removeInsertionPredicate(InsertionPredicate insertionPredicate) {
+        return insertionPredicates.remove(insertionPredicate);
+    }
+
+    public List<InsertionPredicate> getInsertionPredicates() {
+        return List.copyOf(insertionPredicates);
+    }
+
+    public void addRemovalPredicate(RemovalPredicate removalPredicate) {
+        removalPredicates.add(removalPredicate);
+    }
+
+    public boolean removeRemovalPredicate(RemovalPredicate removalPredicate) {
+        return removalPredicates.remove(removalPredicate);
+    }
+
+    public List<RemovalPredicate> getRemovalPredicates() {
+        return List.copyOf(removalPredicates);
+    }
+
+    public boolean canRemove(Inventory inventory, int slot) {
+        for (RemovalPredicate predicate : removalPredicates) {
+            if (!predicate.canRemove(inventory, slot)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public boolean canInsert(Inventory inventory, int slot, ItemStack stack) {
+        if (!inventory.isValid(slot, stack)) return false;
+        for (InsertionPredicate predicate : insertionPredicates) {
+            if (!predicate.canInsert(inventory, slot, stack)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     @Override
     public String toString() {
         return "MultiInventory{" +
@@ -301,5 +368,15 @@ public class MultiInventory implements Inventory {
 
     public interface MultiInventoryChangedListener {
         void onInventoryChanged(MultiInventory inventory);
+    }
+
+    public interface RemovalPredicate {
+
+        boolean canRemove(Inventory inventory, int slot);
+    }
+
+    public interface InsertionPredicate {
+
+        boolean canInsert(Inventory inventory, int slot, ItemStack stack);
     }
 }

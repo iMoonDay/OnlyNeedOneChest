@@ -13,6 +13,7 @@
     "on1chest:connection_cable",
     "on1chest:item_exporter",
     "on1chest:memory_extractor",
-    "on1chest:quick_crafting_table"
+    "on1chest:quick_crafting_table",
+    "on1chest:memory_converter"
   ]
 }

@@ -40,8 +40,9 @@ public class ModelGen extends FabricModelProvider {
         registerMemoryBlock(generator, OBSIDIAN_STORAGE_MEMORY_BLOCK, TextureMap.getSubId(OBSIDIAN_STORAGE_MEMORY_BLOCK, "_end"));
         registerMemoryBlock(generator, GLASS_STORAGE_MEMORY_BLOCK, TextureMap.getSubId(GLASS_STORAGE_MEMORY_BLOCK, "_end"));
         registerMemoryBlock(generator, COMPRESSED_STORAGE_MEMORY_BLOCK, TextureMap.getSubId(COMPRESSED_STORAGE_MEMORY_BLOCK, "_end"));
-        registerExporter(generator);
-        registerExtractor(generator);
+        registerParentedItemModel(generator, ITEM_EXPORTER);
+        registerParentedItemModel(generator, MEMORY_EXTRACTOR);
+        registerParentedItemModel(generator, MEMORY_CONVERTER);
         registerWirelessConnector(generator);
     }
 
@@ -102,13 +103,7 @@ public class ModelGen extends FabricModelProvider {
         })));
     }
 
-    private void registerExporter(BlockStateModelGenerator generator) {
-        Block block = ITEM_EXPORTER;
-        generator.registerParentedItemModel(block, ModelIds.getBlockModelId(block));
-    }
-
-    private void registerExtractor(BlockStateModelGenerator generator) {
-        Block block = MEMORY_EXTRACTOR;
+    private static void registerParentedItemModel(BlockStateModelGenerator generator, Block block) {
         generator.registerParentedItemModel(block, ModelIds.getBlockModelId(block));
     }
 

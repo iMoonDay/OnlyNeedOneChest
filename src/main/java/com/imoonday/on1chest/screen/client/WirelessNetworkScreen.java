@@ -1,10 +1,10 @@
 package com.imoonday.on1chest.screen.client;
 
 import com.imoonday.on1chest.OnlyNeedOneChest;
+import com.imoonday.on1chest.api.IScreenDataReceiver;
 import com.imoonday.on1chest.network.NetworkHandler;
 import com.imoonday.on1chest.screen.WirelessNetworkScreenHandler;
 import com.imoonday.on1chest.screen.widgets.ButtonIconWidget;
-import com.imoonday.on1chest.utils.IScreenDataReceiver;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.widget.TextFieldWidget;

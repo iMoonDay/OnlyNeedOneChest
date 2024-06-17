@@ -1,8 +1,9 @@
 package com.imoonday.on1chest.blocks;
 
-import com.imoonday.on1chest.blocks.entities.AbstractTransferBlockEntity;
 import com.imoonday.on1chest.blocks.entities.MemoryExtractorBlockEntity;
+import com.imoonday.on1chest.blocks.entities.TransferBlockEntity;
 import com.imoonday.on1chest.init.ModBlockEntities;
+import net.minecraft.block.BlockEntityProvider;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
@@ -25,10 +26,11 @@ import org.jetbrains.annotations.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MemoryExtractorBlock extends ConnectableBlock {
+public class MemoryExtractorBlock extends ConnectableBlock implements BlockEntityProvider {
 
     private static final Map<Direction, VoxelShape> BOUNDING_SHAPES = Util.make(() -> {
         Map<Direction, VoxelShape> map = new HashMap<>();
+
         VoxelShape shape = VoxelShapes.empty();
         shape = VoxelShapes.union(shape, VoxelShapes.cuboid(0.375, 0, 0.375, 0.625, 0.625, 0.625));
         shape = VoxelShapes.union(shape, VoxelShapes.cuboid(0.3125, 0.0625, 0.25, 0.6875, 0.125, 0.3125));
@@ -44,6 +46,7 @@ public class MemoryExtractorBlock extends ConnectableBlock {
         shape = VoxelShapes.union(shape, VoxelShapes.cuboid(0.25, 0.3125, 0.3125, 0.3125, 0.375, 0.6875));
         shape = VoxelShapes.union(shape, VoxelShapes.cuboid(0.6875, 0.3125, 0.3125, 0.75, 0.375, 0.6875));
         map.put(Direction.UP, shape);
+
         shape = VoxelShapes.empty();
         shape = VoxelShapes.union(shape, VoxelShapes.cuboid(0.375, 0.375, 0.375, 0.625, 1, 0.625));
         shape = VoxelShapes.union(shape, VoxelShapes.cuboid(0.3125, 0.875, 0.6875, 0.6875, 0.9375, 0.75));
@@ -59,6 +62,7 @@ public class MemoryExtractorBlock extends ConnectableBlock {
         shape = VoxelShapes.union(shape, VoxelShapes.cuboid(0.25, 0.625, 0.3125, 0.3125, 0.6875, 0.6875));
         shape = VoxelShapes.union(shape, VoxelShapes.cuboid(0.6875, 0.625, 0.3125, 0.75, 0.6875, 0.6875));
         map.put(Direction.DOWN, shape);
+
         shape = VoxelShapes.empty();
         shape = VoxelShapes.union(shape, VoxelShapes.cuboid(0.375, 0.375, 0.375, 0.625, 0.625, 1));
         shape = VoxelShapes.union(shape, VoxelShapes.cuboid(0.3125, 0.25, 0.875, 0.6875, 0.3125, 0.9375));
@@ -74,6 +78,7 @@ public class MemoryExtractorBlock extends ConnectableBlock {
         shape = VoxelShapes.union(shape, VoxelShapes.cuboid(0.25, 0.3125, 0.625, 0.3125, 0.6875, 0.6875));
         shape = VoxelShapes.union(shape, VoxelShapes.cuboid(0.6875, 0.3125, 0.625, 0.75, 0.6875, 0.6875));
         map.put(Direction.NORTH, shape);
+
         shape = VoxelShapes.empty();
         shape = VoxelShapes.union(shape, VoxelShapes.cuboid(0.375, 0.375, 0, 0.625, 0.625, 0.625));
         shape = VoxelShapes.union(shape, VoxelShapes.cuboid(0.3125, 0.6875, 0.0625, 0.6875, 0.75, 0.125));
@@ -89,6 +94,7 @@ public class MemoryExtractorBlock extends ConnectableBlock {
         shape = VoxelShapes.union(shape, VoxelShapes.cuboid(0.25, 0.3125, 0.3125, 0.3125, 0.6875, 0.375));
         shape = VoxelShapes.union(shape, VoxelShapes.cuboid(0.6875, 0.3125, 0.3125, 0.75, 0.6875, 0.375));
         map.put(Direction.SOUTH, shape);
+
         shape = VoxelShapes.empty();
         shape = VoxelShapes.union(shape, VoxelShapes.cuboid(0, 0.375, 0.375, 0.625, 0.625, 0.625));
         shape = VoxelShapes.union(shape, VoxelShapes.cuboid(0.0625, 0.3125, 0.25, 0.125, 0.6875, 0.3125));
@@ -104,6 +110,7 @@ public class MemoryExtractorBlock extends ConnectableBlock {
         shape = VoxelShapes.union(shape, VoxelShapes.cuboid(0.3125, 0.6875, 0.3125, 0.375, 0.75, 0.6875));
         shape = VoxelShapes.union(shape, VoxelShapes.cuboid(0.3125, 0.25, 0.3125, 0.375, 0.3125, 0.6875));
         map.put(Direction.EAST, shape);
+
         shape = VoxelShapes.empty();
         shape = VoxelShapes.union(shape, VoxelShapes.cuboid(0.375, 0.375, 0.375, 1, 0.625, 0.625));
         shape = VoxelShapes.union(shape, VoxelShapes.cuboid(0.875, 0.3125, 0.25, 0.9375, 0.6875, 0.3125));
@@ -119,6 +126,7 @@ public class MemoryExtractorBlock extends ConnectableBlock {
         shape = VoxelShapes.union(shape, VoxelShapes.cuboid(0.625, 0.25, 0.3125, 0.6875, 0.3125, 0.6875));
         shape = VoxelShapes.union(shape, VoxelShapes.cuboid(0.625, 0.6875, 0.3125, 0.6875, 0.75, 0.6875));
         map.put(Direction.WEST, shape);
+
         return map;
     });
 
@@ -151,10 +159,7 @@ public class MemoryExtractorBlock extends ConnectableBlock {
         if (world.isClient) {
             return ActionResult.SUCCESS;
         }
-        if (hand == Hand.OFF_HAND) {
-            return ActionResult.PASS;
-        }
-        if (!(world.getBlockEntity(pos) instanceof AbstractTransferBlockEntity entity)) {
+        if (!(world.getBlockEntity(pos) instanceof TransferBlockEntity entity)) {
             return ActionResult.PASS;
         }
         ItemStack stack = player.getMainHandStack();

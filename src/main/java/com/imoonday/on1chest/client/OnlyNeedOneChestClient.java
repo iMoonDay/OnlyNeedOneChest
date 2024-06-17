@@ -1,5 +1,6 @@
 package com.imoonday.on1chest.client;
 
+import com.imoonday.on1chest.api.IScreenDataReceiver;
 import com.imoonday.on1chest.client.renderer.GlassStorageMemoryBlockEntityRenderer;
 import com.imoonday.on1chest.client.renderer.ItemExporterBlockEntityRenderer;
 import com.imoonday.on1chest.client.renderer.MemoryExtractorBlockEntityRenderer;
@@ -12,7 +13,6 @@ import com.imoonday.on1chest.network.NetworkHandler;
 import com.imoonday.on1chest.screen.client.StorageAssessorScreen;
 import com.imoonday.on1chest.utils.CombinedItemStack;
 import com.imoonday.on1chest.utils.CraftingRecipeTreeManager;
-import com.imoonday.on1chest.utils.IScreenDataReceiver;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;

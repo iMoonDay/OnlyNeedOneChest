@@ -11,6 +11,8 @@
   "block.on1chest.item_exporter": "物品导出器",
   "block.on1chest.item_exporter.any": "任意",
   "block.on1chest.item_exporter.match": "匹配模式",
+  "block.on1chest.memory_converter": "内存转换器",
+  "block.on1chest.memory_converter.tooltip": "让任意容器能被访问器访问",
   "block.on1chest.memory_extractor": "内存提取器",
   "block.on1chest.netherite_storage_memory_block": "下界合金存储内存块",
   "block.on1chest.obsidian_storage_memory_block": "黑曜石存储内存块",

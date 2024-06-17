@@ -1,12 +1,8 @@
 package com.imoonday.on1chest.blocks;
 
-import com.imoonday.on1chest.utils.ConnectBlock;
-import com.imoonday.on1chest.utils.Connectable;
+import com.imoonday.on1chest.api.ConnectBlock;
+import com.imoonday.on1chest.api.Connectable;
 import net.minecraft.block.*;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.entity.BlockEntityTicker;
-import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.item.ItemPlacementContext;
@@ -14,11 +10,8 @@ import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.state.property.DirectionProperty;
 import net.minecraft.state.property.Properties;
-import net.minecraft.util.ActionResult;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
-import net.minecraft.util.Hand;
-import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.shape.VoxelShape;
@@ -26,11 +19,10 @@ import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 
-public abstract class ConnectableBlock extends ConnectingBlock implements ConnectBlock, BlockEntityProvider, Waterloggable, Connectable {
+public abstract class ConnectableBlock extends ConnectingBlock implements ConnectBlock, Waterloggable, Connectable {
     public static final DirectionProperty FACING = Properties.FACING;
     public static final BooleanProperty NORTH = Properties.NORTH;
     public static final BooleanProperty EAST = Properties.EAST;
@@ -48,14 +40,6 @@ public abstract class ConnectableBlock extends ConnectingBlock implements Connec
         super(radius, settings);
         this.setDefaultState(this.stateManager.getDefaultState().with(FACING, Direction.UP).with(WATERLOGGED, false).with(NORTH, false).with(EAST, false).with(WEST, false).with(SOUTH, false).with(UP, false).with(DOWN, false));
     }
-
-    @Nullable
-    @Override
-    public abstract BlockEntity createBlockEntity(BlockPos pos, BlockState state);
-
-    @Nullable
-    @Override
-    public abstract <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type);
 
     @Override
     public BlockRenderType getRenderType(BlockState state) {
@@ -134,7 +118,4 @@ public abstract class ConnectableBlock extends ConnectingBlock implements Connec
     public BlockState handleConnection(BlockState state, WorldAccess world, BlockPos pos) {
         return Connectable.super.handleConnection(state, world, pos).with(FACING_PROPERTIES.get(state.get(FACING).getOpposite()), false);
     }
-
-    @Override
-    public abstract ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit);
 }

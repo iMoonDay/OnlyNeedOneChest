@@ -1,11 +1,11 @@
 package com.imoonday.on1chest.screen;
 
+import com.imoonday.on1chest.api.IAutoCraftingHandler;
 import com.imoonday.on1chest.blocks.entities.StorageAccessorBlockEntity;
 import com.imoonday.on1chest.blocks.entities.StorageMemoryBlockEntity;
 import com.imoonday.on1chest.init.ModScreens;
 import com.imoonday.on1chest.network.NetworkHandler;
 import com.imoonday.on1chest.utils.CombinedItemStack;
-import com.imoonday.on1chest.utils.IAutoCraftingHandler;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.CraftingInventory;

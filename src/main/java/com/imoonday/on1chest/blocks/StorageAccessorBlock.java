@@ -1,8 +1,8 @@
 package com.imoonday.on1chest.blocks;
 
+import com.imoonday.on1chest.api.ConnectBlock;
 import com.imoonday.on1chest.blocks.entities.StorageAccessorBlockEntity;
 import com.imoonday.on1chest.init.ModBlockEntities;
-import com.imoonday.on1chest.utils.ConnectBlock;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.BlockWithEntity;

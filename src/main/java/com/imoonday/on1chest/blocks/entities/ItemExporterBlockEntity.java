@@ -1,11 +1,11 @@
 package com.imoonday.on1chest.blocks.entities;
 
+import com.imoonday.on1chest.api.ConnectBlock;
+import com.imoonday.on1chest.api.RecipeFilter;
 import com.imoonday.on1chest.blocks.ItemExporterBlock;
 import com.imoonday.on1chest.blocks.StorageMemoryBlock;
 import com.imoonday.on1chest.init.ModBlockEntities;
-import com.imoonday.on1chest.utils.ConnectBlock;
 import com.imoonday.on1chest.utils.PositionPredicate;
-import com.imoonday.on1chest.utils.RecipeFilter;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.ChestBlock;
 import net.minecraft.block.entity.BlockEntity;
@@ -20,13 +20,13 @@ import net.minecraft.world.World;
 import java.util.Arrays;
 import java.util.List;
 
-public class ItemExporterBlockEntity extends AbstractTransferBlockEntity {
+public class ItemExporterBlockEntity extends TransferBlockEntity {
 
     public ItemExporterBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.ITEM_EXPORTER_BLOCK_ENTITY, pos, state);
     }
 
-    public static void tick(World world, BlockPos pos, BlockState state, AbstractTransferBlockEntity entity) {
+    public static void tick(World world, BlockPos pos, BlockState state, TransferBlockEntity entity) {
         tickUpdate(world, pos, state, entity);
         if (--entity.cooldown <= 0) {
             Direction opposite = state.get(ItemExporterBlock.FACING).getOpposite();
@@ -43,9 +43,7 @@ public class ItemExporterBlockEntity extends AbstractTransferBlockEntity {
                 start:
                 for (int i = 0; i < inventory.size(); i++) {
                     ItemStack stack = inventory.getStack(i);
-                    if (stack.isEmpty()) {
-                        continue;
-                    }
+                    if (stack.isEmpty()) continue;
                     Item target;
                     boolean tested = false;
                     if (entity.matchMode && blockEntity instanceof RecipeFilter filter && filter.shouldFilter()) {
@@ -56,10 +54,8 @@ public class ItemExporterBlockEntity extends AbstractTransferBlockEntity {
                     } else if ((target = entity.target) != null && !stack.isOf(target)) {
                         continue;
                     }
-                    List<Inventory> inventories = ConnectBlock.getConnectedBlocks(world, pos, PositionPredicate.create(world, offset).add((world1, pos1) -> world1.getBlockEntity(pos1) instanceof StorageMemoryBlockEntity && Arrays.stream(Direction.values()).anyMatch(direction -> world1.getBlockEntity(pos1.offset(direction)) instanceof AbstractTransferBlockEntity exporter && exporter.getCachedState().get(ItemExporterBlock.FACING) == direction && stack.getItem() == exporter.target))).stream().filter(pair -> pair.getLeft().getBlockState(pair.getRight()).getBlock() instanceof StorageMemoryBlock && pair.getLeft().getBlockState(pair.getRight()).get(StorageMemoryBlock.ACTIVATED) && pair.getLeft().getBlockEntity(pair.getRight()) instanceof StorageMemoryBlockEntity).map(pair -> (Inventory) pair.getLeft().getBlockEntity(pair.getRight())).toList();
-                    if (inventories.isEmpty()) {
-                        return;
-                    }
+                    List<Inventory> inventories = ConnectBlock.getConnectedBlocks(world, pos, PositionPredicate.create(world, offset).add((world1, pos1) -> world1.getBlockEntity(pos1) instanceof StorageMemoryBlockEntity && Arrays.stream(Direction.values()).anyMatch(direction -> world1.getBlockEntity(pos1.offset(direction)) instanceof TransferBlockEntity exporter && exporter.getCachedState().get(ItemExporterBlock.FACING) == direction && stack.getItem() == exporter.target))).stream().filter(pair -> pair.getLeft().getBlockState(pair.getRight()).getBlock() instanceof StorageMemoryBlock && pair.getLeft().getBlockState(pair.getRight()).get(StorageMemoryBlock.ACTIVATED) && pair.getLeft().getBlockEntity(pair.getRight()) instanceof StorageMemoryBlockEntity).map(pair -> (Inventory) pair.getLeft().getBlockEntity(pair.getRight())).toList();
+                    if (inventories.isEmpty()) return;
                     for (Inventory validInv : inventories) {
                         for (int j = 0; j < validInv.size(); j++) {
                             ItemStack invStack = validInv.getStack(j);

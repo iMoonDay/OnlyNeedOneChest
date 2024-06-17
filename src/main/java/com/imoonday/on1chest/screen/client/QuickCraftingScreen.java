@@ -1,6 +1,7 @@
 package com.imoonday.on1chest.screen.client;
 
 import com.imoonday.on1chest.OnlyNeedOneChest;
+import com.imoonday.on1chest.api.IScreenDataReceiver;
 import com.imoonday.on1chest.client.gui.tooltip.IngredientTooltip;
 import com.imoonday.on1chest.network.NetworkHandler;
 import com.imoonday.on1chest.screen.QuickCraftingScreenHandler;
@@ -8,7 +9,6 @@ import com.imoonday.on1chest.screen.StorageAssessorScreenHandler;
 import com.imoonday.on1chest.screen.widgets.ButtonIconWidget;
 import com.imoonday.on1chest.screen.widgets.ItemStackWidget;
 import com.imoonday.on1chest.utils.CraftingRecipeTreeManager;
-import com.imoonday.on1chest.utils.IScreenDataReceiver;
 import com.imoonday.on1chest.utils.ItemStack2ObjectMap;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;

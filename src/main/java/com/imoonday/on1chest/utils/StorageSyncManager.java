@@ -1,5 +1,6 @@
 package com.imoonday.on1chest.utils;
 
+import com.imoonday.on1chest.api.InteractHandler;
 import com.imoonday.on1chest.network.NetworkHandler;
 import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;

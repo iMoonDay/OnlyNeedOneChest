@@ -1,4 +1,4 @@
-package com.imoonday.on1chest.utils;
+package com.imoonday.on1chest.api;
 
 import com.imoonday.on1chest.blocks.ConnectionCableBlock;
 import net.minecraft.block.BlockState;
@@ -7,6 +7,7 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.world.WorldAccess;
 
 public interface Connectable {
+
     static boolean shouldConnect(WorldAccess world, BlockPos pos, Direction direction) {
         BlockState state = world.getBlockState(pos.offset(direction));
         return state.getBlock() instanceof ConnectBlock connectBlock && connectBlock.canConnect(state, direction.getOpposite());

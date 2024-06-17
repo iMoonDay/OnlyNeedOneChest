@@ -1,11 +1,11 @@
 package com.imoonday.on1chest.blocks.entities;
 
+import com.imoonday.on1chest.api.ConnectBlock;
+import com.imoonday.on1chest.api.RecipeFilter;
 import com.imoonday.on1chest.blocks.MemoryExtractorBlock;
 import com.imoonday.on1chest.blocks.StorageMemoryBlock;
 import com.imoonday.on1chest.init.ModBlockEntities;
-import com.imoonday.on1chest.utils.ConnectBlock;
 import com.imoonday.on1chest.utils.PositionPredicate;
-import com.imoonday.on1chest.utils.RecipeFilter;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.ChestBlock;
 import net.minecraft.block.entity.BlockEntity;
@@ -20,7 +20,7 @@ import net.minecraft.world.World;
 import java.util.Arrays;
 import java.util.List;
 
-public class MemoryExtractorBlockEntity extends AbstractTransferBlockEntity {
+public class MemoryExtractorBlockEntity extends TransferBlockEntity {
 
     public MemoryExtractorBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.MEMORY_EXTRACTOR_BLOCK_ENTITY, pos, state);
@@ -32,9 +32,7 @@ public class MemoryExtractorBlockEntity extends AbstractTransferBlockEntity {
             Direction opposite = state.get(MemoryExtractorBlock.FACING).getOpposite();
             BlockPos offset = pos.offset(opposite);
             List<Inventory> inventories = ConnectBlock.getConnectedBlocks(world, pos, PositionPredicate.create(world, offset).add((world1, pos1) -> world1.getBlockEntity(pos1) instanceof StorageMemoryBlockEntity && Arrays.stream(Direction.values()).anyMatch(direction -> world1.getBlockEntity(pos1.offset(direction)) instanceof MemoryExtractorBlockEntity extractor && extractor.getCachedState().get(MemoryExtractorBlock.FACING) == direction && entity.target == extractor.target))).stream().filter(pair -> pair.getLeft().getBlockState(pair.getRight()).getBlock() instanceof StorageMemoryBlock && pair.getLeft().getBlockState(pair.getRight()).get(StorageMemoryBlock.ACTIVATED) && pair.getLeft().getBlockEntity(pair.getRight()) instanceof StorageMemoryBlockEntity).map(pair -> (Inventory) pair.getLeft().getBlockEntity(pair.getRight())).toList();
-            if (inventories.isEmpty()) {
-                return;
-            }
+            if (inventories.isEmpty()) return;
             BlockEntity blockEntity = world.getBlockEntity(offset);
             if (blockEntity instanceof Inventory inventory) {
                 BlockState blockState = world.getBlockState(offset);

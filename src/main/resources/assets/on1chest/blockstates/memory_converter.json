@@ -1,0 +1,397 @@
+{
+  "multipart": [
+    {
+      "when": {
+        "facing": "down",
+        "active": "false"
+      },
+      "apply": {
+        "model": "on1chest:block/memory_converter_closed",
+        "x": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "down",
+        "active": "true",
+        "used_capacity": "full"
+      },
+      "apply": {
+        "model": "on1chest:block/memory_converter_full",
+        "x": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "down",
+        "active": "true",
+        "used_capacity": "high"
+      },
+      "apply": {
+        "model": "on1chest:block/memory_converter_high",
+        "x": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "down",
+        "active": "true",
+        "used_capacity": "low"
+      },
+      "apply": {
+        "model": "on1chest:block/memory_converter_low",
+        "x": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "down",
+        "active": "true",
+        "used_capacity": "zero"
+      },
+      "apply": {
+        "model": "on1chest:block/memory_converter_zero",
+        "x": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "active": "false"
+      },
+      "apply": {
+        "model": "on1chest:block/memory_converter_closed",
+        "x": 90,
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "active": "true",
+        "used_capacity": "full"
+      },
+      "apply": {
+        "model": "on1chest:block/memory_converter_full",
+        "x": 90,
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "active": "true",
+        "used_capacity": "high"
+      },
+      "apply": {
+        "model": "on1chest:block/memory_converter_high",
+        "x": 90,
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "active": "true",
+        "used_capacity": "low"
+      },
+      "apply": {
+        "model": "on1chest:block/memory_converter_low",
+        "x": 90,
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "active": "true",
+        "used_capacity": "zero"
+      },
+      "apply": {
+        "model": "on1chest:block/memory_converter_zero",
+        "x": 90,
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "active": "false"
+      },
+      "apply": {
+        "model": "on1chest:block/memory_converter_closed",
+        "x": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "active": "true",
+        "used_capacity": "full"
+      },
+      "apply": {
+        "model": "on1chest:block/memory_converter_full",
+        "x": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "active": "true",
+        "used_capacity": "high"
+      },
+      "apply": {
+        "model": "on1chest:block/memory_converter_high",
+        "x": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "active": "true",
+        "used_capacity": "low"
+      },
+      "apply": {
+        "model": "on1chest:block/memory_converter_low",
+        "x": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "active": "true",
+        "used_capacity": "zero"
+      },
+      "apply": {
+        "model": "on1chest:block/memory_converter_zero",
+        "x": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "active": "false"
+      },
+      "apply": {
+        "model": "on1chest:block/memory_converter_closed",
+        "x": 90,
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "active": "true",
+        "used_capacity": "full"
+      },
+      "apply": {
+        "model": "on1chest:block/memory_converter_full",
+        "x": 90,
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "active": "true",
+        "used_capacity": "high"
+      },
+      "apply": {
+        "model": "on1chest:block/memory_converter_high",
+        "x": 90,
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "active": "true",
+        "used_capacity": "low"
+      },
+      "apply": {
+        "model": "on1chest:block/memory_converter_low",
+        "x": 90,
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "active": "true",
+        "used_capacity": "zero"
+      },
+      "apply": {
+        "model": "on1chest:block/memory_converter_zero",
+        "x": 90,
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "up",
+        "active": "false"
+      },
+      "apply": {
+        "model": "on1chest:block/memory_converter_closed"
+      }
+    },
+    {
+      "when": {
+        "facing": "up",
+        "active": "true",
+        "used_capacity": "full"
+      },
+      "apply": {
+        "model": "on1chest:block/memory_converter_full"
+      }
+    },
+    {
+      "when": {
+        "facing": "up",
+        "active": "true",
+        "used_capacity": "high"
+      },
+      "apply": {
+        "model": "on1chest:block/memory_converter_high"
+      }
+    },
+    {
+      "when": {
+        "facing": "up",
+        "active": "true",
+        "used_capacity": "low"
+      },
+      "apply": {
+        "model": "on1chest:block/memory_converter_low"
+      }
+    },
+    {
+      "when": {
+        "facing": "up",
+        "active": "true",
+        "used_capacity": "zero"
+      },
+      "apply": {
+        "model": "on1chest:block/memory_converter_zero"
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "active": "false"
+      },
+      "apply": {
+        "model": "on1chest:block/memory_converter_closed",
+        "x": 90,
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "active": "true",
+        "used_capacity": "full"
+      },
+      "apply": {
+        "model": "on1chest:block/memory_converter_full",
+        "x": 90,
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "active": "true",
+        "used_capacity": "high"
+      },
+      "apply": {
+        "model": "on1chest:block/memory_converter_high",
+        "x": 90,
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "active": "true",
+        "used_capacity": "low"
+      },
+      "apply": {
+        "model": "on1chest:block/memory_converter_low",
+        "x": 90,
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "active": "true",
+        "used_capacity": "zero"
+      },
+      "apply": {
+        "model": "on1chest:block/memory_converter_zero",
+        "x": 90,
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "north": "true"
+      },
+      "apply": {
+        "model": "on1chest:block/connection_cable_open",
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "east": "true"
+      },
+      "apply": {
+        "model": "on1chest:block/connection_cable_open",
+        "y": 90,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "south": "true"
+      },
+      "apply": {
+        "model": "on1chest:block/connection_cable_open",
+        "y": 180,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "west": "true"
+      },
+      "apply": {
+        "model": "on1chest:block/connection_cable_open",
+        "y": 270,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "up": "true"
+      },
+      "apply": {
+        "model": "on1chest:block/connection_cable_open",
+        "x": -90,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "down": "true"
+      },
+      "apply": {
+        "model": "on1chest:block/connection_cable_open",
+        "x": 90,
+        "uvlock": true
+      }
+    }
+  ]
+}

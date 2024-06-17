@@ -1,7 +1,7 @@
 package com.imoonday.on1chest.blocks;
 
-import com.imoonday.on1chest.utils.ConnectBlock;
-import com.imoonday.on1chest.utils.Connectable;
+import com.imoonday.on1chest.api.ConnectBlock;
+import com.imoonday.on1chest.api.Connectable;
 import net.minecraft.block.*;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.FluidState;
