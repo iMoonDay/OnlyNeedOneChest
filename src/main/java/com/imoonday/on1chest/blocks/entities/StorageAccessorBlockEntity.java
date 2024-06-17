@@ -3,6 +3,7 @@ package com.imoonday.on1chest.blocks.entities;
 import com.imoonday.on1chest.api.ConnectBlock;
 import com.imoonday.on1chest.api.ConnectBlockConverter;
 import com.imoonday.on1chest.api.ConnectInventoryProvider;
+import com.imoonday.on1chest.api.StorageAccessorEvent;
 import com.imoonday.on1chest.blocks.StorageMemoryBlock;
 import com.imoonday.on1chest.init.ModBlockEntities;
 import com.imoonday.on1chest.init.ModGameRules;
@@ -31,8 +32,6 @@ import java.util.stream.IntStream;
 
 public class StorageAccessorBlockEntity extends BlockEntity implements NamedScreenHandlerFactory {
 
-    private static final List<MultiInventory.InsertionPredicate> INSERTION_PREDICATES = new ArrayList<>();
-    private static final List<MultiInventory.RemovalPredicate> REMOVAL_PREDICATES = new ArrayList<>();
     protected final MultiInventory inventory = new MultiInventory();
     protected final Map<CombinedItemStack, Long> items = new HashMap<>();
     protected boolean updateItems = true;
@@ -63,11 +62,11 @@ public class StorageAccessorBlockEntity extends BlockEntity implements NamedScre
     }
 
     private static boolean canInsert(Inventory inventory, int slot, ItemStack stack) {
-        return INSERTION_PREDICATES.stream().allMatch(predicate -> predicate.canInsert(inventory, slot, stack));
+        return StorageAccessorEvent.INSERT.invoker().canInsert(inventory, slot, stack);
     }
 
     private static boolean canRemove(Inventory inventory, int slot) {
-        return REMOVAL_PREDICATES.stream().allMatch(predicate -> predicate.canRemove(inventory, slot));
+        return StorageAccessorEvent.REMOVE.invoker().canRemove(inventory, slot);
     }
 
     @Override
@@ -185,13 +184,5 @@ public class StorageAccessorBlockEntity extends BlockEntity implements NamedScre
             }
         }
         return !stackMap.containsValue(false);
-    }
-
-    public static void addInsertionPredicate(MultiInventory.InsertionPredicate insertionPredicate) {
-        INSERTION_PREDICATES.add(insertionPredicate);
-    }
-
-    public static void addRemovalPredicate(MultiInventory.RemovalPredicate removalPredicate) {
-        REMOVAL_PREDICATES.add(removalPredicate);
     }
 }
