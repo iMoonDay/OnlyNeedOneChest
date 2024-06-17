@@ -2,7 +2,6 @@ package com.imoonday.on1chest.screen.widgets;
 
 import com.imoonday.on1chest.OnlyNeedOneChest;
 import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
@@ -18,6 +17,7 @@ public class SmallCheckboxWidget extends PressableWidget {
     private static final Identifier TEXTURE = OnlyNeedOneChest.id("textures/button/small_checkbox.png");
     private static final int TEXTURE_SIZE = 13;
     private boolean checked;
+    private final TextRenderer textRenderer;
     private final boolean showMessage;
     private OnPress onPress;
 
@@ -27,6 +27,7 @@ public class SmallCheckboxWidget extends PressableWidget {
 
     public SmallCheckboxWidget(TextRenderer textRenderer, int x, int y, int width, Text message, boolean checked, boolean showMessage, OnPress onPress) {
         super(x, y, width, TEXTURE_SIZE, message);
+        this.textRenderer = textRenderer;
         this.showMessage = showMessage;
         this.checked = checked;
         this.onPress = onPress;
@@ -62,9 +63,7 @@ public class SmallCheckboxWidget extends PressableWidget {
 
     @Override
     public void renderButton(DrawContext context, int mouseX, int mouseY, float delta) {
-        MinecraftClient minecraftClient = MinecraftClient.getInstance();
         RenderSystem.enableDepthTest();
-        TextRenderer textRenderer = minecraftClient.textRenderer;
         context.setShaderColor(1.0f, 1.0f, 1.0f, this.alpha);
         RenderSystem.enableBlend();
         context.drawTexture(TEXTURE, this.getX(), this.getY(), 0f, 0f, TEXTURE_SIZE, TEXTURE_SIZE, 32, 16);

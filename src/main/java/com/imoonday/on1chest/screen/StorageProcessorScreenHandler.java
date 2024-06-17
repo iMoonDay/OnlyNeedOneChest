@@ -31,7 +31,6 @@ import net.minecraft.world.World;
 
 import java.util.*;
 
-//@IPNPlayerSideOnly
 public class StorageProcessorScreenHandler extends StorageAssessorScreenHandler implements IAutoCraftingHandler {
 
     private final RecipeInputInventory input = new CraftingInventory(this, 3, 3);
@@ -182,9 +181,7 @@ public class StorageProcessorScreenHandler extends StorageAssessorScreenHandler 
     protected static void updateResult(ScreenHandler handler, World world, PlayerEntity player, RecipeInputInventory craftingInventory, CraftingResultInventory resultInventory) {
         ItemStack itemStack2;
         CraftingRecipe craftingRecipe;
-        if (world.isClient) {
-            return;
-        }
+        if (world.isClient) return;
         ServerPlayerEntity serverPlayerEntity = (ServerPlayerEntity) player;
         ItemStack itemStack = ItemStack.EMPTY;
         Optional<CraftingRecipe> optional = world.getServer().getRecipeManager().getFirstMatch(RecipeType.CRAFTING, craftingInventory, world);
@@ -232,7 +229,7 @@ public class StorageProcessorScreenHandler extends StorageAssessorScreenHandler 
             fillInputs(stacks, nbt.getBoolean("m"));
         }
         if (nbt.contains("w")) {
-            if (accessor != null && accessor.getInventory().size() > (StorageMemoryBlockEntity.MAX_LEVEL + 1) * 27 * 10) {
+            if (accessor != null && accessor.size() > (StorageMemoryBlockEntity.MAX_LEVEL + 1) * 27 * 10) {
                 NetworkHandler.sendToClient(player, "w", NbtByte.ONE);
             }
         }

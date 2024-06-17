@@ -33,7 +33,6 @@ import net.minecraft.world.World;
 
 import java.util.*;
 
-//@IPNPlayerSideOnly
 public class StorageAssessorScreenHandler extends AbstractRecipeScreenHandler<RecipeInputInventory> implements IScreenDataReceiver, InteractHandler {
 
     protected StorageAccessorBlockEntity accessor;

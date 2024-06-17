@@ -3,6 +3,7 @@ package com.imoonday.on1chest.blocks.entities;
 import com.imoonday.on1chest.api.ConnectBlock;
 import com.imoonday.on1chest.api.ConnectBlockConverter;
 import com.imoonday.on1chest.api.ConnectInventoryProvider;
+import com.imoonday.on1chest.api.StorageAccessorEvent;
 import com.imoonday.on1chest.blocks.StorageMemoryBlock;
 import com.imoonday.on1chest.init.ModBlockEntities;
 import com.imoonday.on1chest.init.ModGameRules;
@@ -16,6 +17,7 @@ import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventory;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.NamedScreenHandlerFactory;
 import net.minecraft.screen.ScreenHandler;
@@ -26,13 +28,12 @@ import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class StorageAccessorBlockEntity extends BlockEntity implements NamedScreenHandlerFactory {
+public class StorageAccessorBlockEntity extends BlockEntity implements NamedScreenHandlerFactory, Inventory {
 
-    private static final List<MultiInventory.InsertionPredicate> INSERTION_PREDICATES = new ArrayList<>();
-    private static final List<MultiInventory.RemovalPredicate> REMOVAL_PREDICATES = new ArrayList<>();
     protected final MultiInventory inventory = new MultiInventory();
     protected final Map<CombinedItemStack, Long> items = new HashMap<>();
     protected boolean updateItems = true;
@@ -48,13 +49,13 @@ public class StorageAccessorBlockEntity extends BlockEntity implements NamedScre
     }
 
     public static void tick(World world, BlockPos pos, BlockState state, StorageAccessorBlockEntity entity) {
-        entity.inventory.clear();
+        entity.clear();
         entity.getAllMemories(world, pos).forEach(entity.inventory::add);
-        entity.inventory.refresh();
+        entity.refresh();
         if (entity.updateItems) {
             entity.items.clear();
-            IntStream.range(0, entity.inventory.size())
-                    .mapToObj(entity.inventory::getStack)
+            IntStream.range(0, entity.size())
+                    .mapToObj(entity::getStack)
                     .filter(s -> !s.isEmpty())
                     .map(CombinedItemStack::new)
                     .forEach(s -> entity.items.merge(s, s.getCount(), Long::sum));
@@ -63,11 +64,11 @@ public class StorageAccessorBlockEntity extends BlockEntity implements NamedScre
     }
 
     private static boolean canInsert(Inventory inventory, int slot, ItemStack stack) {
-        return INSERTION_PREDICATES.stream().allMatch(predicate -> predicate.canInsert(inventory, slot, stack));
+        return StorageAccessorEvent.INSERT.invoker().canInsert(inventory, slot, stack);
     }
 
     private static boolean canRemove(Inventory inventory, int slot) {
-        return REMOVAL_PREDICATES.stream().allMatch(predicate -> predicate.canRemove(inventory, slot));
+        return StorageAccessorEvent.REMOVE.invoker().canRemove(inventory, slot);
     }
 
     @Override
@@ -91,12 +92,14 @@ public class StorageAccessorBlockEntity extends BlockEntity implements NamedScre
             BlockPos pos1 = pair.getRight();
             BlockState state = world1.getBlockState(pos1);
             BlockEntity blockEntity = world1.getBlockEntity(pos1);
+            if (blockEntity instanceof StorageAccessorBlockEntity) return null;
             if (state.getBlock() instanceof StorageMemoryBlock && state.get(StorageMemoryBlock.ACTIVATED) && blockEntity instanceof StorageMemoryBlockEntity entity) {
                 return entity;
             } else if (ConnectBlockConverter.isConverted(world1, pos1) && blockEntity instanceof Inventory inventory) {
                 return inventory;
             } else if (blockEntity instanceof ConnectInventoryProvider provider) {
-                return provider.getInventory();
+                Inventory inventory1 = provider.getInventory();
+                return inventory1 instanceof StorageAccessorBlockEntity ? null : inventory1;
             }
             return null;
         }).filter(Objects::nonNull).limit(limit).collect(Collectors.toCollection(ArrayList::new));
@@ -106,6 +109,10 @@ public class StorageAccessorBlockEntity extends BlockEntity implements NamedScre
         return inventory;
     }
 
+    public boolean hasInventory() {
+        return getInventory() != null;
+    }
+
     public Map<CombinedItemStack, Long> getStacks() {
         updateItems = true;
         return items;
@@ -113,20 +120,20 @@ public class StorageAccessorBlockEntity extends BlockEntity implements NamedScre
 
     public int getFreeSlotCount() {
         int empty = 0;
-        for (int i = 0; i < inventory.size(); i++) {
-            if (inventory.getStack(i).isEmpty()) empty++;
+        for (int i = 0; i < size(); i++) {
+            if (getStack(i).isEmpty()) empty++;
         }
         return empty;
     }
 
     public CombinedItemStack takeStack(CombinedItemStack stack, long max) {
-        if (stack != null && inventory != null && max > 0) {
+        if (stack != null && hasInventory() && max > 0) {
             ItemStack st = stack.getStack();
             CombinedItemStack cis = null;
-            for (int i = inventory.size() - 1; i >= 0; i--) {
-                ItemStack s = inventory.getStack(i);
+            for (int i = size() - 1; i >= 0; i--) {
+                ItemStack s = getStack(i);
                 if (ItemStack.canCombine(s, st)) {
-                    ItemStack pulled = inventory.removeStack(i, (int) max);
+                    ItemStack pulled = removeStack(i, (int) max);
                     if (!pulled.isEmpty()) {
                         if (cis == null) {
                             cis = new CombinedItemStack(pulled);
@@ -149,7 +156,7 @@ public class StorageAccessorBlockEntity extends BlockEntity implements NamedScre
     }
 
     public CombinedItemStack insertStack(CombinedItemStack stack) {
-        if (stack != null && inventory != null) {
+        if (stack != null && hasInventory()) {
             ItemStack stack1 = stack.getActualStack();
             ItemStack itemStack = inventory.insertItem(stack1);
             return itemStack.isEmpty() ? null : new CombinedItemStack(itemStack);
@@ -187,11 +194,93 @@ public class StorageAccessorBlockEntity extends BlockEntity implements NamedScre
         return !stackMap.containsValue(false);
     }
 
-    public static void addInsertionPredicate(MultiInventory.InsertionPredicate insertionPredicate) {
-        INSERTION_PREDICATES.add(insertionPredicate);
+    @Override
+    public int size() {
+        return inventory.size();
     }
 
-    public static void addRemovalPredicate(MultiInventory.RemovalPredicate removalPredicate) {
-        REMOVAL_PREDICATES.add(removalPredicate);
+    @Override
+    public boolean isEmpty() {
+        return inventory.isEmpty();
+    }
+
+    @Override
+    public ItemStack getStack(int slot) {
+        return inventory.getStack(slot);
+    }
+
+    @Override
+    public ItemStack removeStack(int slot, int amount) {
+        return inventory.removeStack(slot, amount);
+    }
+
+    @Override
+    public ItemStack removeStack(int slot) {
+        return inventory.removeStack(slot);
+    }
+
+    @Override
+    public void setStack(int slot, ItemStack stack) {
+        inventory.setStack(slot, stack);
+    }
+
+    @Override
+    public boolean canPlayerUse(PlayerEntity player) {
+        return inventory.canPlayerUse(player);
+    }
+
+    @Override
+    public void clear() {
+        inventory.clear();
+    }
+
+    @Override
+    public int getMaxCountPerStack() {
+        return inventory.getMaxCountPerStack();
+    }
+
+    @Override
+    public void onOpen(PlayerEntity player) {
+        inventory.onOpen(player);
+    }
+
+    @Override
+    public void onClose(PlayerEntity player) {
+        inventory.onClose(player);
+    }
+
+    @Override
+    public boolean isValid(int slot, ItemStack stack) {
+        return inventory.isValid(slot, stack);
+    }
+
+    @Override
+    public boolean canTransferTo(Inventory hopperInventory, int slot, ItemStack stack) {
+        return inventory.canTransferTo(hopperInventory, slot, stack);
+    }
+
+    @Override
+    public int count(Item item) {
+        return inventory.count(item);
+    }
+
+    @Override
+    public boolean containsAny(Set<Item> items) {
+        return inventory.containsAny(items);
+    }
+
+    @Override
+    public boolean containsAny(Predicate<ItemStack> predicate) {
+        return inventory.containsAny(predicate);
+    }
+
+    @Override
+    public void markDirty() {
+        inventory.markDirty();
+        super.markDirty();
+    }
+
+    public void refresh() {
+        inventory.refresh();
     }
 }

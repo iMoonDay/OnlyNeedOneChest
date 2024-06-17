@@ -35,7 +35,7 @@ public class StorageAccessorBlock extends BlockWithEntity implements ConnectBloc
         if (!world.isClient) {
             if (player.isSneaking()) {
                 List<Inventory> inventories = accessorBlock.getAllMemories(world, pos);
-                int size = accessorBlock.getInventory().size();
+                int size = accessorBlock.size();
                 int occupied = size - accessorBlock.getFreeSlotCount();
                 player.sendMessage(Text.literal("%d/%d(%d)".formatted(occupied, size, inventories.size())), true);
             } else {
