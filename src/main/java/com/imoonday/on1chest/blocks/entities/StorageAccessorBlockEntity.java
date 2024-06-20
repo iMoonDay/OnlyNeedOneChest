@@ -1,8 +1,8 @@
 package com.imoonday.on1chest.blocks.entities;
 
 import com.imoonday.on1chest.api.ConnectBlock;
-import com.imoonday.on1chest.api.ConnectBlockConverter;
 import com.imoonday.on1chest.api.ConnectInventoryProvider;
+import com.imoonday.on1chest.api.IgnoredInventory;
 import com.imoonday.on1chest.api.StorageAccessorEvent;
 import com.imoonday.on1chest.blocks.StorageMemoryBlock;
 import com.imoonday.on1chest.init.ModBlockEntities;
@@ -32,7 +32,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class StorageAccessorBlockEntity extends BlockEntity implements NamedScreenHandlerFactory, Inventory {
+public class StorageAccessorBlockEntity extends BlockEntity implements NamedScreenHandlerFactory, Inventory, IgnoredInventory {
 
     protected final MultiInventory inventory = new MultiInventory();
     protected final Map<CombinedItemStack, Long> items = new HashMap<>();
@@ -92,14 +92,12 @@ public class StorageAccessorBlockEntity extends BlockEntity implements NamedScre
             BlockPos pos1 = pair.getRight();
             BlockState state = world1.getBlockState(pos1);
             BlockEntity blockEntity = world1.getBlockEntity(pos1);
-            if (blockEntity instanceof StorageAccessorBlockEntity) return null;
+            if (IgnoredInventory.isIgnored(blockEntity)) return null;
             if (state.getBlock() instanceof StorageMemoryBlock && state.get(StorageMemoryBlock.ACTIVATED) && blockEntity instanceof StorageMemoryBlockEntity entity) {
                 return entity;
-            } else if (ConnectBlockConverter.isConverted(world1, pos1) && blockEntity instanceof Inventory inventory) {
-                return inventory;
             } else if (blockEntity instanceof ConnectInventoryProvider provider) {
                 Inventory inventory1 = provider.getInventory();
-                return inventory1 instanceof StorageAccessorBlockEntity ? null : inventory1;
+                return IgnoredInventory.isIgnored(inventory1) ? null : inventory1;
             }
             return null;
         }).filter(Objects::nonNull).limit(limit).collect(Collectors.toCollection(ArrayList::new));

@@ -20,6 +20,8 @@ import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 public abstract class ConnectableBlock extends ConnectingBlock implements ConnectBlock, Waterloggable, Connectable {
@@ -106,7 +108,16 @@ public abstract class ConnectableBlock extends ConnectingBlock implements Connec
 
     @Override
     public Direction[] getValidDirections(BlockState state) {
-        return FACING_PROPERTIES.entrySet().stream().filter(entry -> state.get(entry.getValue()) || state.get(FACING) == entry.getKey()).map(Map.Entry::getKey).toList().toArray(new Direction[6]);
+        List<Direction> list = new ArrayList<>();
+        for (Map.Entry<Direction, BooleanProperty> entry : FACING_PROPERTIES.entrySet()) {
+            Direction direction = entry.getKey();
+            if (state.get(entry.getValue()) || state.get(FACING) == direction) {
+                if (direction != null) {
+                    list.add(direction);
+                }
+            }
+        }
+        return list.toArray(new Direction[0]);
     }
 
     @Override

@@ -18,6 +18,7 @@
   "block.on1chest.obsidian_storage_memory_block": "Obsidian Storage Memory Block",
   "block.on1chest.quick_crafting_table": "Quick Crafting Table (Experimental)",
   "block.on1chest.recipe_processor": "Recipe Processor",
+  "block.on1chest.recipe_processor.tooltip": "Control activation status through redstone signals",
   "block.on1chest.storage_accessor_block": "Storage Accessor Block",
   "block.on1chest.storage_accessor_block.title": "Accessor",
   "block.on1chest.storage_blank_block": "Blank Storage Block",

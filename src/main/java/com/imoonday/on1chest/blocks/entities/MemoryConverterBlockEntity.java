@@ -7,6 +7,7 @@ import com.imoonday.on1chest.blocks.StorageMemoryBlock;
 import com.imoonday.on1chest.init.ModBlockEntities;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.ChestBlock;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.util.math.BlockPos;
@@ -33,8 +34,15 @@ public class MemoryConverterBlockEntity extends BlockEntity implements ConnectIn
         if (world == null) return null;
         BlockState state = world.getBlockState(pos);
         if (state.getBlock() instanceof ConnectBlockConverter converter && converter.isActive(world, pos, state)) {
-            BlockEntity blockEntity = world.getBlockEntity(pos.offset(converter.getConvertingDirection(world, pos, state)));
-            if (blockEntity instanceof Inventory inventory) {
+            BlockPos blockPos = converter.getConvertedPos(world, pos, state);
+            BlockState blockState = world.getBlockState(blockPos);
+            if (blockState.getBlock() instanceof ChestBlock block) {
+                Inventory inventory = ChestBlock.getInventory(block, blockState, world, blockPos, true);
+                if (inventory != null) {
+                    return inventory;
+                }
+            }
+            if (world.getBlockEntity(blockPos) instanceof Inventory inventory) {
                 return inventory;
             }
         }

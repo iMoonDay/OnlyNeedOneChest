@@ -18,6 +18,7 @@
   "block.on1chest.obsidian_storage_memory_block": "黑曜石存储内存块",
   "block.on1chest.quick_crafting_table": "快捷合成台(实验性)",
   "block.on1chest.recipe_processor": "配方处理器",
+  "block.on1chest.recipe_processor.tooltip": "通过红石信号控制激活状态",
   "block.on1chest.storage_accessor_block": "存储访问块",
   "block.on1chest.storage_accessor_block.title": "访问器",
   "block.on1chest.storage_blank_block": "存储空白块",

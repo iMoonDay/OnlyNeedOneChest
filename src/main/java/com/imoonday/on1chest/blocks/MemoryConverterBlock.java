@@ -105,8 +105,8 @@ public class MemoryConverterBlock extends ConnectableBlock implements BlockEntit
     }
 
     @Override
-    public Direction getConvertingDirection(World world, BlockPos pos, BlockState state) {
-        return state.get(FACING).getOpposite();
+    public BlockPos getConvertedPos(World world, BlockPos pos, BlockState state) {
+        return pos.offset(state.get(FACING).getOpposite());
     }
 
     @Override

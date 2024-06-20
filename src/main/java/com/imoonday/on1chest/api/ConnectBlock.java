@@ -23,10 +23,16 @@ public interface ConnectBlock {
             World currentWorld = currentPair.getLeft();
             BlockPos currentPos = currentPair.getRight();
             Direction[] directions = Direction.values();
-            if (currentWorld.getBlockEntity(currentPos) instanceof ConnectBlock connectBlock) {
-                directions = connectBlock.getValidDirections(currentWorld.getBlockState(currentPos));
+            BlockState currentState = currentWorld.getBlockState(currentPos);
+            Block currentBlock = currentState.getBlock();
+            if (currentBlock instanceof ConnectBlock connectBlock) {
+                directions = connectBlock.getValidDirections(currentState);
             }
             for (Direction direction : directions) {
+                if (direction == null) {
+                    System.err.println(currentBlock.getName().getString() + ": direction is null");
+                    continue;
+                }
                 BlockPos adjacentPos = currentPos.offset(direction);
                 if (result.stream().anyMatch(pair1 -> pair1.getLeft().equals(currentWorld) && pair1.getRight().equals(adjacentPos))) {
                     continue;
@@ -39,11 +45,6 @@ public interface ConnectBlock {
                     if (block.canContinue(currentWorld, adjacentPos, adjacentState)) {
                         queue.add(pair);
                     }
-                    if (currentWorld.getBlockEntity(adjacentPos) instanceof WirelessConnectorBlockEntity entity) {
-                        queue.addAll(entity.getNetworks());
-                    }
-                } else if (ConnectBlockConverter.isConverted(currentWorld, adjacentPos)) {
-                    result.add(pair);
                     if (currentWorld.getBlockEntity(adjacentPos) instanceof WirelessConnectorBlockEntity entity) {
                         queue.addAll(entity.getNetworks());
                     }
