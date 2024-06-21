@@ -75,7 +75,11 @@ Pinyin, and more.
 
 ### Recipe Processor Block/Recipe Record Card
 
-- To be supplemented.
+- Put the recipe record card into the recipe processor block, put the materials of a recipe into the crafting slots, and
+  then take out the recipe record card to save a recipe into the recipe record card.
+- The recipe record card can be stored in the recipe processor block, and the recipe processor block will automatically
+  try to craft the recipe (requires redstone signal activation).
+- Automatic input and output can be achieved through the cooperation of **Item Exporter** and **Memory Extractor**.
 
 ### Compressed Storage Memory Block
 
