@@ -44,9 +44,6 @@ import java.util.List;
 import java.util.*;
 import java.util.function.Function;
 
-//@IPNPlayerSideOnly
-//@IPNGuiHint(button = IPNButton.CONTINUOUS_CRAFTING, hide = true, bottom = 1000)
-//@IPNGuiHint(button = IPNButton.MOVE_TO_CONTAINER, bottom = -24)
 public class StorageAssessorScreen extends HandledScreen<StorageAssessorScreenHandler> implements IScreenDataReceiver {
 
     protected TextFieldWidget searchBox;

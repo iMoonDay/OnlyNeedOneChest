@@ -8,8 +8,6 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
-//@IPNPlayerSideOnly
-//@IPNGuiHint(button = IPNButton.CONTINUOUS_CRAFTING, hide = true, bottom = 1000)
 public class RecipeProcessorScreen extends HandledScreen<RecipeProcessorScreenHandler> {
 
     private static final Identifier TEXTURE = OnlyNeedOneChest.id("textures/gui/recipe_processor.png");

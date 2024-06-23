@@ -15,9 +15,6 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 
-//@IPNPlayerSideOnly
-//@IPNGuiHint(button = IPNButton.CONTINUOUS_CRAFTING, horizontalOffset = 59, bottom = -24)
-//@IPNGuiHint(button = IPNButton.SORT, horizontalOffset = -12, bottom = 12)
 public class StorageProcessorScreen extends StorageAssessorScreen {
 
     public static final Identifier WARN_ID = OnlyNeedOneChest.id("textures/button/warn.png");

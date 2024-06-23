@@ -8,7 +8,9 @@ import com.imoonday.on1chest.init.ModBlockEntities;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.ChestBlock;
+import net.minecraft.block.InventoryProvider;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.block.entity.ChestBlockEntity;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -36,14 +38,17 @@ public class MemoryConverterBlockEntity extends BlockEntity implements ConnectIn
         if (state.getBlock() instanceof ConnectBlockConverter converter && converter.isActive(world, pos, state)) {
             BlockPos blockPos = converter.getConvertedPos(world, pos, state);
             BlockState blockState = world.getBlockState(blockPos);
-            if (blockState.getBlock() instanceof ChestBlock block) {
-                Inventory inventory = ChestBlock.getInventory(block, blockState, world, blockPos, true);
+            BlockEntity blockEntity = world.getBlockEntity(blockPos);
+            if (blockState.hasBlockEntity() && blockEntity instanceof ChestBlockEntity && blockState.getBlock() instanceof ChestBlock chestBlock) {
+                Inventory inventory = ChestBlock.getInventory(chestBlock, blockState, world, blockPos, true);
                 if (inventory != null) {
                     return inventory;
                 }
             }
-            if (world.getBlockEntity(blockPos) instanceof Inventory inventory) {
+            if (blockEntity instanceof Inventory inventory) {
                 return inventory;
+            } else if (blockEntity instanceof InventoryProvider provider) {
+                return provider.getInventory(blockState, world, blockPos);
             }
         }
         return null;
