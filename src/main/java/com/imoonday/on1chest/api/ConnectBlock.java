@@ -2,16 +2,20 @@ package com.imoonday.on1chest.api;
 
 import com.imoonday.on1chest.blocks.entities.WirelessConnectorBlockEntity;
 import com.imoonday.on1chest.utils.PositionPredicate;
+import com.mojang.logging.LogUtils;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.util.Pair;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
+import org.slf4j.Logger;
 
 import java.util.*;
 
 public interface ConnectBlock {
+
+    Logger LOGGER = LogUtils.getLogger();
 
     static List<Pair<World, BlockPos>> getConnectedBlocks(World world, BlockPos pos, PositionPredicate... ignore) {
         if (world == null || pos == null) return List.of();
@@ -30,7 +34,7 @@ public interface ConnectBlock {
             }
             for (Direction direction : directions) {
                 if (direction == null) {
-                    System.err.println(currentBlock.getName().getString() + ": direction is null");
+                    LOGGER.error("{}: direction is null", currentBlock.getName().getString());
                     continue;
                 }
                 BlockPos adjacentPos = currentPos.offset(direction);

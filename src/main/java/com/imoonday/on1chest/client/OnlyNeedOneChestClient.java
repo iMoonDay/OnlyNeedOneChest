@@ -6,6 +6,7 @@ import com.imoonday.on1chest.client.renderer.ItemExporterBlockEntityRenderer;
 import com.imoonday.on1chest.client.renderer.MemoryExtractorBlockEntityRenderer;
 import com.imoonday.on1chest.client.renderer.RecipeProcessorBlockEntityRenderer;
 import com.imoonday.on1chest.config.Config;
+import com.imoonday.on1chest.filter.ItemFilterManager;
 import com.imoonday.on1chest.init.ModBlockEntities;
 import com.imoonday.on1chest.init.ModBlocks;
 import com.imoonday.on1chest.init.ModScreens;
@@ -13,6 +14,7 @@ import com.imoonday.on1chest.network.NetworkHandler;
 import com.imoonday.on1chest.screen.client.StorageAssessorScreen;
 import com.imoonday.on1chest.utils.CombinedItemStack;
 import com.imoonday.on1chest.utils.CraftingRecipeTreeManager;
+import com.mojang.logging.LogUtils;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -20,19 +22,24 @@ import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactories;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
 public class OnlyNeedOneChestClient implements ClientModInitializer {
 
+    private static final Logger LOGGER = LogUtils.getLogger();
+    public static boolean clothConfig = FabricLoader.getInstance().isModLoaded("cloth-config");
     private static CombinedItemStack selectedStack = null;
 
     @Override
     public void onInitializeClient() {
+        ItemFilterManager.initFilters();
         Config.initConfig();
         ModScreens.registerClient();
         registerGlobalReceiver();
@@ -48,10 +55,10 @@ public class OnlyNeedOneChestClient implements ClientModInitializer {
                 try {
                     CraftingRecipeTreeManager manager = CraftingRecipeTreeManager.getOrCreate(client.world);
                     if (manager != null) {
-                        System.out.println("On1chest: Client recipe loaded successfully");
+                        LOGGER.info("Client recipe loaded successfully");
                     }
                 } catch (Throwable t) {
-                    t.printStackTrace();
+                    LOGGER.error("Failed to load client recipe", t);
                 }
             }
         });
@@ -105,11 +112,11 @@ public class OnlyNeedOneChestClient implements ClientModInitializer {
             client.execute(() -> {
                 if (client.world != null) {
                     CraftingRecipeTreeManager.getOrCreate(client.world).reload();
-                    System.out.println("On1chest: Client recipe reloaded successfully");
+                    LOGGER.info("Client recipe reloaded successfully");
                 }
                 if (client.currentScreen instanceof IScreenDataReceiver receiver) {
                     receiver.update();
-                    System.out.println("On1chest: Server-side recipe synchronization completed");
+                    LOGGER.info("Server-side recipe synchronization completed");
                 }
             });
         });

@@ -6,7 +6,6 @@
   "mixins": [
     "HopperBlockEntityMixin",
     "ItemStackMixin",
-    "ModelProviderMixin",
     "PacketByteBufMixin",
     "ScreenHandlerInvoker",
     "SlotAccessor"

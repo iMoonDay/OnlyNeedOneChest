@@ -4,11 +4,13 @@ import com.imoonday.on1chest.OnlyNeedOneChest;
 import com.imoonday.on1chest.api.IScreenDataReceiver;
 import com.imoonday.on1chest.client.OnlyNeedOneChestClient;
 import com.imoonday.on1chest.config.Config;
-import com.imoonday.on1chest.mixin.CheckboxWidgetAccessor;
+import com.imoonday.on1chest.config.ConfigScreenHandler;
+import com.imoonday.on1chest.filter.ItemFilter;
+import com.imoonday.on1chest.filter.ItemFilterData;
+import com.imoonday.on1chest.filter.ItemFilterInstance;
 import com.imoonday.on1chest.screen.StorageAssessorScreenHandler;
 import com.imoonday.on1chest.screen.widgets.ButtonIconWidget;
 import com.imoonday.on1chest.utils.CombinedItemStack;
-import com.imoonday.on1chest.utils.ItemStackFilter;
 import com.imoonday.on1chest.utils.SlotAction;
 import com.imoonday.on1chest.utils.Theme;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -20,7 +22,7 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.CheckboxWidget;
+import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.entity.player.PlayerEntity;
@@ -46,6 +48,7 @@ import java.util.function.Function;
 
 public class StorageAssessorScreen extends HandledScreen<StorageAssessorScreenHandler> implements IScreenDataReceiver {
 
+    private static final int FILTER_WIDGET_HEIGHT = 21;
     protected TextFieldWidget searchBox;
     protected ButtonIconWidget settingButton;
     protected ButtonIconWidget sortButton;
@@ -53,7 +56,7 @@ public class StorageAssessorScreen extends HandledScreen<StorageAssessorScreenHa
     protected ButtonIconWidget noSortButton;
     protected ButtonIconWidget forceUpdateButton;
     protected ButtonIconWidget themeButton;
-    protected final CheckboxWidget[] filterWidgets = new CheckboxWidget[ItemStackFilter.values().length];
+    protected final Map<ItemFilterInstance, ClickableWidget> filterWidgets = new LinkedHashMap<>();
     protected float scrollPosition;
     protected boolean scrolling;
     protected boolean refreshItemList;
@@ -63,6 +66,7 @@ public class StorageAssessorScreen extends HandledScreen<StorageAssessorScreenHa
     private Comparator<CombinedItemStack> sortComp;
     private int buttonYOffset;
     protected boolean drawTitle = true;
+    protected int filterYOffset;
 
     public StorageAssessorScreen(StorageAssessorScreenHandler handler, PlayerInventory inventory, Text title) {
         super(handler, inventory, title);
@@ -86,11 +90,11 @@ public class StorageAssessorScreen extends HandledScreen<StorageAssessorScreenHa
 
         this.settingButton = createIconButtonWidget("setting", buttonWidget -> {
             if (this.client != null) {
-                this.client.setScreen(Config.createConfigScreen(this));
+                this.client.setScreen(ConfigScreenHandler.createConfigScreen(this));
             }
             return false;
         }, null, Text.translatable("screen.on1chest.button.setting"));
-        this.settingButton.visible = OnlyNeedOneChest.clothConfig;
+        this.settingButton.visible = OnlyNeedOneChestClient.clothConfig;
 
         this.sortButton = createIconButtonWidget("sort", button -> {
             Config.getInstance().setComparator(Config.getInstance().getComparator().next());
@@ -125,10 +129,24 @@ public class StorageAssessorScreen extends HandledScreen<StorageAssessorScreenHa
             return false;
         }, null, Config.getInstance().getTheme().getLocalizeText());
 
-        for (int i = 0; i < ItemStackFilter.values().length; i++) {
-            this.filterWidgets[i] = createCheckboxWidget(i);
-            this.addDrawableChild(this.filterWidgets[i]);
+        List<ItemFilterData> itemFilterList = Config.getInstance().getItemFilterList();
+        for (ItemFilterData data : itemFilterList) {
+            ItemFilterInstance filterInstance = data.getMainFilter();
+            ClickableWidget checkboxWidget = createCheckboxWidget(filterInstance);
+            this.filterWidgets.put(filterInstance, checkboxWidget);
+            this.addDrawableChild(checkboxWidget);
+            boolean enabled = filterInstance.isEnabled();
+            for (ItemFilterInstance subFilter : data.getSubFilters()) {
+                ClickableWidget widget = createCheckboxWidget(subFilter);
+                if (!enabled) {
+                    widget.visible = false;
+                }
+                this.filterWidgets.put(subFilter, widget);
+                this.addDrawableChild(widget);
+            }
         }
+
+        updateFilters(Config.getInstance());
     }
 
     public void onScreenConfigUpdate(Config config) {
@@ -136,8 +154,46 @@ public class StorageAssessorScreen extends HandledScreen<StorageAssessorScreenHa
         this.sortButton.visible = visible;
         this.filtersButton.visible = visible;
         this.noSortButton.visible = visible;
-        Arrays.stream(this.filterWidgets).forEach(widget -> widget.visible = config.isDisplayFilterWidgets());
+        updateFilters(config);
         refreshItemList = true;
+    }
+
+    public void updateFilters(Config config) {
+        if (!isFilterWidgetsOutOfBounds() && filterYOffset != 0) {
+            filterYOffset = 0;
+        }
+        this.filterWidgets.forEach((key, value) -> {
+            ItemFilter filter = key.getFilter();
+            boolean parentEnabled = !filter.hasParent() || this.filterWidgets.keySet().stream().anyMatch(filterInstance -> filterInstance.is(filter.getParent()) && filterInstance.isEnabled() && !filterInstance.isHide());
+            value.visible = config.isDisplayFilterWidgets() && !key.isHide() && parentEnabled;
+        });
+        int y = 5;
+        for (Map.Entry<ItemFilterInstance, ClickableWidget> entry : this.filterWidgets.entrySet()) {
+            ItemFilterInstance filterInstance = entry.getKey();
+            ClickableWidget widget = entry.getValue();
+            if (widget.visible && !filterInstance.isHide()) {
+                widget.setY((filterInstance.getFilter().hasParent() ? y + 3 : y) + filterYOffset);
+                y += FILTER_WIDGET_HEIGHT;
+            }
+        }
+    }
+
+    protected List<ClickableWidget> getVisibleFilterWidgets() {
+        return this.filterWidgets.values().stream().filter(e -> e.visible).toList();
+    }
+
+    public boolean isFilterWidgetsOutOfBounds() {
+        return isFilterWidgetsTooHigh() || isFilterWidgetsTooLow();
+    }
+
+    public boolean isFilterWidgetsTooHigh() {
+        return getVisibleFilterWidgets().get(0).getY() < 5;
+    }
+
+    public boolean isFilterWidgetsTooLow() {
+        List<ClickableWidget> list = getVisibleFilterWidgets();
+        ClickableWidget widget = list.get(list.size() - 1);
+        return widget.getY() + widget.getHeight() > this.height - 5;
     }
 
     private ButtonIconWidget createIconButtonWidget(String fileName, Function<ButtonIconWidget, Boolean> function, Function<ButtonIconWidget, Boolean> rightClickFunction, Text tooltip) {
@@ -162,25 +218,24 @@ public class StorageAssessorScreen extends HandledScreen<StorageAssessorScreenHa
         return widget;
     }
 
-    @SuppressWarnings("DataFlowIssue")
     @NotNull
-    private CheckboxWidget createCheckboxWidget(int i) {
-        ItemStackFilter filter = ItemStackFilter.values()[i];
-        CheckboxWidget checkboxWidget = new CheckboxWidget(this.x + this.backgroundWidth + 1, this.y + 17 + 21 * i, 20, 20, Text.translatable(filter.getTranslationKey()), false) {
-            @Override
-            public void onPress() {
-                super.onPress();
-                Config config = Config.getInstance();
-                if (config.getStackFilters().contains(filter)) {
-                    config.removeStackFilter(filter);
-                } else {
-                    config.addStackFilter(filter);
-                }
-                refreshItemList = true;
-            }
-        };
-        checkboxWidget.visible = Config.getInstance().isDisplayFilterWidgets();
-        ((CheckboxWidgetAccessor) checkboxWidget).setChecked(Config.getInstance().getStackFilters().contains(filter));
+    private ClickableWidget createCheckboxWidget(ItemFilterInstance filterInstance) {
+        ItemFilter filter = filterInstance.getFilter();
+        boolean isChild = filter.hasParent();
+        ClickableWidget checkboxWidget = isChild ? filterInstance.createSmallCheckbox(textRenderer, this.x + this.backgroundWidth + 1 + 7, 0, (checkbox, enabled) -> {
+            Config.getInstance().setItemFilterEnabled(filter, enabled);
+            refreshItemList = true;
+        }) : filterInstance.createCheckbox(textRenderer, this.x + this.backgroundWidth + 1, 0, (checkbox, enabled) -> {
+            Config.getInstance().setItemFilterEnabled(filter, enabled);
+            refreshItemList = true;
+        });
+        Text tooltip = filter.getTooltip(filterInstance);
+        if (!tooltip.getString().isEmpty()) {
+            checkboxWidget.setTooltip(Tooltip.of(tooltip));
+        }
+        if (!Config.getInstance().isDisplayFilterWidgets()) {
+            checkboxWidget.visible = false;
+        }
         return checkboxWidget;
     }
 
@@ -190,7 +245,7 @@ public class StorageAssessorScreen extends HandledScreen<StorageAssessorScreenHa
             handler.itemListClientSorted.clear();
             handler.itemListClient.stream().filter(stack -> stack != null && stack.getStack() != null && StorageAssessorScreenHandler.checkTextFilter(stack.getStack(), searchString)).forEach(this::addStackToClientList);
             handler.itemListClientSorted.sort(handler.noSort && !forceUpdate ? sortComp : Config.getInstance().getComparator().createComparator(Config.getInstance().getFavouriteStacks(), Config.getInstance().isReversed()));
-            handler.itemListClientSorted.removeIf(stack -> !Config.getInstance().getStackFilters().stream().allMatch(filter -> filter.getPredicate().test(stack.getStack())));
+            handler.itemListClientSorted.removeIf(stack -> !Config.getInstance().getItemFilters().test(stack.getStack()));
             if (!searchLast.equals(searchString)) {
                 handler.scrollItems(0);
                 this.scrollPosition = 0;
@@ -274,6 +329,12 @@ public class StorageAssessorScreen extends HandledScreen<StorageAssessorScreenHa
         if (!this.searchBox.mouseClicked(mouseX, mouseY, button)) {
             this.setFocused(null);
         }
+        if (this.searchBox.isMouseOver(mouseX, mouseY) && this.searchBox.active && this.searchBox.visible && button == 1 && Config.getInstance().isResetWithRightClick()) {
+            if (client != null) {
+                this.searchBox.playDownSound(client.getSoundManager());
+            }
+            this.searchBox.setText("");
+        }
         if (button == 0 && this.isClickInScrollbar(mouseX, mouseY)) {
             this.scrolling = true;
             return true;
@@ -336,12 +397,24 @@ public class StorageAssessorScreen extends HandledScreen<StorageAssessorScreenHa
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
-        if (!Config.getInstance().isScrollOutside() && this.selectedSlot <= -1 && !this.isClickInScrollbar(mouseX, mouseY)) {
+        Config config = Config.getInstance();
+        if (config.isDisplayFilterWidgets() && mouseX > this.x + this.backgroundWidth && isFilterWidgetsOutOfBounds()) {
+            filterYOffset += amount > 0 ? FILTER_WIDGET_HEIGHT : -FILTER_WIDGET_HEIGHT;
+            int min = this.height - getFilterWidgetHeight() - 5 - 5;
+            filterYOffset = MathHelper.clamp(filterYOffset, min, 0);
+            updateFilters(config);
+            return true;
+        }
+        if (!config.isScrollOutside() && this.selectedSlot <= -1 && !this.isClickInScrollbar(mouseX, mouseY)) {
             return super.mouseScrolled(mouseX, mouseY, amount);
         }
         this.scrollPosition = this.handler.getScrollPosition(this.scrollPosition, amount);
         this.handler.scrollItems(this.scrollPosition);
         return true;
+    }
+
+    private int getFilterWidgetHeight() {
+        return getVisibleFilterWidgets().size() * FILTER_WIDGET_HEIGHT;
     }
 
     protected boolean isClickInScrollbar(double mouseX, double mouseY) {
