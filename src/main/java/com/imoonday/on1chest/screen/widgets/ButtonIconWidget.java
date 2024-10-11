@@ -13,15 +13,15 @@ import java.util.function.Consumer;
 
 public class ButtonIconWidget extends IconWidget {
 
-    private final Map<Integer, Consumer<ButtonIconWidget>> actions = new HashMap<>();
+    protected final Map<Integer, Consumer<ButtonIconWidget>> actions = new HashMap<>();
     @Nullable
-    private final Identifier hoveredTexture;
-    private float textureU = 0.0f;
-    private float textureV = 0.0f;
-    private float hoveredTextureU = 0.0f;
-    private float hoveredTextureV = 0.0f;
-    private int textureWidth;
-    private int textureHeight;
+    protected final Identifier hoveredTexture;
+    protected float textureU;
+    protected float textureV;
+    protected float hoveredTextureU;
+    protected float hoveredTextureV;
+    protected int textureWidth;
+    protected int textureHeight;
 
     public ButtonIconWidget(int width, int height, Identifier texture, @Nullable Identifier hoveredTexture) {
         super(width, height, texture);
@@ -41,53 +41,90 @@ public class ButtonIconWidget extends IconWidget {
         return textureU;
     }
 
-    public void setTextureU(float textureU) {
+    public ButtonIconWidget setTextureU(float textureU) {
         this.textureU = textureU;
+        return this;
     }
 
     public float getTextureV() {
         return textureV;
     }
 
-    public void setTextureV(float textureV) {
+    public ButtonIconWidget setTextureV(float textureV) {
         this.textureV = textureV;
+        return this;
+    }
+
+    public ButtonIconWidget setTextureOffset(float u, float v) {
+        this.textureU = u;
+        this.textureV = v;
+        return this;
     }
 
     public float getHoveredTextureU() {
         return hoveredTextureU;
     }
 
-    public void setHoveredTextureU(float hoveredTextureU) {
+    public ButtonIconWidget setHoveredTextureU(float hoveredTextureU) {
         this.hoveredTextureU = hoveredTextureU;
+        return this;
     }
 
     public float getHoveredTextureV() {
         return hoveredTextureV;
     }
 
-    public void setHoveredTextureV(float hoveredTextureV) {
+    public ButtonIconWidget setHoveredTextureV(float hoveredTextureV) {
         this.hoveredTextureV = hoveredTextureV;
+        return this;
+    }
+
+    public ButtonIconWidget setHoveredTextureOffset(float u, float v) {
+        this.hoveredTextureU = u;
+        this.hoveredTextureV = v;
+        return this;
     }
 
     public int getTextureWidth() {
         return textureWidth;
     }
 
-    public void setTextureWidth(int textureWidth) {
+    public ButtonIconWidget setTextureWidth(int textureWidth) {
         this.textureWidth = textureWidth;
+        return this;
     }
 
     public int getTextureHeight() {
         return textureHeight;
     }
 
-    public void setTextureHeight(int textureHeight) {
+    public ButtonIconWidget setTextureHeight(int textureHeight) {
         this.textureHeight = textureHeight;
+        return this;
+    }
+
+    public ButtonIconWidget setTextureSize(int width, int height) {
+        this.textureWidth = width;
+        this.textureHeight = height;
+        return this;
+    }
+
+    public ButtonIconWidget setTextureSize(int size) {
+        this.setTextureSize(size, size);
+        return this;
     }
 
     public ButtonIconWidget addClickAction(int button, Consumer<ButtonIconWidget> action) {
         this.actions.put(button, action);
         return this;
+    }
+
+    public Identifier getTexture() {
+        return ((IconWidgetAccessor) this).texture();
+    }
+
+    public @Nullable Identifier getHoveredTexture() {
+        return hoveredTexture;
     }
 
     @Override
@@ -114,10 +151,11 @@ public class ButtonIconWidget extends IconWidget {
         int y = this.getY();
         int textureWidth = getTextureWidth();
         int textureHeight = getTextureHeight();
-        if (this.hoveredTexture != null && this.isMouseOver(mouseX, mouseY)) {
-            context.drawTexture(this.hoveredTexture, x, y, getHoveredTextureU(), getHoveredTextureV(), i, j, textureWidth, textureHeight);
+        Identifier hoveredTexture = this.getHoveredTexture();
+        if (hoveredTexture != null && this.isMouseOver(mouseX, mouseY)) {
+            context.drawTexture(hoveredTexture, x, y, getHoveredTextureU(), getHoveredTextureV(), i, j, textureWidth, textureHeight);
         } else {
-            context.drawTexture(((IconWidgetAccessor) this).getTexture(), x, y, getTextureU(), getTextureV(), i, j, textureWidth, textureHeight);
+            context.drawTexture(this.getTexture(), x, y, getTextureU(), getTextureV(), i, j, textureWidth, textureHeight);
         }
     }
 }

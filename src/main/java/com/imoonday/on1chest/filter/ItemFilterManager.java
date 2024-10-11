@@ -1,33 +1,36 @@
 package com.imoonday.on1chest.filter;
 
+import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemGroups;
 import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class ItemFilterManager {
 
-    private static final Map<Identifier, ItemFilter> FILTERS = new ConcurrentHashMap<>();
-    private static final Map<Identifier, List<Identifier>> SUB_FILTERS = new ConcurrentHashMap<>();
+    private static final Map<Identifier, ItemFilter> FILTERS = Collections.synchronizedMap(new LinkedHashMap<>());
+    private static final Map<Identifier, List<Identifier>> SUB_FILTERS = Collections.synchronizedMap(new LinkedHashMap<>());
 
     public static void initFilters() {
-        Arrays.stream(ItemFilters.values()).forEach(ItemFilterManager::register);
-        //TODO 改成子类型
-        ItemGroups.getGroupsToDisplay().stream()
-                  .map(Registries.ITEM_GROUP::getKey)
-                  .filter(Optional::isPresent)
-                  .map(Optional::get)
-                  .forEach(key -> register(new ItemGroupFilter(key)));
+        register(new RegularExpressionFilter());
+        register(new CustomItemFilter());
+        register(new CompositeFilter("item_group"));
+        ItemGroups.getGroups().stream()
+                  .filter(group -> group.getType() == ItemGroup.Type.CATEGORY)
+                  .map(group -> Registries.ITEM_GROUP.getKey(group).map(key -> Map.entry(group, key)).orElse(null))
+                  .filter(Objects::nonNull)
+                  .sorted(Comparator.comparing(e -> !e.getValue().getValue().getNamespace().equals(Identifier.DEFAULT_NAMESPACE)))
+                  .forEach(e -> register(new ItemGroupFilter(e.getValue(), e.getKey().getDisplayName())));
+        Arrays.stream(CommonFilters.values()).forEach(ItemFilterManager::register);
     }
 
     public static List<ItemFilter> getFilters() {
         return List.copyOf(FILTERS.values());
     }
 
-    public static ItemFilter getFilter(Identifier id) {
-        return FILTERS.get(id);
+    public static Optional<ItemFilter> getFilter(Identifier id) {
+        return Optional.ofNullable(FILTERS.get(id));
     }
 
     public static List<Identifier> getSubFilters(Identifier id) {

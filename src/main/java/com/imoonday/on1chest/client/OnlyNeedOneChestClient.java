@@ -19,6 +19,7 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -28,8 +29,13 @@ import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactories;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.Text;
+import net.minecraft.util.Util;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
+
+import java.io.File;
+
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
 
 public class OnlyNeedOneChestClient implements ClientModInitializer {
 
@@ -47,6 +53,36 @@ public class OnlyNeedOneChestClient implements ClientModInitializer {
         registerRenderers();
         KeyBindings.registerKeys();
         registerRecipeTreeManagerEvents();
+        registerCommands();
+    }
+
+    private static void registerCommands() {
+        ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
+            dispatcher.register(literal("on1chest")
+                                        .then(literal("load").executes(context -> {
+                                                  Config.load();
+                                                  context.getSource().sendFeedback(Text.translatable("message.on1chest.loaded"));
+                                                  return 1;
+                                              })
+                                        )
+                                        .then(literal("settings").executes(context -> {
+                                            if (clothConfig) {
+                                                return 1;
+                                            } else {
+                                                context.getSource().sendFeedback(Text.translatable("message.on1chest.no_cloth_config"));
+                                                File file = Config.getFile();
+                                                if (file != null) {
+                                                    if (!file.exists()) {
+                                                        Config.save();
+                                                    }
+                                                    Util.getOperatingSystem().open(file.toPath().toUri());
+                                                    return 1;
+                                                }
+                                                return 0;
+                                            }
+                                        }))
+            );
+        });
     }
 
     private static void registerRecipeTreeManagerEvents() {

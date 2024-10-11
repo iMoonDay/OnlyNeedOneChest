@@ -6,7 +6,6 @@ import com.imoonday.on1chest.network.NetworkHandler;
 import com.imoonday.on1chest.screen.StorageAssessorScreenHandler;
 import com.imoonday.on1chest.screen.widgets.SmallCheckboxWidget;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.nbt.NbtByte;
 import net.minecraft.nbt.NbtCompound;
@@ -36,11 +35,11 @@ public class StorageProcessorScreen extends StorageAssessorScreen {
         nbt.putBoolean("c", continuousCrafting);
         nbt.putBoolean("w", true);
         NetworkHandler.sendToServer(nbt);
-        this.continuousCraftingWidget = new SmallCheckboxWidget(this.textRenderer, width / 2, height / 2 + 26, 13, Text.translatable("screen.on1chest.button.continuous_crafting"), continuousCrafting, false, (widget, checked) -> {
+        this.continuousCraftingWidget = new SmallCheckboxWidget(this.textRenderer, width / 2, height / 2 + 26, 13, Text.translatable("screen.on1chest.button.continuous_crafting"), continuousCrafting, true, (widget, checked) -> {
             continuousCrafting = checked;
             updateContinuousCrafting();
         });
-        this.continuousCraftingWidget.setTooltip(Tooltip.of(Text.translatable("screen.on1chest.button.continuous_crafting")));
+        this.continuousCraftingWidget.setUseTooltipInsteadOfMessage(true);
         this.addDrawableChild(this.continuousCraftingWidget);
     }
 

@@ -11,7 +11,7 @@ public class ItemFilterSerialization implements JsonSerializer<ItemFilter>, Json
     public ItemFilter deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
         String id = json.getAsJsonObject().get("id").getAsString();
         Identifier identifier = Identifier.tryParse(id);
-        return identifier != null ? ItemFilterManager.getFilter(identifier) : null;
+        return identifier != null ? ItemFilterManager.getFilter(identifier).orElse(new UnknownFilter(identifier)) : null;
     }
 
     @Override

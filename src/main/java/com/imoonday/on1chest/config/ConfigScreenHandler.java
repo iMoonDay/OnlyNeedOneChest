@@ -2,9 +2,10 @@ package com.imoonday.on1chest.config;
 
 import com.imoonday.on1chest.client.OnlyNeedOneChestClient;
 import com.imoonday.on1chest.filter.ItemFilter;
-import com.imoonday.on1chest.filter.ItemFilterData;
-import com.imoonday.on1chest.filter.ItemFilterInstance;
+import com.imoonday.on1chest.filter.ItemFilterSettings;
+import com.imoonday.on1chest.filter.ItemFilterWrapper;
 import com.imoonday.on1chest.utils.FavouriteItemStack;
+import com.imoonday.on1chest.utils.ListUtils;
 import com.imoonday.on1chest.utils.Theme;
 import com.mojang.logging.LogUtils;
 import me.shedaniel.clothconfig2.api.ConfigBuilder;
@@ -16,7 +17,6 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.text.Text;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 
 import java.awt.*;
@@ -67,9 +67,10 @@ public class ConfigScreenHandler {
                                                 .setSaveConsumer(display -> Config.getInstance().setDisplayButtonWidgets(display))
                                                 .build());
 
-            screenSettings.addEntry(entryBuilder.startBooleanToggle(Text.translatable("config.on1chest.screen.displayFilterWidgets"), Config.getInstance().isDisplayFilterWidgets())
-                                                .setDefaultValue(true)
+            screenSettings.addEntry(entryBuilder.startEnumSelector(Text.translatable("config.on1chest.screen.displayFilterWidgets"), ItemFilter.DisplayType.class, Config.getInstance().getDisplayFilterWidgets())
+                                                .setDefaultValue(ItemFilter.DisplayType.DISPLAY)
                                                 .setSaveConsumer(display -> Config.getInstance().setDisplayFilterWidgets(display))
+                                                .setEnumNameProvider(value -> ((ItemFilter.DisplayType) value).getDisplayName())
                                                 .build());
 
             screenSettings.addEntry(entryBuilder.startBooleanToggle(Text.translatable("config.on1chest.screen.noSortWithShift"), Config.getInstance().isNoSortWithShift())
@@ -171,10 +172,16 @@ public class ConfigScreenHandler {
 
             ConfigCategory filterSettings = builder.getOrCreateCategory(Text.translatable("config.on1chest.categories.filter"));
 
-            for (ItemFilterData data : Config.getInstance().getItemFilterList()) {
-                ItemFilterInstance filter = data.getMainFilter();
+            filterSettings.addEntry(entryBuilder.startEnumSelector(Text.translatable("config.on1chest.filter.filtering_logic"), ItemFilter.FilteringLogic.class, Config.getInstance().getFilteringLogic())
+                                                .setDefaultValue(ItemFilter.FilteringLogic.AND)
+                                                .setSaveConsumer(logic -> Config.getInstance().setFilteringLogic(logic))
+                                                .setEnumNameProvider(logic -> ((ItemFilter.FilteringLogic) logic).getDisplayName())
+                                                .build());
+
+            for (ItemFilterWrapper data : Config.getInstance().getItemFilterList()) {
+                ItemFilterSettings filter = data.getMainFilter();
                 SubCategoryBuilder filterBuilder = createItemFilterCategory(entryBuilder, filter);
-                for (ItemFilterInstance subFilter : data.getSubFilters()) {
+                for (ItemFilterSettings subFilter : data.getSubFilters()) {
                     SubCategoryBuilder subFilterBuilder = createItemFilterCategory(entryBuilder, subFilter);
                     filterBuilder.add(subFilterBuilder.build());
                 }
@@ -188,30 +195,99 @@ public class ConfigScreenHandler {
         }
     }
 
-    private static @NotNull SubCategoryBuilder createItemFilterCategory(ConfigEntryBuilder entryBuilder, ItemFilterInstance filterInstance) {
-        ItemFilter filter = filterInstance.getFilter();
+    private static SubCategoryBuilder createItemFilterCategory(ConfigEntryBuilder entryBuilder, ItemFilterSettings settings) {
+        ItemFilter filter = settings.getFilter();
         SubCategoryBuilder entries = entryBuilder.startSubCategory(filter.getDisplayName());
-        addEntries(entryBuilder, filterInstance, entries);
+        addEntries(entryBuilder, settings, entries);
         return entries;
     }
 
-    private static void addEntries(ConfigEntryBuilder entryBuilder, ItemFilterInstance filterInstance, SubCategoryBuilder entries) {
-        ItemFilter filter = filterInstance.getFilter();
-        entries.add(entryBuilder.startBooleanToggle(Text.translatable("filter.on1chest.enabled"), filterInstance.isEnabled())
+    private static void addEntries(ConfigEntryBuilder entryBuilder, ItemFilterSettings settings, SubCategoryBuilder entries) {
+        ItemFilter filter = settings.getFilter();
+        entries.add(entryBuilder.startBooleanToggle(Text.translatable("filter.on1chest.enabled"), settings.isEnabled())
                                 .setDefaultValue(false)
-                                .setSaveConsumer(filterInstance::setEnabled)
+                                .setSaveConsumer(settings::setEnabled)
                                 .build());
-        entries.add(entryBuilder.startBooleanToggle(Text.translatable("filter.on1chest.hide"), filterInstance.isHide())
+        entries.add(entryBuilder.startBooleanToggle(Text.translatable("filter.on1chest.hide"), settings.isHide())
                                 .setDefaultValue(false)
-                                .setSaveConsumer(filterInstance::setHide)
+                                .setSaveConsumer(settings::setHide)
                                 .build());
+
         if (filter.hasExtraData()) {
+            Object data = settings.getData();
             Text tooltip = filter.getDataTooltip();
-            entries.add(entryBuilder.startStrList(filter.getDataDisplayName(), filterInstance.getData())
-                                    .setDefaultValue(ArrayList::new)
-                                    .setSaveConsumer(filterInstance::setData)
-                                    .setTooltip(Optional.ofNullable(!tooltip.getString().isEmpty() ? new Text[]{tooltip} : null))
-                                    .build());
+            Optional<Text[]> optTooltips = Optional.ofNullable(!tooltip.getString().isEmpty() ? new Text[]{tooltip} : null);
+            Object defaultData = filter.getDefaultData().get();
+
+            if (defaultData instanceof String stringDefaultData) {
+                entries.add(entryBuilder.startTextField(filter.getDataDisplayName(), data instanceof String s ? s : "")
+                                        .setDefaultValue(stringDefaultData)
+                                        .setSaveConsumer(settings::setData)
+                                        .setTooltip(optTooltips)
+                                        .build());
+            } else if (defaultData instanceof Integer integerDefaultData) {
+                entries.add(entryBuilder.startIntField(filter.getDataDisplayName(), data instanceof Integer i ? i : 0)
+                                        .setDefaultValue(integerDefaultData)
+                                        .setSaveConsumer(settings::setData)
+                                        .setTooltip(optTooltips)
+                                        .build());
+            } else if (defaultData instanceof Float floatDefaultData) {
+                entries.add(entryBuilder.startFloatField(filter.getDataDisplayName(), data instanceof Float f ? f : 0)
+                                        .setDefaultValue(floatDefaultData)
+                                        .setSaveConsumer(settings::setData)
+                                        .setTooltip(optTooltips)
+                                        .build());
+            } else if (defaultData instanceof Double doubleDefaultData) {
+                entries.add(entryBuilder.startDoubleField(filter.getDataDisplayName(), data instanceof Double d ? d : 0)
+                                        .setDefaultValue(doubleDefaultData)
+                                        .setSaveConsumer(settings::setData)
+                                        .setTooltip(optTooltips)
+                                        .build());
+            } else if (defaultData instanceof Boolean booleanDefaultData) {
+                entries.add(entryBuilder.startBooleanToggle(filter.getDataDisplayName(), data instanceof Boolean b ? b : false)
+                                        .setDefaultValue(booleanDefaultData)
+                                        .setSaveConsumer(settings::setData)
+                                        .setTooltip(optTooltips)
+                                        .build());
+            } else if (defaultData instanceof Long longDefaultData) {
+                entries.add(entryBuilder.startLongField(filter.getDataDisplayName(), data instanceof Long l ? l : 0)
+                                        .setDefaultValue(longDefaultData)
+                                        .setSaveConsumer(settings::setData)
+                                        .setTooltip(optTooltips)
+                                        .build());
+            } else if (ListUtils.isListOfString(defaultData)) {
+                entries.add(entryBuilder.startStrList(filter.getDataDisplayName(), ListUtils.toStringList(data))
+                                        .setDefaultValue(ListUtils.toStringList(defaultData))
+                                        .setSaveConsumer(settings::setData)
+                                        .setTooltip(optTooltips)
+                                        .build());
+            } else if (ListUtils.isList(defaultData, Integer.class)) {
+                entries.add(entryBuilder.startIntList(filter.getDataDisplayName(), ListUtils.toList(data, Integer.class))
+                                        .setDefaultValue(ListUtils.toList(defaultData, Integer.class))
+                                        .setSaveConsumer(settings::setData)
+                                        .setTooltip(optTooltips)
+                                        .build());
+            } else if (ListUtils.isList(defaultData, Long.class)) {
+                entries.add(entryBuilder.startLongList(filter.getDataDisplayName(), ListUtils.toList(data, Long.class))
+                                        .setDefaultValue(ListUtils.toList(defaultData, Long.class))
+                                        .setSaveConsumer(settings::setData)
+                                        .setTooltip(optTooltips)
+                                        .build());
+            } else if (ListUtils.isList(defaultData, Float.class)) {
+                entries.add(entryBuilder.startFloatList(filter.getDataDisplayName(), ListUtils.toList(data, Float.class))
+                                        .setDefaultValue(ListUtils.toList(defaultData, Float.class))
+                                        .setSaveConsumer(settings::setData)
+                                        .setTooltip(optTooltips)
+                                        .build());
+            } else if (ListUtils.isList(defaultData, Double.class)) {
+                entries.add(entryBuilder.startDoubleList(filter.getDataDisplayName(), ListUtils.toList(data, Double.class))
+                                        .setDefaultValue(ListUtils.toList(defaultData, Double.class))
+                                        .setSaveConsumer(settings::setData)
+                                        .setTooltip(optTooltips)
+                                        .build());
+            } else {
+                LOGGER.warn("Unsupported default data type: {}", defaultData.getClass());
+            }
         }
     }
 }

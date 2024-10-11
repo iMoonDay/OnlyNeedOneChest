@@ -179,26 +179,22 @@ public class QuickCraftingScreen extends HandledScreen<QuickCraftingScreenHandle
         this.prevPageButton.setTextureUV(1, 208, 13, 18, RECIPE_BOOK);
         this.prevPageButton.visible = false;
         this.addDrawableChild(this.prevPageButton);
-        this.craftButton = new ButtonIconWidget(this.x + 123, this.y + 37, 12, 12, CRAFT_ID, CRAFT_ON_ID);
-        this.craftButton.addClickAction(0, widget -> NetworkHandler.sendToServer("Confirm", NbtByte.of(hasShiftDown())));
+        this.craftButton = new ButtonIconWidget(this.x + 123, this.y + 37, 12, 12, CRAFT_ID, CRAFT_ON_ID)
+                .addClickAction(0, widget -> NetworkHandler.sendToServer("Confirm", NbtByte.of(hasShiftDown())));
         this.craftButton.visible = false;
         this.addDrawableChild(this.craftButton);
-        this.increaseButton = new ButtonIconWidget(this.x + 147, this.y + 16, 17, 11, TEXTURE, TEXTURE);
-        this.increaseButton.addClickAction(0, widget -> onClickStack(0, this.handler.result.getStack(0).copyWithCount(1), true));
-        this.increaseButton.setTextureWidth(256);
-        this.increaseButton.setTextureHeight(256);
-        this.increaseButton.setTextureV(190);
-        this.increaseButton.setHoveredTextureU(18);
-        this.increaseButton.setHoveredTextureV(190);
+        this.increaseButton = new ButtonIconWidget(this.x + 147, this.y + 16, 17, 11, TEXTURE, TEXTURE)
+                .addClickAction(0, widget -> onClickStack(0, this.handler.result.getStack(0).copyWithCount(1), true))
+                .setTextureSize(256)
+                .setTextureV(190)
+                .setHoveredTextureOffset(18, 190);
         this.increaseButton.visible = false;
         this.addDrawableChild(this.increaseButton);
-        this.decreaseButton = new ButtonIconWidget(this.x + 147, this.y + 59, 17, 11, TEXTURE, TEXTURE);
-        this.decreaseButton.addClickAction(0, widget -> onClickStack(1, this.handler.result.getStack(0).copyWithCount(1), true));
-        this.decreaseButton.setTextureWidth(256);
-        this.decreaseButton.setTextureHeight(256);
-        this.decreaseButton.setTextureV(176);
-        this.decreaseButton.setHoveredTextureU(18);
-        this.decreaseButton.setHoveredTextureV(176);
+        this.decreaseButton = new ButtonIconWidget(this.x + 147, this.y + 59, 17, 11, TEXTURE, TEXTURE)
+                .addClickAction(0, widget -> onClickStack(1, this.handler.result.getStack(0).copyWithCount(1), true))
+                .setTextureSize(256)
+                .setTextureV(176)
+                .setHoveredTextureOffset(18, 176);
         this.decreaseButton.visible = false;
         this.addDrawableChild(this.decreaseButton);
         updateDisplayStacks();

@@ -38,15 +38,16 @@ public class Config {
     private static final Logger LOGGER = LogUtils.getLogger();
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().registerTypeHierarchyAdapter(ItemFilter.class, new ItemFilterSerialization()).create();
     private static File file;
-    private static Config INSTANCE = new Config();
+    private static Config config = new Config();
 
     private String markItemStackKey = "key.keyboard.left.alt";
     private String takeAllStacksKey = "key.keyboard.space";
     private boolean displayButtonWidgets = true;
-    private boolean displayFilterWidgets = true;
+    private ItemFilter.DisplayType displayFilterWidgets = ItemFilter.DisplayType.DISPLAY;
     private Set<FavouriteItemStack> favouriteStacks = new HashSet<>();
     private final String _validFilters = ItemFilterManager.getFilters().stream().map(itemFilter -> itemFilter.getId().toString()).collect(Collectors.joining(", "));
     private ItemFilterList itemFilters = ItemFilterList.create();
+    private ItemFilter.FilteringLogic filteringLogic = ItemFilter.FilteringLogic.AND;
     private SortComparator comparator = SortComparator.ID;
     private boolean reversed = false;
     private boolean noSortWithShift = true;
@@ -74,8 +75,17 @@ public class Config {
         }
     }
 
+    public static File getFile() {
+        prepareConfigFile();
+        return file;
+    }
+
     public static void initConfig() {
         load();
+        config.checkValid();
+        if (config.getItemFilters().checkMissingFilters()) {
+            save();
+        }
     }
 
     public static void load() {
@@ -90,8 +100,8 @@ public class Config {
                 JsonElement jsonElement = JsonParser.parseReader(br);
                 Config config = Config.fromJson(jsonElement.toString());
                 if (config != null) {
-                    Config.INSTANCE = config;
-                    Config.INSTANCE.checkValid();
+                    Config.config = config;
+                    Config.config.checkValid();
                 } else {
                     save();
                 }
@@ -120,8 +130,7 @@ public class Config {
     }
 
     public static Config getInstance() {
-        INSTANCE.checkValid();
-        return INSTANCE;
+        return config;
     }
 
     public static void saveAndUpdate() {
@@ -168,11 +177,11 @@ public class Config {
         saveAndUpdate();
     }
 
-    public boolean isDisplayFilterWidgets() {
+    public ItemFilter.DisplayType getDisplayFilterWidgets() {
         return displayFilterWidgets;
     }
 
-    public void setDisplayFilterWidgets(boolean displayFilterWidgets) {
+    public void setDisplayFilterWidgets(ItemFilter.DisplayType displayFilterWidgets) {
         this.displayFilterWidgets = displayFilterWidgets;
         saveAndUpdate();
     }
@@ -200,7 +209,7 @@ public class Config {
         return itemFilters;
     }
 
-    public List<ItemFilterData> getItemFilterList() {
+    public List<ItemFilterWrapper> getItemFilterList() {
         return itemFilters.getFilters();
     }
 
@@ -218,6 +227,14 @@ public class Config {
         if (modified) {
             saveAndUpdate();
         }
+    }
+
+    public ItemFilter.FilteringLogic getFilteringLogic() {
+        return filteringLogic;
+    }
+
+    public void setFilteringLogic(ItemFilter.FilteringLogic filteringLogic) {
+        this.filteringLogic = filteringLogic;
     }
 
     public SortComparator getComparator() {

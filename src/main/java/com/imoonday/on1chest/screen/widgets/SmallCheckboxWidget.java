@@ -19,7 +19,15 @@ public class SmallCheckboxWidget extends PressableWidget {
     private boolean checked;
     private final TextRenderer textRenderer;
     private final boolean showMessage;
+    private boolean autoWidth;
+    private boolean useTooltipInsteadOfMessage;
     private OnPress onPress;
+
+    public SmallCheckboxWidget(TextRenderer textRenderer, int x, int y, Text message, boolean checked, OnPress onPress) {
+        this(textRenderer, x, y, 0, message, checked, onPress);
+        this.autoWidth = true;
+        recalculateWidth();
+    }
 
     public SmallCheckboxWidget(TextRenderer textRenderer, int x, int y, int width, Text message, boolean checked, OnPress onPress) {
         this(textRenderer, x, y, width, message, checked, true, onPress);
@@ -49,6 +57,10 @@ public class SmallCheckboxWidget extends PressableWidget {
         return this.checked;
     }
 
+    public void setChecked(boolean checked) {
+        this.checked = checked;
+    }
+
     @Override
     public void appendClickableNarrations(NarrationMessageBuilder builder) {
         builder.put(NarrationPart.TITLE, this.getNarrationMessage());
@@ -73,12 +85,42 @@ public class SmallCheckboxWidget extends PressableWidget {
         context.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         if (this.showMessage) {
             Text message = this.getMessage();
-            TextColor textColor = message.getStyle().getColor();
-            drawScrollableText(context, textRenderer, message, this.getX() + TEXTURE_SIZE + 3, this.getY(), this.getX() + this.getWidth(), this.getY() + TEXTURE_SIZE, textColor != null ? textColor.getRgb() : 0xE0E0E0 | MathHelper.ceil(this.alpha * 255.0f) << 24);
+            if (this.useTooltipInsteadOfMessage) {
+                if (this.isMouseOver(mouseX, mouseY)) {
+                    context.drawTooltip(textRenderer, message, mouseX, mouseY);
+                }
+            } else {
+                TextColor textColor = message.getStyle().getColor();
+                drawScrollableText(context, textRenderer, message, this.getX() + TEXTURE_SIZE + 3, this.getY(), this.getX() + this.getWidth(), this.getY() + TEXTURE_SIZE, textColor != null ? textColor.getRgb() : 0xE0E0E0 | MathHelper.ceil(this.alpha * 255.0f) << 24);
+            }
         }
     }
 
+    public void recalculateWidth() {
+        this.setWidth(this.showMessage && !useTooltipInsteadOfMessage ? this.textRenderer.getWidth(this.getMessage()) + TEXTURE_SIZE + 3 : TEXTURE_SIZE);
+    }
+
+    public boolean isUseTooltipInsteadOfMessage() {
+        return useTooltipInsteadOfMessage;
+    }
+
+    public void setUseTooltipInsteadOfMessage(boolean useTooltipInsteadOfMessage) {
+        this.useTooltipInsteadOfMessage = useTooltipInsteadOfMessage;
+        if (this.autoWidth) {
+            recalculateWidth();
+        }
+    }
+
+    public boolean isAutoWidth() {
+        return autoWidth;
+    }
+
+    public void setAutoWidth(boolean autoWidth) {
+        this.autoWidth = autoWidth;
+    }
+
     public interface OnPress {
+
         void onPress(SmallCheckboxWidget widget, boolean checked);
     }
 }

@@ -11,10 +11,12 @@
     "SlotAccessor"
   ],
   "client": [
+    "ChatScreenMixin",
     "CheckboxWidgetAccessor",
     "ClickableWidgetAccessor",
     "ClientPlayNetworkHandlerMixin",
     "IconWidgetAccessor",
+    "SleepingChatScreenMixin",
     "TooltipComponentMixin"
   ],
   "injectors": {
