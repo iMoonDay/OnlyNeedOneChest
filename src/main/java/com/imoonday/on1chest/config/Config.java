@@ -5,7 +5,10 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
-import com.imoonday.on1chest.filter.*;
+import com.imoonday.on1chest.filter.ItemFilter;
+import com.imoonday.on1chest.filter.ItemFilterList;
+import com.imoonday.on1chest.filter.ItemFilterSerialization;
+import com.imoonday.on1chest.filter.ItemFilterWrapper;
 import com.imoonday.on1chest.screen.client.StorageAssessorScreen;
 import com.imoonday.on1chest.utils.FavouriteItemStack;
 import com.imoonday.on1chest.utils.SortComparator;
@@ -30,7 +33,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Environment(EnvType.CLIENT)
 public class Config {
@@ -45,7 +47,6 @@ public class Config {
     private boolean displayButtonWidgets = true;
     private ItemFilter.DisplayType displayFilterWidgets = ItemFilter.DisplayType.DISPLAY;
     private Set<FavouriteItemStack> favouriteStacks = new HashSet<>();
-    private final String _validFilters = ItemFilterManager.getFilters().stream().map(itemFilter -> itemFilter.getId().toString()).collect(Collectors.joining(", "));
     private ItemFilterList itemFilters = ItemFilterList.create();
     private ItemFilter.FilteringLogic filteringLogic = ItemFilter.FilteringLogic.AND;
     private SortComparator comparator = SortComparator.ID;
