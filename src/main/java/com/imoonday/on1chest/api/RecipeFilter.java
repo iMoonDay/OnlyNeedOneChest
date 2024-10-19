@@ -4,6 +4,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.server.MinecraftServer;
 
 public interface RecipeFilter {
+
     default boolean shouldFilter() {
         return true;
     }

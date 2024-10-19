@@ -12,6 +12,7 @@ import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 public class GlassStorageMemoryBlock extends StorageMemoryBlock {
+
     public GlassStorageMemoryBlock(Settings settings) {
         super(settings);
     }

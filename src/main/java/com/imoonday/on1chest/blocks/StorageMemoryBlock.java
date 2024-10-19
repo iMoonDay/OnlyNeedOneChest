@@ -87,13 +87,15 @@ public abstract class StorageMemoryBlock extends BlockWithEntity implements Conn
             }
             if (world.getBlockEntity(pos) instanceof StorageMemoryBlockEntity entity) {
                 ItemStack stack = player.getStackInHand(hand);
-                StorageMemoryBlock memoryBlock = getLevelUpEntries().get(stack.getItem());
-                if (canLevelUp() && memoryBlock != null) {
-                    if (levelUp(world, pos, state, memoryBlock.getDefaultState())) {
-                        if (!player.getAbilities().creativeMode) {
-                            stack.decrement(1);
+                if (canLevelUp()) {
+                    StorageMemoryBlock memoryBlock = getLevelUpEntries().get(stack.getItem());
+                    if (memoryBlock != null) {
+                        if (levelUp(world, pos, state, memoryBlock.getDefaultState())) {
+                            if (!player.getAbilities().creativeMode) {
+                                stack.decrement(1);
+                            }
+                            world.playSound(null, pos, SoundEvents.ENTITY_PLAYER_LEVELUP, SoundCategory.BLOCKS, 1.0f, 1.0f);
                         }
-                        world.playSound(null, pos, SoundEvents.ENTITY_PLAYER_LEVELUP, SoundCategory.BLOCKS, 1.0f, 1.0f);
                     }
                 }
                 player.sendMessage(Text.literal(entity.getOccupiedSize() + "/" + entity.getStorageSize()), true);
