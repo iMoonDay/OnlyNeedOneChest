@@ -5,7 +5,6 @@ import com.imoonday.on1chest.blocks.entities.StorageMemoryBlockEntity;
 import com.imoonday.on1chest.init.ModBlocks;
 import com.imoonday.on1chest.init.ModItems;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.Item;
@@ -18,7 +17,6 @@ import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -42,11 +40,7 @@ public class CompressedStorageMemoryBlock extends StorageMemoryBlock {
         if (nbt == null || !nbt.contains("CompressionLevel")) return;
         int level = nbt.getInt("CompressionLevel");
         if (level <= 0) return;
-        BlockEntity blockEntity = world.getBlockEntity(pos);
-        if (blockEntity instanceof StorageMemoryBlockEntity entity) {
-            entity.updateLevel(level);
-            entity.markDirty();
-        }
+        updateLevel(world, pos, level);
     }
 
     @Override
@@ -79,9 +73,7 @@ public class CompressedStorageMemoryBlock extends StorageMemoryBlock {
 
     @Override
     public Map<Item, StorageMemoryBlock> getLevelUpEntries() {
-        Map<Item, StorageMemoryBlock> map = new HashMap<>();
-        map.put(ModItems.COMPRESSION_UPGRADE_MODULE, ModBlocks.COMPRESSED_STORAGE_MEMORY_BLOCK);
-        return map;
+        return Map.of(ModItems.COMPRESSION_UPGRADE_MODULE, ModBlocks.COMPRESSED_STORAGE_MEMORY_BLOCK);
     }
 
     @Override

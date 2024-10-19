@@ -1,9 +1,10 @@
 package com.imoonday.on1chest.blocks.entities;
 
-import com.imoonday.on1chest.blocks.memories.GlassStorageMemoryBlock;
+import com.imoonday.on1chest.blocks.StorageMemoryBlock;
 import com.imoonday.on1chest.init.ModBlockEntities;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
@@ -17,17 +18,21 @@ import java.util.stream.Collectors;
 
 public class GlassStorageMemoryBlockEntity extends StorageMemoryBlockEntity {
 
-    private ItemStack displayItem = ItemStack.EMPTY;
+    protected ItemStack displayItem = ItemStack.EMPTY;
     public float uniqueOffset;
 
-    public GlassStorageMemoryBlockEntity(BlockPos pos, BlockState state) {
-        super(ModBlockEntities.GLASS_STORAGE_MEMORY_BLOCK_ENTITY, pos, state);
+    protected GlassStorageMemoryBlockEntity(BlockEntityType<? extends GlassStorageMemoryBlockEntity> type, BlockPos pos, BlockState state) {
+        super(type, pos, state);
         this.uniqueOffset = Random.create().nextFloat() * (float) Math.PI * 2.0f;
+    }
+
+    public GlassStorageMemoryBlockEntity(BlockPos pos, BlockState state) {
+        this(ModBlockEntities.GLASS_STORAGE_MEMORY_BLOCK_ENTITY, pos, state);
     }
 
     public static void tick(World world, BlockPos pos, BlockState state, GlassStorageMemoryBlockEntity entity) {
         StorageMemoryBlockEntity.tick(world, pos, state, entity);
-        if (!state.get(GlassStorageMemoryBlock.ACTIVATED)) {
+        if (!state.get(StorageMemoryBlock.ACTIVATED)) {
             entity.displayItem = ItemStack.EMPTY;
             world.updateListeners(pos, state, state, Block.NOTIFY_LISTENERS);
             return;

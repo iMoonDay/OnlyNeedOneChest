@@ -127,6 +127,18 @@ public abstract class StorageMemoryBlock extends BlockWithEntity implements Conn
         }
     }
 
+    protected void updateLevel(World world, BlockPos pos) {
+        updateLevel(world, pos, getLevel());
+    }
+
+    protected void updateLevel(World world, BlockPos pos, int level) {
+        BlockEntity blockEntity = world.getBlockEntity(pos);
+        if (blockEntity instanceof StorageMemoryBlockEntity entity) {
+            entity.updateLevel(level);
+            entity.markDirty();
+        }
+    }
+
     @Override
     public boolean hasComparatorOutput(BlockState state) {
         return true;

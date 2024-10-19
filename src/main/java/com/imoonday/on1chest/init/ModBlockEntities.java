@@ -10,8 +10,10 @@ import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 
 public class ModBlockEntities {
+
     public static final BlockEntityType<StorageMemoryBlockEntity> STORAGE_MEMORY_BLOCK_ENTITY = register("storage_memory_block", StorageMemoryBlockEntity::new, ModBlocks.WOOD_STORAGE_MEMORY_BLOCK, ModBlocks.COPPER_STORAGE_MEMORY_BLOCK, ModBlocks.IRON_STORAGE_MEMORY_BLOCK, ModBlocks.GOLD_STORAGE_MEMORY_BLOCK, ModBlocks.DIAMOND_STORAGE_MEMORY_BLOCK, ModBlocks.NETHERITE_STORAGE_MEMORY_BLOCK, ModBlocks.OBSIDIAN_STORAGE_MEMORY_BLOCK, ModBlocks.COMPRESSED_STORAGE_MEMORY_BLOCK);
     public static final BlockEntityType<GlassStorageMemoryBlockEntity> GLASS_STORAGE_MEMORY_BLOCK_ENTITY = register("glass_storage_memory_block", GlassStorageMemoryBlockEntity::new, ModBlocks.GLASS_STORAGE_MEMORY_BLOCK);
+    public static final BlockEntityType<DisplayStorageMemoryBlockEntity> DISPLAY_STORAGE_MEMORY_BLOCK_ENTITY = register("display_storage_memory_block", DisplayStorageMemoryBlockEntity::new, ModBlocks.DISPLAY_STORAGE_MEMORY_BLOCK);
     public static final BlockEntityType<StorageAccessorBlockEntity> STORAGE_ACCESSOR_BLOCK_ENTITY = register("storage_accessor_block", StorageAccessorBlockEntity::new, ModBlocks.STORAGE_ACCESSOR_BLOCK);
     public static final BlockEntityType<StorageProcessorBlockEntity> STORAGE_PROCESSOR_BLOCK_ENTITY = register("storage_processor_block", StorageProcessorBlockEntity::new, ModBlocks.STORAGE_PROCESSOR_BLOCK);
     public static final BlockEntityType<StorageRecycleBinBlockEntity> STORAGE_RECYCLE_BIN_BLOCK_ENTITY = register("storage_recycle_bin", StorageRecycleBinBlockEntity::new, ModBlocks.STORAGE_RECYCLE_BIN);

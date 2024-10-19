@@ -39,5 +39,6 @@ public class BlockLootTableGen extends FabricBlockLootTableProvider {
         this.addDrop(QUICK_CRAFTING_TABLE);
         this.addDrop(MEMORY_CONVERTER);
         this.addDropWithSilkTouch(GLASS_STORAGE_MEMORY_BLOCK);
+        this.addDropWithSilkTouch(DISPLAY_STORAGE_MEMORY_BLOCK);
     }
 }

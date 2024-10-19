@@ -1,15 +1,13 @@
 package com.imoonday.on1chest.utils;
 
+import com.imoonday.on1chest.api.PrioritizedInventory;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
@@ -168,7 +166,7 @@ public class MultiInventory implements Inventory {
 
     public ItemStack insertItem(ItemStack stack) {
         a:
-        for (Inventory inventory : this.inventories) {
+        for (Inventory inventory : getSortedInventories(stack)) {
             ItemStack itemStack;
             int i = 0;
             if (stack.isStackable()) {
@@ -355,18 +353,23 @@ public class MultiInventory implements Inventory {
         return true;
     }
 
+    public List<Inventory> getSortedInventories(ItemStack stack) {
+        return this.inventories.stream().sorted(Comparator.comparing(inventory -> inventory instanceof PrioritizedInventory prioritized && prioritized.isPrioritizedFor(stack) ? -prioritized.getPriorityFor(stack) : Integer.MAX_VALUE)).toList();
+    }
+
     @Override
     public String toString() {
         return "MultiInventory{" +
-                "inventories=" + inventories +
-                ", dupDetector=" + dupDetector +
-                ", invSizes=" + Arrays.toString(invSizes) +
-                ", invSize=" + invSize +
-                ", using=" + using +
-                '}';
+               "inventories=" + inventories +
+               ", dupDetector=" + dupDetector +
+               ", invSizes=" + Arrays.toString(invSizes) +
+               ", invSize=" + invSize +
+               ", using=" + using +
+               '}';
     }
 
     public interface MultiInventoryChangedListener {
+
         void onInventoryChanged(MultiInventory inventory);
     }
 

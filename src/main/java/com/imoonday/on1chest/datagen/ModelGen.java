@@ -39,6 +39,7 @@ public class ModelGen extends FabricModelProvider {
         registerMemoryBlock(generator, NETHERITE_STORAGE_MEMORY_BLOCK, TextureMap.getSubId(NETHERITE_STORAGE_MEMORY_BLOCK, "_end"));
         registerMemoryBlock(generator, OBSIDIAN_STORAGE_MEMORY_BLOCK, TextureMap.getSubId(OBSIDIAN_STORAGE_MEMORY_BLOCK, "_end"));
         registerMemoryBlock(generator, GLASS_STORAGE_MEMORY_BLOCK, TextureMap.getSubId(GLASS_STORAGE_MEMORY_BLOCK, "_end"));
+        registerMemoryBlock(generator, DISPLAY_STORAGE_MEMORY_BLOCK, TextureMap.getSubId(DISPLAY_STORAGE_MEMORY_BLOCK, "_end"));
         registerMemoryBlock(generator, COMPRESSED_STORAGE_MEMORY_BLOCK, TextureMap.getSubId(COMPRESSED_STORAGE_MEMORY_BLOCK, "_end"));
         registerParentedItemModel(generator, ITEM_EXPORTER);
         registerParentedItemModel(generator, MEMORY_EXTRACTOR);

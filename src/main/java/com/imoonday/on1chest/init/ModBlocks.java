@@ -29,6 +29,7 @@ public class ModBlocks {
     public static final StorageMemoryBlock OBSIDIAN_STORAGE_MEMORY_BLOCK = register("obsidian_storage_memory_block", new ObsidianStorageMemoryBlock(FabricBlockSettings.copyOf(Blocks.OBSIDIAN)));
     public static final StorageMemoryBlock GLASS_STORAGE_MEMORY_BLOCK = register("glass_storage_memory_block", new GlassStorageMemoryBlock(FabricBlockSettings.copyOf(Blocks.GLASS)));
     public static final StorageMemoryBlock COMPRESSED_STORAGE_MEMORY_BLOCK = register("compressed_storage_memory_block", new CompressedStorageMemoryBlock(FabricBlockSettings.copyOf(Blocks.STONE)));
+    public static final StorageMemoryBlock DISPLAY_STORAGE_MEMORY_BLOCK = register("display_storage_memory_block", new DisplayStorageMemoryBlock(FabricBlockSettings.copyOf(Blocks.GLASS)));
 
     public static final Block STORAGE_BLANK_BLOCK = register("storage_blank_block", new StorageBlankBlock(FabricBlockSettings.copyOf(Blocks.OAK_PLANKS).burnable()));
     public static final Block STORAGE_ACCESSOR_BLOCK = register("storage_accessor_block", new StorageAccessorBlock(FabricBlockSettings.copyOf(Blocks.OAK_PLANKS).burnable()));

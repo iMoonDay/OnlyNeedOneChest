@@ -1,0 +1,26 @@
+{
+  "replace": false,
+  "values": [
+    "on1chest:iron_storage_memory_block",
+    "on1chest:copper_storage_memory_block",
+    "on1chest:compressed_storage_memory_block",
+    "on1chest:memory_converter",
+    "on1chest:diamond_storage_memory_block",
+    "on1chest:wireless_connector",
+    "on1chest:wood_storage_memory_block",
+    "on1chest:gold_storage_memory_block",
+    "on1chest:memory_extractor",
+    "on1chest:item_exporter",
+    "on1chest:glass_storage_memory_block",
+    "on1chest:storage_processor_block",
+    "on1chest:connection_cable",
+    "on1chest:storage_accessor_block",
+    "on1chest:netherite_storage_memory_block",
+    "on1chest:quick_crafting_table",
+    "on1chest:storage_recycle_bin",
+    "on1chest:obsidian_storage_memory_block",
+    "on1chest:display_storage_memory_block",
+    "on1chest:storage_blank_block",
+    "on1chest:recipe_processor"
+  ]
+}
