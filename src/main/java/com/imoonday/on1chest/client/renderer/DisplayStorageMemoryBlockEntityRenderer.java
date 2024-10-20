@@ -2,6 +2,7 @@ package com.imoonday.on1chest.client.renderer;
 
 import com.imoonday.on1chest.blocks.StorageMemoryBlock;
 import com.imoonday.on1chest.blocks.entities.DisplayStorageMemoryBlockEntity;
+import com.imoonday.on1chest.config.Config;
 import com.imoonday.on1chest.init.ModBlocks;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -15,7 +16,6 @@ import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
 import net.minecraft.client.render.item.ItemRenderer;
 import net.minecraft.client.render.model.json.ModelTransformationMode;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.RotationAxis;
 import net.minecraft.world.World;
@@ -47,17 +47,20 @@ public class DisplayStorageMemoryBlockEntityRenderer implements BlockEntityRende
         if (stack.isEmpty()) {
             return;
         }
-        Item item = stack.getItem();
+        Config config = Config.getInstance();
+
+        double y = config.isRenderDisplayItemInCenter() ? 0.4 : 1.15;
         matrices.push();
-        matrices.translate(0.5, 1.15, 0.5);
+        matrices.translate(0.5, y, 0.5);
         matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees((world.getTime() + tickDelta) * 4));
         itemRenderer.renderItem(stack, ModelTransformationMode.GROUND, light, overlay, matrices, vertexConsumers, world, 0);
         matrices.pop();
 
+        if (!config.isRenderDisplayItemCount()) return;
         int count = stack.getCount();
         if (count > 1) {
             matrices.push();
-            matrices.translate(0.5, 1.15, 0.5);
+            matrices.translate(0.5, y, 0.5);
             drawString(matrices, vertexConsumers, String.valueOf(count), 0, 0.5, 0, 0xffffff, 0.02f, true, 0.0f, false);
             matrices.pop();
         }

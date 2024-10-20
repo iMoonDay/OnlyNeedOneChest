@@ -75,6 +75,13 @@ public class ItemFilterList {
         return setFilterEnabled(filter.getId(), enabled);
     }
 
+    public void disableAll() {
+        for (ItemFilterWrapper wrapper : this.filters) {
+            wrapper.setEnabled(false);
+            wrapper.getSubFilters().forEach(s -> s.setEnabled(false));
+        }
+    }
+
     public boolean isFilterHide(Identifier id) {
         for (ItemFilterWrapper wrapper : this.filters) {
             if (wrapper.getMainFilter().is(id)) {

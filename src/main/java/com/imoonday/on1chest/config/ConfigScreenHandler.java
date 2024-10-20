@@ -4,6 +4,7 @@ import com.imoonday.on1chest.client.OnlyNeedOneChestClient;
 import com.imoonday.on1chest.filter.ItemFilter;
 import com.imoonday.on1chest.filter.ItemFilterSettings;
 import com.imoonday.on1chest.filter.ItemFilterWrapper;
+import com.imoonday.on1chest.filter.StickyFilter;
 import com.imoonday.on1chest.utils.FavouriteItemStack;
 import com.imoonday.on1chest.utils.ListUtils;
 import com.imoonday.on1chest.utils.Theme;
@@ -170,12 +171,33 @@ public class ConfigScreenHandler {
                                                .setSaveConsumer(render -> Config.getInstance().setRenderTargetItem(render))
                                                .build());
 
+            blockSettings.addEntry(entryBuilder.startBooleanToggle(Text.translatable("config.on1chest.block.renderDisplayItemCount"), Config.getInstance().isRenderDisplayItemCount())
+                                               .setDefaultValue(true)
+                                               .setSaveConsumer(render -> Config.getInstance().setRenderDisplayItemCount(render))
+                                               .build());
+
+            blockSettings.addEntry(entryBuilder.startBooleanToggle(Text.translatable("config.on1chest.block.renderDisplayItemInCenter"), Config.getInstance().isRenderDisplayItemInCenter())
+                                               .setDefaultValue(false)
+                                               .setSaveConsumer(render -> Config.getInstance().setRenderDisplayItemInCenter(render))
+                                               .build());
+
             ConfigCategory filterSettings = builder.getOrCreateCategory(Text.translatable("config.on1chest.categories.filter"));
+
+            filterSettings.addEntry(entryBuilder.startStrField(Text.translatable("config.on1chest.filter.text_filter"), Config.getInstance().getTextFilter())
+                                                .setDefaultValue("")
+                                                .setSaveConsumer(text -> Config.getInstance().setTextFilter(text))
+                                                .build());
 
             filterSettings.addEntry(entryBuilder.startEnumSelector(Text.translatable("config.on1chest.filter.filtering_logic"), ItemFilter.FilteringLogic.class, Config.getInstance().getFilteringLogic())
                                                 .setDefaultValue(ItemFilter.FilteringLogic.AND)
                                                 .setSaveConsumer(logic -> Config.getInstance().setFilteringLogic(logic))
                                                 .setEnumNameProvider(logic -> ((ItemFilter.FilteringLogic) logic).getDisplayName())
+                                                .build());
+
+            filterSettings.addEntry(entryBuilder.startEnumSelector(Text.translatable("config.on1chest.filter.sticky_filter"), StickyFilter.class, Config.getInstance().getStickyFilter())
+                                                .setDefaultValue(StickyFilter.BOTH)
+                                                .setSaveConsumer(sticky -> Config.getInstance().setStickyFilter(sticky))
+                                                .setEnumNameProvider(sticky -> ((StickyFilter) sticky).getDisplayName())
                                                 .build());
 
             for (ItemFilterWrapper data : Config.getInstance().getItemFilterList()) {

@@ -5,10 +5,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
-import com.imoonday.on1chest.filter.ItemFilter;
-import com.imoonday.on1chest.filter.ItemFilterList;
-import com.imoonday.on1chest.filter.ItemFilterSerialization;
-import com.imoonday.on1chest.filter.ItemFilterWrapper;
+import com.imoonday.on1chest.filter.*;
 import com.imoonday.on1chest.screen.client.StorageAssessorScreen;
 import com.imoonday.on1chest.utils.FavouriteItemStack;
 import com.imoonday.on1chest.utils.SortComparator;
@@ -47,8 +44,10 @@ public class Config {
     private boolean displayButtonWidgets = true;
     private ItemFilter.DisplayType displayFilterWidgets = ItemFilter.DisplayType.DISPLAY;
     private Set<FavouriteItemStack> favouriteStacks = new HashSet<>();
+    private String textFilter = "";
     private ItemFilterList itemFilters = ItemFilterList.create();
     private ItemFilter.FilteringLogic filteringLogic = ItemFilter.FilteringLogic.AND;
+    private StickyFilter stickyFilter = StickyFilter.BOTH;
     private SortComparator comparator = SortComparator.ID;
     private boolean reversed = false;
     private boolean noSortWithShift = true;
@@ -69,6 +68,8 @@ public class Config {
     private double itemYOffset = 0.0f;
 
     private boolean renderTargetItem = true;
+    private boolean renderDisplayItemCount = true;
+    private boolean renderDisplayItemInCenter = false;
 
     private static void prepareConfigFile() {
         if (file == null) {
@@ -206,6 +207,21 @@ public class Config {
         saveAndUpdate();
     }
 
+    public String getTextFilter() {
+        if (textFilter == null) {
+            textFilter = "";
+        }
+        return textFilter;
+    }
+
+    public void setTextFilter(String textFilter) {
+        if (textFilter == null) {
+            textFilter = "";
+        }
+        this.textFilter = textFilter;
+        saveAndUpdate();
+    }
+
     public ItemFilterList getItemFilters() {
         return itemFilters;
     }
@@ -230,12 +246,26 @@ public class Config {
         }
     }
 
+    public void disableAllItemFilters() {
+        this.itemFilters.disableAll();
+        saveAndUpdate();
+    }
+
     public ItemFilter.FilteringLogic getFilteringLogic() {
         return filteringLogic;
     }
 
     public void setFilteringLogic(ItemFilter.FilteringLogic filteringLogic) {
         this.filteringLogic = filteringLogic;
+    }
+
+    public StickyFilter getStickyFilter() {
+        return stickyFilter;
+    }
+
+    public void setStickyFilter(StickyFilter stickyFilter) {
+        this.stickyFilter = stickyFilter;
+        saveAndUpdate();
     }
 
     public SortComparator getComparator() {
@@ -415,6 +445,24 @@ public class Config {
 
     public void setRenderTargetItem(boolean renderTargetItem) {
         this.renderTargetItem = renderTargetItem;
+        saveAndUpdate();
+    }
+
+    public boolean isRenderDisplayItemCount() {
+        return renderDisplayItemCount;
+    }
+
+    public void setRenderDisplayItemCount(boolean renderDisplayItemCount) {
+        this.renderDisplayItemCount = renderDisplayItemCount;
+        saveAndUpdate();
+    }
+
+    public boolean isRenderDisplayItemInCenter() {
+        return renderDisplayItemInCenter;
+    }
+
+    public void setRenderDisplayItemInCenter(boolean renderDisplayItemInCenter) {
+        this.renderDisplayItemInCenter = renderDisplayItemInCenter;
         saveAndUpdate();
     }
 }

@@ -5,10 +5,7 @@ import com.imoonday.on1chest.api.IScreenDataReceiver;
 import com.imoonday.on1chest.client.OnlyNeedOneChestClient;
 import com.imoonday.on1chest.config.Config;
 import com.imoonday.on1chest.config.ConfigScreenHandler;
-import com.imoonday.on1chest.filter.ItemFilter;
-import com.imoonday.on1chest.filter.ItemFilterList;
-import com.imoonday.on1chest.filter.ItemFilterSettings;
-import com.imoonday.on1chest.filter.ItemFilterWrapper;
+import com.imoonday.on1chest.filter.*;
 import com.imoonday.on1chest.screen.StorageAssessorScreenHandler;
 import com.imoonday.on1chest.screen.widgets.ButtonIconWidget;
 import com.imoonday.on1chest.screen.widgets.OnOffButtonIconWidget;
@@ -92,6 +89,10 @@ public class StorageAssessorScreen extends HandledScreen<StorageAssessorScreenHa
         this.searchBox = new TextFieldWidget(this.textRenderer, this.x + 82, this.y + 6, 86, 10, Text.empty());
         this.searchBox.setDrawsBackground(false);
         this.searchBox.setEditableColor(0xFFFFFF);
+        if (Config.getInstance().getStickyFilter().isStickyText()) {
+            this.searchBox.setText(Config.getInstance().getTextFilter());
+            this.searchBox.setChangedListener(s -> Config.getInstance().setTextFilter(s));
+        }
         this.addDrawableChild(this.searchBox);
 
         this.addDrawableChild(ButtonWidget.builder(Text.literal("X"), button -> this.searchBox.setText("")).dimensions(this.x + 175, this.y + 4, 14, 12).tooltip(Tooltip.of(Text.translatable("button.on1chest.clear"))).build());
@@ -371,6 +372,15 @@ public class StorageAssessorScreen extends HandledScreen<StorageAssessorScreenHa
     public void close() {
         super.close();
         OnlyNeedOneChestClient.setSelectedStack(null);
+        handleStickyFilters();
+    }
+
+    public void handleStickyFilters() {
+        StickyFilter stickyFilter = Config.getInstance().getStickyFilter();
+        if (!stickyFilter.isStickyButtons()) {
+            Config.getInstance().disableAllItemFilters();
+        }
+        Config.getInstance().setTextFilter(stickyFilter.isStickyText() ? searchBox.getText() : "");
     }
 
     private void addStackToClientList(CombinedItemStack stack) {
