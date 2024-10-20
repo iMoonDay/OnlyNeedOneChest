@@ -3,7 +3,7 @@
   "id": "on1chest",
   "version": "${version}",
   "name": "Only Need One Chest",
-  "description": "",
+  "description": "Unified management of chest storage",
   "authors": [
     "iMoonDay"
   ],
@@ -37,8 +37,8 @@
     "on1chest.mixins.json"
   ],
   "depends": {
-    "fabricloader": "*",
-    "fabric": "*",
+    "fabricloader": ">=0.15.0",
+    "fabric-api": "*",
     "minecraft": "~1.20"
   },
   "suggests": {
