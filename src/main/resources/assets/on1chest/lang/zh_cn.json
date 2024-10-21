@@ -33,6 +33,7 @@
   "block.on1chest.wireless_connector.title": "连接端口",
   "block.on1chest.wood_storage_memory_block": "木质存储内存块",
   "button.on1chest.clear": "清除",
+  "config.on1chest.block.displayItemYOffset": "展示物品Y轴偏移量",
   "config.on1chest.block.renderDisplayItemCount": "渲染展示物品数量",
   "config.on1chest.block.renderDisplayItemInCenter": "在中心渲染展示物品",
   "config.on1chest.block.renderTargetItem": "渲染目标物品",

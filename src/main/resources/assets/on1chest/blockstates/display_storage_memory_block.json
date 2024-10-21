@@ -1,15 +1,6 @@
 {
   "variants": {
-    "activated=false,used_capacity=full": {
-      "model": "on1chest:block/display_storage_memory_block_closed"
-    },
-    "activated=false,used_capacity=high": {
-      "model": "on1chest:block/display_storage_memory_block_closed"
-    },
-    "activated=false,used_capacity=low": {
-      "model": "on1chest:block/display_storage_memory_block_closed"
-    },
-    "activated=false,used_capacity=zero": {
+    "activated=false": {
       "model": "on1chest:block/display_storage_memory_block_closed"
     },
     "activated=true,used_capacity=full": {

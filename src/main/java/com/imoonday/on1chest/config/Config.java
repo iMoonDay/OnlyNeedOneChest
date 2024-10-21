@@ -67,9 +67,11 @@ public class Config {
     private float rotationDegrees = -1;
     private double itemYOffset = 0.0f;
 
-    private boolean renderTargetItem = true;
     private boolean renderDisplayItemCount = true;
-    private boolean renderDisplayItemInCenter = false;
+    private boolean renderDisplayItemInCenter = true;
+    private double displayItemYOffset = 0.0f;
+
+    private boolean renderTargetItem = true;
 
     private static void prepareConfigFile() {
         if (file == null) {
@@ -463,6 +465,15 @@ public class Config {
 
     public void setRenderDisplayItemInCenter(boolean renderDisplayItemInCenter) {
         this.renderDisplayItemInCenter = renderDisplayItemInCenter;
+        saveAndUpdate();
+    }
+
+    public double getDisplayItemYOffset() {
+        return displayItemYOffset;
+    }
+
+    public void setDisplayItemYOffset(double displayItemYOffset) {
+        this.displayItemYOffset = displayItemYOffset;
         saveAndUpdate();
     }
 }

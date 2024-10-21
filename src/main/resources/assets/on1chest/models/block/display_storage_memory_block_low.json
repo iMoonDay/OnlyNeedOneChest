@@ -1,7 +1,6 @@
 {
-  "parent": "minecraft:block/cube_column",
+  "parent": "on1chest:block/display_storage_memory_block",
   "textures": {
-    "end": "on1chest:block/display_storage_memory_block_end",
-    "side": "on1chest:block/display_storage_memory_block_low"
+    "texture": "on1chest:block/display_storage_memory_block_low"
   }
 }

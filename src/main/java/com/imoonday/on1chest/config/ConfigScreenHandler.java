@@ -5,6 +5,7 @@ import com.imoonday.on1chest.filter.ItemFilter;
 import com.imoonday.on1chest.filter.ItemFilterSettings;
 import com.imoonday.on1chest.filter.ItemFilterWrapper;
 import com.imoonday.on1chest.filter.StickyFilter;
+import com.imoonday.on1chest.init.ModBlocks;
 import com.imoonday.on1chest.utils.FavouriteItemStack;
 import com.imoonday.on1chest.utils.ListUtils;
 import com.imoonday.on1chest.utils.Theme;
@@ -117,68 +118,83 @@ public class ConfigScreenHandler {
 
             ConfigCategory rendererSettings = builder.getOrCreateCategory(Text.translatable("config.on1chest.categories.renderer"));
 
-            rendererSettings.addEntry(entryBuilder.startBooleanToggle(Text.translatable("config.on1chest.renderer.randomMode"), Config.getInstance().isRandomMode())
-                                                  .setDefaultValue(false)
-                                                  .setSaveConsumer(random -> Config.getInstance().setRandomMode(random))
-                                                  .build());
+            SubCategoryBuilder glassSubSettings = entryBuilder.startSubCategory(ModBlocks.GLASS_STORAGE_MEMORY_BLOCK.getName());
 
-            rendererSettings.addEntry(entryBuilder.startBooleanToggle(Text.translatable("config.on1chest.renderer.autoSpacing"), Config.getInstance().isAutoSpacing())
-                                                  .setDefaultValue(false)
-                                                  .setSaveConsumer(autoSpacing -> Config.getInstance().setAutoSpacing(autoSpacing))
-                                                  .setRequirement(() -> !Config.getInstance().isRandomMode())
-                                                  .build());
+            glassSubSettings.add(entryBuilder.startBooleanToggle(Text.translatable("config.on1chest.renderer.randomMode"), Config.getInstance().isRandomMode())
+                                             .setDefaultValue(false)
+                                             .setSaveConsumer(random -> Config.getInstance().setRandomMode(random))
+                                             .build());
 
-            rendererSettings.addEntry(entryBuilder.startFloatField(Text.translatable("config.on1chest.renderer.scale"), Config.getInstance().getScale())
-                                                  .setDefaultValue(1.25f)
-                                                  .setSaveConsumer(scale -> Config.getInstance().setScale(scale))
-                                                  .setRequirement(() -> !Config.getInstance().isRandomMode())
-                                                  .setMin(0)
-                                                  .build());
+            glassSubSettings.add(entryBuilder.startBooleanToggle(Text.translatable("config.on1chest.renderer.autoSpacing"), Config.getInstance().isAutoSpacing())
+                                             .setDefaultValue(false)
+                                             .setSaveConsumer(autoSpacing -> Config.getInstance().setAutoSpacing(autoSpacing))
+                                             .setRequirement(() -> !Config.getInstance().isRandomMode())
+                                             .build());
 
-            rendererSettings.addEntry(entryBuilder.startDoubleField(Text.translatable("config.on1chest.renderer.interval"), Config.getInstance().getInterval())
-                                                  .setDefaultValue(0.75)
-                                                  .setSaveConsumer(interval -> Config.getInstance().setInterval(interval))
-                                                  .setRequirement(() -> !Config.getInstance().isRandomMode())
-                                                  .setMin(0)
-                                                  .build());
+            glassSubSettings.add(entryBuilder.startFloatField(Text.translatable("config.on1chest.renderer.scale"), Config.getInstance().getScale())
+                                             .setDefaultValue(1.25f)
+                                             .setSaveConsumer(scale -> Config.getInstance().setScale(scale))
+                                             .setRequirement(() -> !Config.getInstance().isRandomMode())
+                                             .setMin(0)
+                                             .build());
 
-            rendererSettings.addEntry(entryBuilder.startFloatField(Text.translatable("config.on1chest.renderer.rotationDegrees"), Config.getInstance().getRotationDegrees())
-                                                  .setDefaultValue(-1.0f)
-                                                  .setSaveConsumer(angle -> Config.getInstance().setRotationDegrees(angle))
-                                                  .setRequirement(() -> !Config.getInstance().isRandomMode())
-                                                  .setMin(-1.0f)
-                                                  .setMax(360.0f)
-                                                  .build());
+            glassSubSettings.add(entryBuilder.startDoubleField(Text.translatable("config.on1chest.renderer.interval"), Config.getInstance().getInterval())
+                                             .setDefaultValue(0.75)
+                                             .setSaveConsumer(interval -> Config.getInstance().setInterval(interval))
+                                             .setRequirement(() -> !Config.getInstance().isRandomMode())
+                                             .setMin(0)
+                                             .build());
 
-            rendererSettings.addEntry(entryBuilder.startFloatField(Text.translatable("config.on1chest.renderer.rotationSpeed"), Config.getInstance().getRotationSpeed())
-                                                  .setDefaultValue(1.0f)
-                                                  .setSaveConsumer(speed -> Config.getInstance().setRotationSpeed(speed))
-                                                  .setRequirement(() -> !Config.getInstance().isRandomMode() && Config.getInstance().getRotationDegrees() < 0)
-                                                  .setMin(0)
-                                                  .build());
+            glassSubSettings.add(entryBuilder.startFloatField(Text.translatable("config.on1chest.renderer.rotationDegrees"), Config.getInstance().getRotationDegrees())
+                                             .setDefaultValue(-1.0f)
+                                             .setSaveConsumer(angle -> Config.getInstance().setRotationDegrees(angle))
+                                             .setRequirement(() -> !Config.getInstance().isRandomMode())
+                                             .setMin(-1.0f)
+                                             .setMax(360.0f)
+                                             .build());
 
-            rendererSettings.addEntry(entryBuilder.startDoubleField(Text.translatable("config.on1chest.renderer.itemYOffset"), Config.getInstance().getItemYOffset())
-                                                  .setDefaultValue(0)
-                                                  .setSaveConsumer(offset -> Config.getInstance().setItemYOffset(offset))
-                                                  .setMin(-1)
-                                                  .setMax(2)
-                                                  .build());
+            glassSubSettings.add(entryBuilder.startFloatField(Text.translatable("config.on1chest.renderer.rotationSpeed"), Config.getInstance().getRotationSpeed())
+                                             .setDefaultValue(1.0f)
+                                             .setSaveConsumer(speed -> Config.getInstance().setRotationSpeed(speed))
+                                             .setRequirement(() -> !Config.getInstance().isRandomMode() && Config.getInstance().getRotationDegrees() < 0)
+                                             .setMin(0)
+                                             .build());
+
+            glassSubSettings.add(entryBuilder.startDoubleField(Text.translatable("config.on1chest.renderer.itemYOffset"), Config.getInstance().getItemYOffset())
+                                             .setDefaultValue(0)
+                                             .setSaveConsumer(offset -> Config.getInstance().setItemYOffset(offset))
+                                             .setMin(-1)
+                                             .setMax(2)
+                                             .build());
+
+            rendererSettings.addEntry(glassSubSettings.build());
+
+            SubCategoryBuilder displaySubSettings = entryBuilder.startSubCategory(ModBlocks.DISPLAY_STORAGE_MEMORY_BLOCK.getName());
+
+            displaySubSettings.add(entryBuilder.startBooleanToggle(Text.translatable("config.on1chest.block.renderDisplayItemCount"), Config.getInstance().isRenderDisplayItemCount())
+                                               .setDefaultValue(true)
+                                               .setSaveConsumer(render -> Config.getInstance().setRenderDisplayItemCount(render))
+                                               .build());
+
+            displaySubSettings.add(entryBuilder.startBooleanToggle(Text.translatable("config.on1chest.block.renderDisplayItemInCenter"), Config.getInstance().isRenderDisplayItemInCenter())
+                                               .setDefaultValue(false)
+                                               .setSaveConsumer(render -> Config.getInstance().setRenderDisplayItemInCenter(render))
+                                               .build());
+
+            displaySubSettings.add(entryBuilder.startDoubleField(Text.translatable("config.on1chest.block.displayItemYOffset"), Config.getInstance().getDisplayItemYOffset())
+                                               .setDefaultValue(0)
+                                               .setSaveConsumer(offset -> Config.getInstance().setDisplayItemYOffset(offset))
+                                               .setMin(-1)
+                                               .setMax(2)
+                                               .build());
+
+            rendererSettings.addEntry(displaySubSettings.build());
 
             ConfigCategory blockSettings = builder.getOrCreateCategory(Text.translatable("config.on1chest.categories.block"));
 
             blockSettings.addEntry(entryBuilder.startBooleanToggle(Text.translatable("config.on1chest.block.renderTargetItem"), Config.getInstance().isRenderTargetItem())
                                                .setDefaultValue(true)
                                                .setSaveConsumer(render -> Config.getInstance().setRenderTargetItem(render))
-                                               .build());
-
-            blockSettings.addEntry(entryBuilder.startBooleanToggle(Text.translatable("config.on1chest.block.renderDisplayItemCount"), Config.getInstance().isRenderDisplayItemCount())
-                                               .setDefaultValue(true)
-                                               .setSaveConsumer(render -> Config.getInstance().setRenderDisplayItemCount(render))
-                                               .build());
-
-            blockSettings.addEntry(entryBuilder.startBooleanToggle(Text.translatable("config.on1chest.block.renderDisplayItemInCenter"), Config.getInstance().isRenderDisplayItemInCenter())
-                                               .setDefaultValue(false)
-                                               .setSaveConsumer(render -> Config.getInstance().setRenderDisplayItemInCenter(render))
                                                .build());
 
             ConfigCategory filterSettings = builder.getOrCreateCategory(Text.translatable("config.on1chest.categories.filter"));

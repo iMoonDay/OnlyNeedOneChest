@@ -104,7 +104,7 @@ public class OnlyNeedOneChestClient implements ClientModInitializer {
         BlockEntityRendererFactories.register(ModBlockEntities.MEMORY_EXTRACTOR_BLOCK_ENTITY, MemoryExtractorBlockEntityRenderer::new);
         BlockEntityRendererFactories.register(ModBlockEntities.RECIPE_PROCESSOR_BLOCK_ENTITY, RecipeProcessorBlockEntityRenderer::new);
         BlockRenderLayerMap.INSTANCE.putBlock(ModBlocks.GLASS_STORAGE_MEMORY_BLOCK, RenderLayer.getTranslucent());
-        BlockRenderLayerMap.INSTANCE.putBlock(ModBlocks.DISPLAY_STORAGE_MEMORY_BLOCK, RenderLayer.getTranslucent());
+        BlockRenderLayerMap.INSTANCE.putBlock(ModBlocks.DISPLAY_STORAGE_MEMORY_BLOCK, RenderLayer.getCutout());
     }
 
     @Environment(EnvType.CLIENT)

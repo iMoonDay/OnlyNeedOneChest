@@ -33,6 +33,7 @@
   "block.on1chest.wireless_connector.title": "Connection Port",
   "block.on1chest.wood_storage_memory_block": "Wooden Storage Memory Block",
   "button.on1chest.clear": "Clear",
+  "config.on1chest.block.displayItemYOffset": "Display Item y-axis offset",
   "config.on1chest.block.renderDisplayItemCount": "Render display item count",
   "config.on1chest.block.renderDisplayItemInCenter": "Render display item centered",
   "config.on1chest.block.renderTargetItem": "Render the target item",
