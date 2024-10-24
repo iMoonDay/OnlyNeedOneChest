@@ -22,7 +22,7 @@ Pinyin, and more.
 - **Special Materials**:
     - Obsidian: 135 slots, explosion-proof.
     - Glass: 27 slots, displays stored items in real-time.
-  - Display: 999 slots, a large number of items of the same type can be stored and displayed in real-time.
+    - Display: 999 slots, a large number of items of the same type can be stored and displayed in real-time.
 
 ### Storage Accessor Block/Storage Processor Block
 
