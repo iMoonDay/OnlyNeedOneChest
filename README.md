@@ -6,9 +6,9 @@
 
 此模组包含多种不同容量的存储方块，配合访问器使用，可在一个界面里访问所有箱子。支持自定义显示设置、过滤、中文或拼音搜索等功能。
 
-![logo](https://i.postimg.cc/tJFXFPL9/logo.png)
+[![logo.png](https://i.postimg.cc/QNf8jQrB/logo.png)](https://postimg.cc/JtBVqB0m)
 
-[视频展示](https://www.bilibili.com/video/av830034396/)
+[视频展示(旧)](https://www.bilibili.com/video/av830034396/)
 
 ## 内容介绍
 
@@ -48,8 +48,6 @@
 ### 连接线缆
 
 - 连接两处不相连的连接方块（模组内所有方块为连接方块）。
-
-![v0-2](https://i.postimg.cc/nhnGC5KC/v0-2.png)
 
 ### 物品导出器
 

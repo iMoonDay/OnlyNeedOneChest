@@ -8,9 +8,7 @@ This mod includes various storage blocks with different capacities, which can be
 access all chests within a single interface. It supports custom display settings, filtering, search in Chinese or
 Pinyin, and more.
 
-![logo](https://i.postimg.cc/tJFXFPL9/logo.png)
-
-[Video Demonstration](https://www.bilibili.com/video/av830034396/)
+[![logo.png](https://i.postimg.cc/QNf8jQrB/logo.png)](https://postimg.cc/JtBVqB0m)
 
 ## Content Overview
 
@@ -51,8 +49,6 @@ Pinyin, and more.
 ### Connection Cables
 
 - Connects two non-contiguous connection blocks (all blocks within the mod are connection blocks).
-
-![v0-2](https://i.postimg.cc/nhnGC5KC/v0-2.png)
 
 ### Item Exporter
 
