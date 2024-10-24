@@ -20,6 +20,9 @@ import net.minecraft.client.render.model.json.ModelTransformationMode;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.text.Text;
+import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.RotationAxis;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
@@ -53,51 +56,59 @@ public class DisplayStorageMemoryBlockEntityRenderer implements BlockEntityRende
         if (stack.isEmpty()) {
             return;
         }
+        int count = stack.getCount();
+
         Config config = Config.getInstance();
         boolean renderInCenter = config.isRenderDisplayItemInCenter();
-        boolean renderCount = config.isRenderDisplayItemCount();
+        boolean renderCount = config.isRenderDisplayItemCount() && count > 1 && (!config.isRenderCountOnlyWhenAimed() || MinecraftClient.getInstance().crosshairTarget instanceof BlockHitResult hitResult && hitResult.getType() != HitResult.Type.MISS && hitResult.getBlockPos().equals(entity.getPos()));
+        CountRenderType renderType = config.getDisplayItemCountRenderType();
 
         int seed = Item.getRawId(stack.getItem()) + stack.getDamage();
-        int count = stack.getCount();
         BakedModel bakedModel = this.itemRenderer.getModel(stack, world, null, seed);
         float scaleY = bakedModel.getTransformation().getTransformation(ModelTransformationMode.GROUND).scale.y();
-        double y = (renderInCenter ? 0.3 : 1.15) - (renderCount && count > 1 ? 0.05 : 0.0) + config.getDisplayItemYOffset() + 0.25f * scaleY;
+        double y = (renderInCenter ? 0.3 : 1.15) - (renderCount && renderType == CountRenderType.ABOVE_ITEM ? 0.05 : 0.0) + config.getDisplayItemYOffset() + 0.25f * scaleY;
 
+        renderItem(tickDelta, matrices, vertexConsumers, light, y, world, stack, bakedModel);
+        if (renderCount) {
+            renderItemCount(matrices, vertexConsumers, count, renderType == CountRenderType.AROUND_BLOCK, y);
+        }
+    }
+
+    private void renderItem(float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, double y, World world, ItemStack stack, BakedModel bakedModel) {
         matrices.push();
         matrices.translate(0.5, y, 0.5);
         matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees((world.getTime() + tickDelta) * 4));
         this.itemRenderer.renderItem(stack, ModelTransformationMode.GROUND, false, matrices, vertexConsumers, light, OverlayTexture.DEFAULT_UV, bakedModel);
         matrices.pop();
+    }
 
-        if (!renderCount) return;
-        if (count > 1) {
-            String text = String.valueOf(count);
-            if (renderInCenter) {
-                MinecraftClient client = MinecraftClient.getInstance();
-                float scale = 0.02f;
-                float offsetX = -textRenderer.getWidth(text) / 2.0f + 0.5f;
-                float offsetY = -textRenderer.fontHeight;
-                if (!client.options.getForceUnicodeFont().getValue()) {
-                    offsetY += 0.75f;
-                }
-                Vec3d offset = new Vec3d(0.5, 0, -0.001);
-                double[][] offsets = {{0, 0}, {0, 1.005}, {1, 1.005}, {1.005, 0}};
-                for (int i = 0; i < 4; i++) {
-                    matrices.push();
-                    matrices.translate(offset.x + offsets[i][0], 0, offset.z + offsets[i][1]);
-                    matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(90 * i));
-                    matrices.scale(-scale, -scale, scale);
-                    Matrix4f matrix = matrices.peek().getPositionMatrix();
-                    textRenderer.draw(text, offsetX, offsetY, 0xffffff, false, matrix, vertexConsumers, TextRenderer.TextLayerType.NORMAL, 0, 0xF000F0);
-                    matrices.pop();
-                    offset = offset.rotateY((float) Math.PI / 2.0f);
-                }
-            } else {
-                matrices.push();
-                matrices.translate(0.5, y, 0.5);
-                drawString(matrices, vertexConsumers, text, 0, 0.5, 0, 0xffffff, 0.02f, true, 0.0f, false);
-                matrices.pop();
+    private void renderItemCount(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int count, boolean renderInCenter, double y) {
+        String text = String.valueOf(count);
+        if (renderInCenter) {
+            MinecraftClient client = MinecraftClient.getInstance();
+            float scale = 0.02f;
+            float offsetX = -textRenderer.getWidth(text) / 2.0f + 0.5f;
+            float offsetY = -textRenderer.fontHeight;
+            if (!client.options.getForceUnicodeFont().getValue()) {
+                offsetY += 0.75f;
             }
+            Vec3d offset = new Vec3d(0.5, 0, -0.001);
+            double[][] offsets = {{0, 0}, {0, 1.005}, {1, 1.005}, {1.005, 0}};
+            for (int i = 0; i < 4; i++) {
+                matrices.push();
+                matrices.translate(offset.x + offsets[i][0], 0, offset.z + offsets[i][1]);
+                matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(90 * i));
+                matrices.scale(-scale, -scale, scale);
+                Matrix4f matrix = matrices.peek().getPositionMatrix();
+                textRenderer.draw(text, offsetX, offsetY, 0xffffff, false, matrix, vertexConsumers, TextRenderer.TextLayerType.NORMAL, 0, 0xF000F0);
+                matrices.pop();
+                offset = offset.rotateY((float) Math.PI / 2.0f);
+            }
+        } else {
+            matrices.push();
+            matrices.translate(0.5, y, 0.5);
+            drawString(matrices, vertexConsumers, text, 0, 0.5, 0, 0xffffff, 0.02f, true, 0.0f, false);
+            matrices.pop();
         }
     }
 
@@ -114,5 +125,14 @@ public class DisplayStorageMemoryBlockEntityRenderer implements BlockEntityRende
         float g = center ? (float) (-textRenderer.getWidth(string)) / 2.0f : 0.0f;
         textRenderer.draw(string, g - (offset / size), 0.0f, color, false, matrices.peek().getPositionMatrix(), vertexConsumers, visibleThroughObjects ? TextRenderer.TextLayerType.SEE_THROUGH : TextRenderer.TextLayerType.NORMAL, 0, 0xF000F0);
         matrices.pop();
+    }
+
+    public enum CountRenderType {
+        ABOVE_ITEM,
+        AROUND_BLOCK;
+
+        public Text getDisplayName() {
+            return Text.translatable("render.on1chest.count_render_type." + this.name().toLowerCase());
+        }
     }
 }

@@ -5,6 +5,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
+import com.imoonday.on1chest.client.renderer.DisplayStorageMemoryBlockEntityRenderer;
 import com.imoonday.on1chest.filter.*;
 import com.imoonday.on1chest.screen.client.StorageAssessorScreen;
 import com.imoonday.on1chest.utils.FavouriteItemStack;
@@ -70,6 +71,8 @@ public class Config {
     private boolean renderDisplayItemCount = true;
     private boolean renderDisplayItemInCenter = true;
     private double displayItemYOffset = 0.0f;
+    private DisplayStorageMemoryBlockEntityRenderer.CountRenderType displayItemCountRenderType = DisplayStorageMemoryBlockEntityRenderer.CountRenderType.AROUND_BLOCK;
+    private boolean renderCountOnlyWhenAimed = false;
 
     private boolean renderTargetItem = true;
 
@@ -474,6 +477,24 @@ public class Config {
 
     public void setDisplayItemYOffset(double displayItemYOffset) {
         this.displayItemYOffset = displayItemYOffset;
+        saveAndUpdate();
+    }
+
+    public DisplayStorageMemoryBlockEntityRenderer.CountRenderType getDisplayItemCountRenderType() {
+        return displayItemCountRenderType;
+    }
+
+    public void setDisplayItemCountRenderType(DisplayStorageMemoryBlockEntityRenderer.CountRenderType displayItemCountRenderType) {
+        this.displayItemCountRenderType = displayItemCountRenderType;
+        saveAndUpdate();
+    }
+
+    public boolean isRenderCountOnlyWhenAimed() {
+        return renderCountOnlyWhenAimed;
+    }
+
+    public void setRenderCountOnlyWhenAimed(boolean renderCountOnlyWhenAimed) {
+        this.renderCountOnlyWhenAimed = renderCountOnlyWhenAimed;
         saveAndUpdate();
     }
 }

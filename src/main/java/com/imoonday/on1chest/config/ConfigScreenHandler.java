@@ -1,6 +1,7 @@
 package com.imoonday.on1chest.config;
 
 import com.imoonday.on1chest.client.OnlyNeedOneChestClient;
+import com.imoonday.on1chest.client.renderer.DisplayStorageMemoryBlockEntityRenderer;
 import com.imoonday.on1chest.filter.ItemFilter;
 import com.imoonday.on1chest.filter.ItemFilterSettings;
 import com.imoonday.on1chest.filter.ItemFilterWrapper;
@@ -177,7 +178,7 @@ public class ConfigScreenHandler {
                                                .build());
 
             displaySubSettings.add(entryBuilder.startBooleanToggle(Text.translatable("config.on1chest.block.renderDisplayItemInCenter"), Config.getInstance().isRenderDisplayItemInCenter())
-                                               .setDefaultValue(false)
+                                               .setDefaultValue(true)
                                                .setSaveConsumer(render -> Config.getInstance().setRenderDisplayItemInCenter(render))
                                                .build());
 
@@ -186,6 +187,17 @@ public class ConfigScreenHandler {
                                                .setSaveConsumer(offset -> Config.getInstance().setDisplayItemYOffset(offset))
                                                .setMin(-1)
                                                .setMax(2)
+                                               .build());
+
+            displaySubSettings.add(entryBuilder.startEnumSelector(Text.translatable("config.on1chest.block.displayItemCountRenderType"), DisplayStorageMemoryBlockEntityRenderer.CountRenderType.class, Config.getInstance().getDisplayItemCountRenderType())
+                                               .setDefaultValue(DisplayStorageMemoryBlockEntityRenderer.CountRenderType.AROUND_BLOCK)
+                                               .setSaveConsumer(renderType -> Config.getInstance().setDisplayItemCountRenderType(renderType))
+                                               .setEnumNameProvider(renderType -> ((DisplayStorageMemoryBlockEntityRenderer.CountRenderType) renderType).getDisplayName())
+                                               .build());
+
+            displaySubSettings.add(entryBuilder.startBooleanToggle(Text.translatable("config.on1chest.block.renderCountOnlyWhenAimed"), Config.getInstance().isRenderCountOnlyWhenAimed())
+                                               .setDefaultValue(false)
+                                               .setSaveConsumer(render -> Config.getInstance().setRenderCountOnlyWhenAimed(render))
                                                .build());
 
             rendererSettings.addEntry(displaySubSettings.build());
